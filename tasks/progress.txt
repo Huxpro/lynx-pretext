@@ -242,3 +242,19 @@ Started: 2026-03-29
   - The CSS panel uses cssWidth (max line width + padding) to simulate fit-content behavior
   - BUBBLE_DIRECTIONS array maps sent/received alignment — no DOM class queries needed
 ---
+
+## 2026-03-29 - US-016
+- Ported wrap-geometry.ts from pretext/pages/demos/wrap-geometry.ts
+- All pure geometry functions ported 1:1: getPolygonIntervalForBand, getRectIntervalsForBand, carveTextLineSlots, transformWrapPoints, isPointInPolygon, getPolygonXsAtY
+- Replaced getWrapHull (uses OffscreenCanvas/Image) with precomputed hull data approach
+- Created hull-data.ts with precomputed hull points for OpenAI and Claude logos (4 hull variants)
+- Added registerLogoHulls() to register hull data keyed by asset URL for runtime lookup
+- Created scripts/generate-hulls.mjs to regenerate hull data from SVGs using sharp
+- Files changed: pages/demos/wrap-geometry.ts (new), pages/demos/hull-data.ts (new), scripts/generate-hulls.mjs (new)
+- **Learnings for future iterations:**
+  - OffscreenCanvas and Image APIs are not available in Lynx — precompute any rasterization-dependent data
+  - Hull data is normalized to 0-1 coordinates, so it's resolution-independent
+  - The dynamic-layout demo (US-017) needs 4 hull variants: openaiLayout (sr=6), claudeLayout (sr=6), openaiHit (sr=3), claudeHit (sr=5)
+  - registerLogoHulls() must be called with the actual asset URLs before getWrapHull() is used
+  - sharp npm package works well for Node.js SVG rasterization on macOS (prebuilt binaries)
+---

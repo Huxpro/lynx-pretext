@@ -290,7 +290,7 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/pages/demos/wrap-geometry.ts. The hull extraction (getWrapHull) uses OffscreenCanvas.getImageData() which Lynx likely lacks. Fallback: precompute hull points as static JSON from the browser version."
     },
     {
