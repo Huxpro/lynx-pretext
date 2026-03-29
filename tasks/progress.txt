@@ -24,3 +24,14 @@ Started: 2026-03-29
   - `@lynx-js/react` provides React primitives (useState, useEffect, etc.) — import from there, not `react`
   - Build and typecheck both pass with zero config beyond the template defaults
 ---
+
+## 2026-03-29 - US-002
+- Ported core types and whitespace normalization from pretext/src/analysis.ts (lines 1-385)
+- Exported types: WhiteSpaceMode, SegmentBreakKind, MergedSegmentation, AnalysisChunk, TextAnalysis, AnalysisProfile
+- Exported functions: normalizeWhitespaceNormal, normalizeWhitespacePreWrap, classifySegmentBreakChar, splitSegmentByBreakKind, getWhiteSpaceProfile
+- Files changed: src/analysis.ts (new)
+- **Learnings for future iterations:**
+  - The original analysis.ts has internal types (SegmentationPiece, WhiteSpaceProfile) that need to be included but aren't part of the public API
+  - getWhiteSpaceProfile was made export since classifySegmentBreakChar and splitSegmentByBreakKind both take WhiteSpaceProfile as parameter — callers need a way to create one
+  - US-003 and US-004 will add more to the same src/analysis.ts file (character sets, merge pipeline, analyzeText)
+---

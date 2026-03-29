@@ -31,7 +31,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/analysis.ts (lines 1-385). Port the top half: types, whitespace normalization, and segment classification. Does NOT include the merge pipeline or analyzeText() yet."
     },
     {
