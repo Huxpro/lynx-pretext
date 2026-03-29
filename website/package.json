@@ -1,0 +1,11 @@
+{
+  "name": "lynx-pretext-website",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare-examples": "node scripts/prepare-examples.mjs",
+    "dev": "pnpm prepare-examples && npx serve dist",
+    "build": "pnpm prepare-examples && node scripts/build.mjs"
+  }
+}

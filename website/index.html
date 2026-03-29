@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lynx Pretext Demos</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    color-scheme: light;
+    --page: #f5f1ea;
+    --panel: #fffdf8;
+    --ink: #201b18;
+    --muted: #6d645d;
+    --rule: #d8cec3;
+    --accent: #955f3b;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #fbf7f0 0%, var(--page) 100%);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .page {
+    width: min(960px, calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 32px 0 64px;
+  }
+  .eyebrow {
+    margin: 0 0 8px;
+    font: 12px/1.2 "SF Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    margin: 0;
+    font: 700 34px/1.08 Georgia, "Times New Roman", serif;
+  }
+  .intro {
+    margin: 10px 0 0;
+    max-width: 62ch;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .intro a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .intro code {
+    font-size: 0.9em;
+    padding: 1px 5px;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border-radius: 4px;
+  }
+  .demos {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  .demo h2 {
+    margin: 0 0 4px;
+    font: 600 22px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .demo p {
+    margin: 0 0 12px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .embed-container {
+    height: 480px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    box-shadow: 0 18px 40px rgb(54 40 23 / 0.08);
+    background: #fff;
+  }
+  .embed-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  @media (max-width: 600px) {
+    .page { width: min(100vw - 20px, 960px); padding-top: 22px; }
+    .embed-container { height: 400px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <p class="eyebrow">Lynx Pretext</p>
+    <h1>Demos</h1>
+    <p class="intro">
+      Lynx ports of the
+      <a href="https://pretext.pages.dev" target="_blank" rel="noreferrer">Pretext</a>
+      layout demos. These run natively on Lynx via
+      <code>getTextInfo()</code> &mdash; scan the QR&nbsp;code on a Lynx-enabled
+      device to see them live.
+    </p>
+    <div class="demos" id="demos"></div>
+  </main>
+
+  <script type="module">
+    // ── Config ──────────────────────────────────────────────────
+    // go-web embed endpoint. Change to localhost for local dev:
+    //   const GO_EMBED_BASE = 'http://localhost:5969';
+    const GO_EMBED_BASE = 'https://go.lynxjs.org';
+
+    // Example assets are served from this site's /examples/ path.
+    const EXAMPLE_BASE_PATH = `${window.location.origin}/examples`;
+
+    // ── Demos ───────────────────────────────────────────────────
+    const demos = [
+      {
+        name: 'bubbles',
+        title: 'Bubbles',
+        desc: 'Tight multiline message bubbles that keep the same line count with less wasted area.',
+        defaultFile: 'pages/demos/bubbles.tsx',
+      },
+      {
+        name: 'dynamic-layout',
+        title: 'Dynamic Layout',
+        desc: 'A fixed-height editorial spread with obstacle-aware title routing and continuous flow.',
+        defaultFile: 'pages/demos/dynamic-layout.tsx',
+      },
+      {
+        name: 'editorial-engine',
+        title: 'Editorial Engine',
+        desc: 'Animated orbs, live text reflow, pull quotes, and multi-column flow with zero DOM measurements.',
+        defaultFile: 'pages/demos/editorial-engine.tsx',
+      },
+    ];
+
+    // ── Embed mount (mirrors go-web/src/embed.ts) ───────────────
+    function mount(container, options) {
+      const el = typeof container === 'string'
+        ? document.querySelector(container) : container;
+      if (!el) return;
+
+      const embedUrl = new URL(`${GO_EMBED_BASE}/embed`);
+      if (options.seamless) embedUrl.searchParams.set('seamless', '1');
+
+      const iframe = document.createElement('iframe');
+      iframe.src = embedUrl.href;
+      iframe.style.cssText = 'width:100%;height:100%;border:none';
+
+      let currentOptions = { ...options };
+
+      function handleMessage(event) {
+        if (event.source !== iframe.contentWindow) return;
+        if (event.data?.type === 'go-embed:ready') {
+          iframe.contentWindow.postMessage(
+            { type: 'go-embed:init', options: currentOptions }, '*');
+        }
+      }
+      window.addEventListener('message', handleMessage);
+      el.appendChild(iframe);
+    }
+
+    // ── Render ──────────────────────────────────────────────────
+    const container = document.getElementById('demos');
+
+    for (const demo of demos) {
+      const section = document.createElement('section');
+      section.className = 'demo';
+      section.innerHTML = `
+        <h2>${demo.title}</h2>
+        <p>${demo.desc}</p>
+        <div class="embed-container" id="embed-${demo.name}"></div>
+      `;
+      container.appendChild(section);
+
+      mount(`#embed-${demo.name}`, {
+        example: demo.name,
+        defaultFile: demo.defaultFile,
+        defaultTab: 'qrcode',
+        exampleBasePath: EXAMPLE_BASE_PATH,
+      });
+    }
+  </script>
+</body>
+</html>

@@ -18,6 +18,8 @@ export default defineConfig({
       'editorial-engine': './pages/demos/editorial-engine.tsx',
       'dynamic-layout-mts': './pages/demos/dynamic-layout-mts.tsx',
       'dynamic-layout-bts': './pages/demos/dynamic-layout-bts.tsx',
+      'editorial-mts': './pages/demos/editorial-mts.tsx',
+      'wireframe-torus': './pages/demos/wireframe-torus.tsx',
     },
   },
   plugins: [
