@@ -225,3 +225,20 @@ Started: 2026-03-29
   - findTightWrapMetrics uses binary search on layout() lineCount — same pattern as shrinkwrap.tsx demo
   - pages/demos/*.ts files are included in typecheck via src/tsconfig.json include pattern "../pages/**/*.ts"
 ---
+
+## 2026-03-29 - US-015
+- Created bubbles shrinkwrap chat page at pages/demos/bubbles.tsx
+- Replaced all DOM APIs (document.getElementById, HTMLDivElement, requestAnimationFrame, CSS variables) with ReactLynx state-driven components
+- Hardcoded 7 chat bubble texts matching the original HTML (English, Korean, Arabic, mixed scripts)
+- Two panels: CSS fit-content (uses cssWidth from computeBubbleRender) vs Pretext shrinkwrap (uses tightWidth)
+- +/− buttons change chatWidth (220–500px in 20px steps), all bubbles reflow live via computeBubbleRender
+- Wasted pixels comparison: CSS panel shows total wasted px², shrinkwrap panel shows 0
+- Explanation section on why CSS can't do this
+- Updated src/index.tsx to render BubblesPage
+- Files changed: pages/demos/bubbles.tsx (new), src/index.tsx (updated), tasks/prd.json (updated)
+- **Learnings for future iterations:**
+  - computeBubbleRender from bubbles-shared.ts does all the heavy lifting — returns per-bubble cssWidth and tightWidth
+  - In Lynx, set explicit `width` on bubble views instead of CSS `fit-content` — Lynx doesn't support fit-content
+  - The CSS panel uses cssWidth (max line width + padding) to simulate fit-content behavior
+  - BUBBLE_DIRECTIONS array maps sent/received alignment — no DOM class queries needed
+---
