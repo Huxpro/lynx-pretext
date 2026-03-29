@@ -3,6 +3,7 @@
  * to public/examples/ for the <Go> component to consume.
  *
  * Mirrors the vue-lynx website pattern: builds locally, no npm round-trip.
+ * Each demo gets its bundle renamed to main.lynx.bundle (Go web convention).
  *
  * Usage:
  *   node scripts/prepare-examples.mjs
@@ -20,8 +21,28 @@ const EXAMPLES_DEST = path.resolve(__dirname, '../public/examples');
 const EXAMPLE_GIT_BASE_URL =
   'https://github.com/Huxpro/lynx-pretext/tree/main';
 
-/** Demo entries to expose on the website. */
+/** All demo entries to expose on the website (matches lynx.config.ts). */
 const demos = [
+  {
+    name: 'basic-height',
+    sources: ['pages/basic-height.tsx'],
+  },
+  {
+    name: 'layout-with-lines',
+    sources: ['pages/layout-with-lines.tsx'],
+  },
+  {
+    name: 'shrinkwrap',
+    sources: ['pages/shrinkwrap.tsx'],
+  },
+  {
+    name: 'variable-flow',
+    sources: ['pages/variable-flow.tsx'],
+  },
+  {
+    name: 'accuracy',
+    sources: ['pages/accuracy.tsx'],
+  },
   {
     name: 'bubbles',
     sources: ['pages/demos/bubbles.tsx', 'pages/demos/bubbles-shared.ts'],
@@ -38,6 +59,32 @@ const demos = [
   {
     name: 'editorial-engine',
     sources: ['pages/demos/editorial-engine.tsx'],
+  },
+  {
+    name: 'dynamic-layout-mts',
+    sources: [
+      'pages/demos/dynamic-layout-mts.tsx',
+      'pages/demos/dynamic-layout-text.ts',
+      'pages/demos/hull-data.ts',
+      'pages/demos/wrap-geometry.ts',
+    ],
+  },
+  {
+    name: 'dynamic-layout-bts',
+    sources: [
+      'pages/demos/dynamic-layout-bts.tsx',
+      'pages/demos/dynamic-layout-text.ts',
+      'pages/demos/hull-data.ts',
+      'pages/demos/wrap-geometry.ts',
+    ],
+  },
+  {
+    name: 'editorial-mts',
+    sources: ['pages/demos/editorial-mts.tsx', 'pages/demos/wrap-geometry.ts'],
+  },
+  {
+    name: 'wireframe-torus',
+    sources: ['pages/demos/wireframe-torus.tsx'],
   },
 ];
 
@@ -67,6 +114,8 @@ fs.mkdirSync(EXAMPLES_DEST, { recursive: true });
 
 // --- Process each demo ---
 
+let processed = 0;
+
 for (const demo of demos) {
   const bundleFile = `${demo.name}.lynx.bundle`;
   const bundlePath = path.join(DIST_DIR, bundleFile);
@@ -80,8 +129,8 @@ for (const demo of demos) {
   const destDist = path.join(destDir, 'dist');
   fs.mkdirSync(destDist, { recursive: true });
 
-  // Copy the .lynx.bundle
-  fs.copyFileSync(bundlePath, path.join(destDist, bundleFile));
+  // Copy the .lynx.bundle, renamed to main.lynx.bundle (Go web convention)
+  fs.copyFileSync(bundlePath, path.join(destDist, 'main.lynx.bundle'));
 
   // Copy static assets from dist/static/ (images referenced by bundles)
   const staticDir = path.join(DIST_DIR, 'static');
@@ -111,7 +160,7 @@ for (const demo of demos) {
   const metadata = {
     name: demo.name,
     files: sourceFiles,
-    templateFiles: [{ name: demo.name, file: `dist/${bundleFile}` }],
+    templateFiles: [{ name: 'main', file: 'dist/main.lynx.bundle' }],
     exampleGitBaseUrl: EXAMPLE_GIT_BASE_URL,
   };
 
@@ -120,7 +169,8 @@ for (const demo of demos) {
     JSON.stringify(metadata, null, 2),
   );
 
+  processed++;
   console.info(`  ✓ ${demo.name} (${sourceFiles.length} files)`);
 }
 
-console.info(`\nPrepared ${demos.length} examples in public/examples/`);
+console.info(`\nPrepared ${processed}/${demos.length} examples in public/examples/`);

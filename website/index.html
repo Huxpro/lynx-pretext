@@ -54,23 +54,44 @@
     background: color-mix(in srgb, var(--accent) 8%, transparent);
     border-radius: 4px;
   }
-  .demos {
+
+  /* Tab bar */
+  .tab-bar {
     margin-top: 32px;
     display: flex;
-    flex-direction: column;
-    gap: 36px;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0;
   }
-  .demo h2 {
-    margin: 0 0 4px;
-    font: 600 22px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  }
-  .demo p {
-    margin: 0 0 12px;
-    line-height: 1.5;
+  .tab {
+    appearance: none;
+    border: none;
+    background: none;
+    font: 500 13px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    padding: 8px 14px;
     color: var(--muted);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .tab:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  /* Embed */
+  .embed-section {
+    margin-top: 16px;
   }
   .embed-container {
-    height: 480px;
+    height: 540px;
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--rule);
@@ -84,6 +105,7 @@
   }
   @media (max-width: 600px) {
     .page { width: min(100vw - 20px, 960px); padding-top: 22px; }
+    .tab { font-size: 12px; padding: 6px 10px; }
     .embed-container { height: 400px; }
   }
 </style>
@@ -99,7 +121,11 @@
       <code>getTextInfo()</code> &mdash; scan the QR&nbsp;code on a Lynx-enabled
       device to see them live.
     </p>
-    <div class="demos" id="demos"></div>
+
+    <div class="tab-bar" id="tab-bar"></div>
+    <div class="embed-section">
+      <div class="embed-container" id="embed"></div>
+    </div>
   </main>
 
   <script type="module">
@@ -111,74 +137,93 @@
     // Example assets are served from this site's /examples/ path.
     const EXAMPLE_BASE_PATH = `${window.location.origin}/examples`;
 
-    // ── Demos ───────────────────────────────────────────────────
+    // ── All demos (matches lynx.config.ts entries) ─────────────
     const demos = [
-      {
-        name: 'bubbles',
-        title: 'Bubbles',
-        desc: 'Tight multiline message bubbles that keep the same line count with less wasted area.',
-        defaultFile: 'pages/demos/bubbles.tsx',
-      },
-      {
-        name: 'dynamic-layout',
-        title: 'Dynamic Layout',
-        desc: 'A fixed-height editorial spread with obstacle-aware title routing and continuous flow.',
-        defaultFile: 'pages/demos/dynamic-layout.tsx',
-      },
-      {
-        name: 'editorial-engine',
-        title: 'Editorial Engine',
-        desc: 'Animated orbs, live text reflow, pull quotes, and multi-column flow with zero DOM measurements.',
-        defaultFile: 'pages/demos/editorial-engine.tsx',
-      },
+      { name: 'basic-height',       title: 'Basic Height',       defaultFile: 'pages/basic-height.tsx' },
+      { name: 'layout-with-lines',  title: 'Layout with Lines',  defaultFile: 'pages/layout-with-lines.tsx' },
+      { name: 'shrinkwrap',         title: 'Shrinkwrap',         defaultFile: 'pages/shrinkwrap.tsx' },
+      { name: 'variable-flow',      title: 'Variable Flow',      defaultFile: 'pages/variable-flow.tsx' },
+      { name: 'accuracy',           title: 'Accuracy',           defaultFile: 'pages/accuracy.tsx' },
+      { name: 'bubbles',            title: 'Bubbles',            defaultFile: 'pages/demos/bubbles.tsx' },
+      { name: 'dynamic-layout',     title: 'Dynamic Layout',     defaultFile: 'pages/demos/dynamic-layout.tsx' },
+      { name: 'editorial-engine',   title: 'Editorial Engine',   defaultFile: 'pages/demos/editorial-engine.tsx' },
+      { name: 'dynamic-layout-mts', title: 'Dynamic Layout MTS', defaultFile: 'pages/demos/dynamic-layout-mts.tsx' },
+      { name: 'dynamic-layout-bts', title: 'Dynamic Layout BTS', defaultFile: 'pages/demos/dynamic-layout-bts.tsx' },
+      { name: 'editorial-mts',      title: 'Editorial MTS',      defaultFile: 'pages/demos/editorial-mts.tsx' },
+      { name: 'wireframe-torus',    title: 'Wireframe Torus',    defaultFile: 'pages/demos/wireframe-torus.tsx' },
     ];
 
     // ── Embed mount (mirrors go-web/src/embed.ts) ───────────────
+    let cleanupFn = null;
+
     function mount(container, options) {
       const el = typeof container === 'string'
         ? document.querySelector(container) : container;
       if (!el) return;
 
+      // Remove previous iframe
+      if (cleanupFn) cleanupFn();
+
       const embedUrl = new URL(`${GO_EMBED_BASE}/embed`);
-      if (options.seamless) embedUrl.searchParams.set('seamless', '1');
+      embedUrl.searchParams.set('seamless', '1');
 
       const iframe = document.createElement('iframe');
       iframe.src = embedUrl.href;
       iframe.style.cssText = 'width:100%;height:100%;border:none';
 
-      let currentOptions = { ...options };
-
       function handleMessage(event) {
         if (event.source !== iframe.contentWindow) return;
         if (event.data?.type === 'go-embed:ready') {
           iframe.contentWindow.postMessage(
-            { type: 'go-embed:init', options: currentOptions }, '*');
+            { type: 'go-embed:init', options }, '*');
         }
       }
       window.addEventListener('message', handleMessage);
       el.appendChild(iframe);
+
+      cleanupFn = () => {
+        window.removeEventListener('message', handleMessage);
+        iframe.remove();
+        cleanupFn = null;
+      };
     }
 
-    // ── Render ──────────────────────────────────────────────────
-    const container = document.getElementById('demos');
+    // ── Render tabs ─────────────────────────────────────────────
+    const tabBar = document.getElementById('tab-bar');
 
     for (const demo of demos) {
-      const section = document.createElement('section');
-      section.className = 'demo';
-      section.innerHTML = `
-        <h2>${demo.title}</h2>
-        <p>${demo.desc}</p>
-        <div class="embed-container" id="embed-${demo.name}"></div>
-      `;
-      container.appendChild(section);
+      const btn = document.createElement('button');
+      btn.className = 'tab';
+      btn.dataset.example = demo.name;
+      btn.textContent = demo.title;
+      btn.addEventListener('click', () => switchDemo(demo.name));
+      tabBar.appendChild(btn);
+    }
 
-      mount(`#embed-${demo.name}`, {
+    function switchDemo(name) {
+      const demo = demos.find(d => d.name === name);
+      if (!demo) return;
+
+      // Update active tab
+      tabBar.querySelectorAll('.tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.example === name));
+
+      // Mount Go web embed for the selected demo
+      mount('#embed', {
         example: demo.name,
         defaultFile: demo.defaultFile,
-        defaultTab: 'qrcode',
+        defaultTab: 'preview',
         exampleBasePath: EXAMPLE_BASE_PATH,
       });
+
+      // Update URL hash for bookmarking
+      history.replaceState(null, '', `#${name}`);
     }
+
+    // ── Init: activate from URL hash or first demo ──────────────
+    const hashName = location.hash.slice(1);
+    const initial = demos.find(d => d.name === hashName) ? hashName : demos[0].name;
+    switchDemo(initial);
   </script>
 </body>
 </html>
