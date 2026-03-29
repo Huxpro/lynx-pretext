@@ -201,7 +201,7 @@ export function DynamicLayoutMTSPage() {
   function fitHeadlineFontSizeMTS(headlineWidth: number, pWidth: number): number {
     'main thread'
     let low = Math.ceil(Math.max(22, pWidth * 0.026))
-    let high = Math.floor(Math.min(94.4, Math.max(55.2, pWidth * 0.055)))
+    let high = Math.floor(Math.min(32, Math.max(24, pWidth * 0.03)))
     let best = low
     while (low <= high) {
       const size = Math.floor((low + high) / 2)
@@ -220,7 +220,7 @@ export function DynamicLayoutMTSPage() {
       const gutter = Math.round(Math.max(18, Math.min(28, pWidth * 0.06)))
       const columnWidth = Math.round(Math.min(pWidth - gutter * 2, NARROW_COLUMN_MAX_WIDTH))
       const headlineWidth = pWidth - gutter * 2
-      const headlineFontSize = Math.min(48, fitHeadlineFontSizeMTS(headlineWidth, pWidth))
+      const headlineFontSize = Math.min(32, fitHeadlineFontSizeMTS(headlineWidth, pWidth))
       const headlineLineHeight = Math.round(headlineFontSize * 0.92)
       const openaiSize = Math.round(Math.min(138, pWidth * 0.34))
       const claudeSize = Math.round(Math.min(184, pWidth * 0.46, pHeight * 0.22))
@@ -260,7 +260,7 @@ export function DynamicLayoutMTSPage() {
     const text = textRef.current
     if (!text) return
     if (fontSize !== undefined) text.setStyleProperty('font-size', `${fontSize}px`)
-    text.setAttribute('textContent', line.text)
+    text.setAttribute('text', line.text)
   }
 
   function positionLogo(ref: any, rect: Rect, angle: number): void {
@@ -348,7 +348,7 @@ export function DynamicLayoutMTSPage() {
       const fps = Math.round((fpsFrameCountMT.current / fpsElapsed) * 1000)
       fpsFrameCountMT.current = 0; fpsLastTimeMT.current = now
       // Update FPS display directly on MTS — no cross-thread
-      if (fpsTextRef.current) fpsTextRef.current.setAttribute('textContent', `${fps}`)
+      if (fpsTextRef.current) fpsTextRef.current.setAttribute('text', `${fps}`)
       runOnBackground(setMtsFpsDisplay)(fps)
     }
 
