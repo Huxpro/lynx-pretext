@@ -429,3 +429,11 @@ Started: 2026-03-29
   - Always add `alignSelf: 'flex-start'` on fixed-width containers inside flex parents to prevent height stretching
   - For visual comparison demos, native `<text>` rendering is simpler and more honest than per-line rendering
 ---
+
+## 2026-03-29 - US-013 (VERIFIED)
+- Fixed text line rendering: wrapped `<text>` in `<view>` with `position: 'absolute'` for each flow line
+- Obstacle `<view>` with `position: 'absolute'` works correctly (only `<text>` doesn't support it)
+- DevTool screenshot verified: text flows around obstacle, narrow lines beside it, full-width below
+- tsc --build passes, pnpm build passes
+- Files changed: pages/variable-flow.tsx (fixed line rendering), tasks/prd.json (mark passes: true)
+---

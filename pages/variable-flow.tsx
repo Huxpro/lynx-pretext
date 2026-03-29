@@ -190,21 +190,21 @@ export function VariableFlowPage() {
             </text>
           </view>
 
-          {/* Each line as a positioned <text> */}
+          {/* Each line as a positioned <view> wrapping a <text> */}
           {flowLines.map((line, i) => (
-            <text
+            <view
               key={`flow-${i}`}
               style={{
                 position: 'absolute',
                 top: line.y,
                 left: 0,
-                fontSize: FONT_SIZE,
-                lineHeight: LINE_HEIGHT,
-                color: '#333',
+                height: LINE_HEIGHT,
               }}
             >
-              {line.text}
-            </text>
+              <text style={{ fontSize: FONT_SIZE, color: '#333' }}>
+                {line.text}
+              </text>
+            </view>
           ))}
         </view>
 

@@ -251,8 +251,8 @@
         "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "Demonstrates the streaming variable-width API. This is the key differentiator vs native <text> layout. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Demonstrates the streaming variable-width API. This is the key differentiator vs native <text> layout."
     },
     {
       "id": "US-014",
