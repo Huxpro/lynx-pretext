@@ -1,6 +1,6 @@
 import { root, useState, useCallback, useMemo } from '@lynx-js/react'
 
-import { layout, prepareWithSegments, walkLineRanges, layoutWithLines } from '../src/layout'
+import { layout, prepareWithSegments, walkLineRanges } from '../src/layout'
 
 const SAMPLE_TEXT =
   'The quick brown fox jumps over the lazy dog. ' +
@@ -69,11 +69,7 @@ export function ShrinkwrapPage() {
 
   const lineCount = layout(prepared, maxWidth, LINE_HEIGHT).lineCount
   const height = lineCount * LINE_HEIGHT
-  const wastedPixels = Math.max(0, cssWidth - shrinkwrapWidth) * height
-
-  // Get lines for rendering
-  const cssLines = layoutWithLines(prepared, maxWidth, LINE_HEIGHT)
-  const shrinkwrapLines = layoutWithLines(prepared, shrinkwrapMaxWidth, LINE_HEIGHT)
+  const wastedPixels = Math.max(0, cssWidth - shrinkwrapMaxWidth) * height
 
   return (
     <scroll-view style={{ flex: 1 }}>
@@ -142,7 +138,7 @@ export function ShrinkwrapPage() {
             <view>
               <text style={{ fontSize: 12, color: '#2e7d32' }}>Shrinkwrap</text>
               <text style={{ fontSize: 20, fontWeight: 'bold', color: '#1b5e20' }}>
-                {`${shrinkwrapWidth}px`}
+                {`${shrinkwrapMaxWidth}px`}
               </text>
             </view>
             <view>
@@ -159,8 +155,8 @@ export function ShrinkwrapPage() {
           }}>
             <text style={{ fontSize: 13, color: wastedPixels > 0 ? '#c62828' : '#2e7d32' }}>
               {wastedPixels > 0
-                ? `Wasted: ${Math.round(wastedPixels).toLocaleString()} pixels² (${cssWidth - shrinkwrapWidth}px × ${height}px)`
-                : 'No wasted space — already tight!'}
+                ? `Wasted: ${Math.round(wastedPixels).toLocaleString()} pixels\u00B2 (${cssWidth - shrinkwrapMaxWidth}px \u00D7 ${height}px)`
+                : 'No wasted space \u2014 already tight!'}
             </text>
           </view>
         </view>
@@ -170,72 +166,40 @@ export function ShrinkwrapPage() {
           Side-by-side comparison:
         </text>
 
-        <view style={{ flexDirection: 'row', marginTop: 8, gap: 12 }}>
-          {/* maxWidth container */}
-          <view style={{ flex: 1 }}>
-            <text style={{ fontSize: 12, color: '#e65100', marginBottom: 4 }}>
-              {`maxWidth (${cssWidth}px)`}
-            </text>
-            <view style={{
-              width: cssWidth,
-              height: height,
-              borderWidth: 2,
-              borderColor: '#ff9800',
-              borderRadius: 4,
-              backgroundColor: '#fff8e1',
-              overflow: 'hidden',
-            }}>
-              {cssLines.lines.map((line, i) => (
-                <text
-                  key={`css-${i}`}
-                  style={{
-                    position: 'absolute',
-                    top: i * LINE_HEIGHT,
-                    left: 0,
-                    fontSize: FONT_SIZE,
-                    lineHeight: LINE_HEIGHT,
-                    color: '#333',
-                  }}
-                >
-                  {line.text}
-                </text>
-              ))}
-            </view>
-          </view>
+        {/* maxWidth container */}
+        <text style={{ fontSize: 12, color: '#e65100', marginTop: 8, marginBottom: 4 }}>
+          {`CSS fit-content (${cssWidth}px)`}
+        </text>
+        <view style={{
+          width: cssWidth,
+          borderWidth: 2,
+          borderColor: '#ff9800',
+          borderRadius: 4,
+          backgroundColor: '#fff8e1',
+          padding: 4,
+          alignSelf: 'flex-start',
+        }}>
+          <text style={{ fontSize: FONT_SIZE, color: '#333' }}>
+            {SAMPLE_TEXT}
+          </text>
         </view>
 
-        <view style={{ flexDirection: 'row', marginTop: 12, gap: 12 }}>
-          {/* Shrinkwrap container */}
-          <view style={{ flex: 1 }}>
-            <text style={{ fontSize: 12, color: '#2e7d32', marginBottom: 4 }}>
-              {`Shrinkwrap (${shrinkwrapWidth}px)`}
-            </text>
-            <view style={{
-              width: shrinkwrapWidth,
-              height: height,
-              borderWidth: 2,
-              borderColor: '#4caf50',
-              borderRadius: 4,
-              backgroundColor: '#e8f5e9',
-              overflow: 'hidden',
-            }}>
-              {shrinkwrapLines.lines.map((line, i) => (
-                <text
-                  key={`tight-${i}`}
-                  style={{
-                    position: 'absolute',
-                    top: i * LINE_HEIGHT,
-                    left: 0,
-                    fontSize: FONT_SIZE,
-                    lineHeight: LINE_HEIGHT,
-                    color: '#333',
-                  }}
-                >
-                  {line.text}
-                </text>
-              ))}
-            </view>
-          </view>
+        {/* Shrinkwrap container */}
+        <text style={{ fontSize: 12, color: '#2e7d32', marginTop: 12, marginBottom: 4 }}>
+          {`Shrinkwrap (${shrinkwrapMaxWidth}px)`}
+        </text>
+        <view style={{
+          width: shrinkwrapMaxWidth,
+          borderWidth: 2,
+          borderColor: '#4caf50',
+          borderRadius: 4,
+          backgroundColor: '#e8f5e9',
+          padding: 4,
+          alignSelf: 'flex-start',
+        }}>
+          <text style={{ fontSize: FONT_SIZE, color: '#333' }}>
+            {SAMPLE_TEXT}
+          </text>
         </view>
 
         {/* Explanation */}

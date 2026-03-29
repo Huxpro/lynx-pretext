@@ -233,8 +233,8 @@
         "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "Demonstrates a capability missing from native Lynx layout — multiline shrinkwrap. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Demonstrates a capability missing from native Lynx layout — multiline shrinkwrap."
     },
     {
       "id": "US-013",

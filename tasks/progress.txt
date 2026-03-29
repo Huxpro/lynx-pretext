@@ -416,3 +416,16 @@ Started: 2026-03-29
   - Stacked `<view>` with fixed `height: LINE_HEIGHT` is a reliable alternative to absolute positioning for line rendering
   - `numberOfLines` is not a valid prop on Lynx `<text>` — use Lynx-specific text truncation if needed
 ---
+
+## 2026-03-29 - US-012 (VERIFIED)
+- Simplified shrinkwrap demo to use native `<text>` rendering in bordered containers
+- Fixed container height issue: removed `lineHeight` from `<text>` style (caused abnormal height), added `alignSelf: 'flex-start'`
+- Used `shrinkwrapMaxWidth` (minimum maxWidth preserving lineCount) for container width instead of `shrinkwrapWidth` (widest line)
+- DevTool screenshot verified: CSS fit-content (291px, orange) vs shrinkwrap (233px, green) clearly shows tighter container
+- tsc --build passes, pnpm build passes
+- Files changed: pages/shrinkwrap.tsx (simplified rendering), tasks/prd.json (mark passes: true)
+- **Learnings for future iterations:**
+  - Setting `lineHeight` on `<text>` in a `<view>` with `width` can cause unexpectedly tall containers in Lynx — omit if not needed
+  - Always add `alignSelf: 'flex-start'` on fixed-width containers inside flex parents to prevent height stretching
+  - For visual comparison demos, native `<text>` rendering is simpler and more honest than per-line rendering
+---
