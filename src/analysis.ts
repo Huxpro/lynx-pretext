@@ -138,3 +138,229 @@ export function splitSegmentByBreakKind(
 
   return pieces
 }
+
+// --- Character sets and merge helpers (US-003) ---
+
+const arabicScriptRe = /\p{Script=Arabic}/u
+const combiningMarkRe = /\p{M}/u
+const decimalDigitRe = /\p{Nd}/u
+
+function containsArabicScript(text: string): boolean {
+  return arabicScriptRe.test(text)
+}
+
+export function isCJK(s: string): boolean {
+  for (const ch of s) {
+    const c = ch.codePointAt(0)!
+    if ((c >= 0x4E00 && c <= 0x9FFF) ||
+        (c >= 0x3400 && c <= 0x4DBF) ||
+        (c >= 0x20000 && c <= 0x2A6DF) ||
+        (c >= 0x2A700 && c <= 0x2B73F) ||
+        (c >= 0x2B740 && c <= 0x2B81F) ||
+        (c >= 0x2B820 && c <= 0x2CEAF) ||
+        (c >= 0x2CEB0 && c <= 0x2EBEF) ||
+        (c >= 0x30000 && c <= 0x3134F) ||
+        (c >= 0xF900 && c <= 0xFAFF) ||
+        (c >= 0x2F800 && c <= 0x2FA1F) ||
+        (c >= 0x3000 && c <= 0x303F) ||
+        (c >= 0x3040 && c <= 0x309F) ||
+        (c >= 0x30A0 && c <= 0x30FF) ||
+        (c >= 0xAC00 && c <= 0xD7AF) ||
+        (c >= 0xFF00 && c <= 0xFFEF)) {
+      return true
+    }
+  }
+  return false
+}
+
+export const kinsokuStart = new Set([
+  '\uFF0C',
+  '\uFF0E',
+  '\uFF01',
+  '\uFF1A',
+  '\uFF1B',
+  '\uFF1F',
+  '\u3001',
+  '\u3002',
+  '\u30FB',
+  '\uFF09',
+  '\u3015',
+  '\u3009',
+  '\u300B',
+  '\u300D',
+  '\u300F',
+  '\u3011',
+  '\u3017',
+  '\u3019',
+  '\u301B',
+  '\u30FC',
+  '\u3005',
+  '\u303B',
+  '\u309D',
+  '\u309E',
+  '\u30FD',
+  '\u30FE',
+])
+
+export const kinsokuEnd = new Set([
+  '"',
+  '(', '[', '{',
+  '\u201C', '\u2018', '\u00AB', '\u2039',
+  '\uFF08',
+  '\u3014',
+  '\u3008',
+  '\u300A',
+  '\u300C',
+  '\u300E',
+  '\u3010',
+  '\u3016',
+  '\u3018',
+  '\u301A',
+])
+
+const forwardStickyGlue = new Set([
+  "'", '\u2018',
+])
+
+export const leftStickyPunctuation = new Set([
+  '.', ',', '!', '?', ':', ';',
+  '\u060C',
+  '\u061B',
+  '\u061F',
+  '\u0964',
+  '\u0965',
+  '\u104A',
+  '\u104B',
+  '\u104C',
+  '\u104D',
+  '\u104F',
+  ')', ']', '}',
+  '%',
+  '"',
+  '\u201D', '\u2019', '\u00BB', '\u203A',
+  '\u2026',
+])
+
+const arabicNoSpaceTrailingPunctuation = new Set([
+  ':',
+  '.',
+  '\u060C',
+  '\u061B',
+])
+
+const myanmarMedialGlue = new Set([
+  '\u104F',
+])
+
+const closingQuoteChars = new Set([
+  '\u201D', '\u2019', '\u00BB', '\u203A',
+  '\u300D',
+  '\u300F',
+  '\u3011',
+  '\u300B',
+  '\u3009',
+  '\u3015',
+  '\uFF09',
+])
+
+export function isLeftStickyPunctuationSegment(segment: string): boolean {
+  if (isEscapedQuoteClusterSegment(segment)) return true
+  let sawPunctuation = false
+  for (const ch of segment) {
+    if (leftStickyPunctuation.has(ch)) {
+      sawPunctuation = true
+      continue
+    }
+    if (sawPunctuation && combiningMarkRe.test(ch)) continue
+    return false
+  }
+  return sawPunctuation
+}
+
+function isCJKLineStartProhibitedSegment(segment: string): boolean {
+  for (const ch of segment) {
+    if (!kinsokuStart.has(ch) && !leftStickyPunctuation.has(ch)) return false
+  }
+  return segment.length > 0
+}
+
+export function isForwardStickyClusterSegment(segment: string): boolean {
+  if (isEscapedQuoteClusterSegment(segment)) return true
+  for (const ch of segment) {
+    if (!kinsokuEnd.has(ch) && !forwardStickyGlue.has(ch) && !combiningMarkRe.test(ch)) return false
+  }
+  return segment.length > 0
+}
+
+export function isEscapedQuoteClusterSegment(segment: string): boolean {
+  let sawQuote = false
+  for (const ch of segment) {
+    if (ch === '\\' || combiningMarkRe.test(ch)) continue
+    if (kinsokuEnd.has(ch) || leftStickyPunctuation.has(ch) || forwardStickyGlue.has(ch)) {
+      sawQuote = true
+      continue
+    }
+    return false
+  }
+  return sawQuote
+}
+
+export function splitTrailingForwardStickyCluster(text: string): { head: string, tail: string } | null {
+  const chars = Array.from(text)
+  let splitIndex = chars.length
+
+  while (splitIndex > 0) {
+    const ch = chars[splitIndex - 1]!
+    if (combiningMarkRe.test(ch)) {
+      splitIndex--
+      continue
+    }
+    if (kinsokuEnd.has(ch) || forwardStickyGlue.has(ch)) {
+      splitIndex--
+      continue
+    }
+    break
+  }
+
+  if (splitIndex <= 0 || splitIndex === chars.length) return null
+  return {
+    head: chars.slice(0, splitIndex).join(''),
+    tail: chars.slice(splitIndex).join(''),
+  }
+}
+
+function isRepeatedSingleCharRun(segment: string, ch: string): boolean {
+  if (segment.length === 0) return false
+  for (const part of segment) {
+    if (part !== ch) return false
+  }
+  return true
+}
+
+function endsWithArabicNoSpacePunctuation(segment: string): boolean {
+  if (!containsArabicScript(segment) || segment.length === 0) return false
+  return arabicNoSpaceTrailingPunctuation.has(segment[segment.length - 1]!)
+}
+
+function endsWithMyanmarMedialGlue(segment: string): boolean {
+  if (segment.length === 0) return false
+  return myanmarMedialGlue.has(segment[segment.length - 1]!)
+}
+
+function splitLeadingSpaceAndMarks(segment: string): { space: string, marks: string } | null {
+  if (segment.length < 2 || segment[0] !== ' ') return null
+  const marks = segment.slice(1)
+  if (/^\p{M}+$/u.test(marks)) {
+    return { space: ' ', marks }
+  }
+  return null
+}
+
+export function endsWithClosingQuote(text: string): boolean {
+  for (let i = text.length - 1; i >= 0; i--) {
+    const ch = text[i]!
+    if (closingQuoteChars.has(ch)) return true
+    if (!leftStickyPunctuation.has(ch)) return false
+  }
+  return false
+}
