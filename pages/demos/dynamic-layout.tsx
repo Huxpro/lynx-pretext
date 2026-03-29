@@ -471,6 +471,7 @@ export function DynamicLayoutPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
   const [showControls, setShowControls] = useState(false)
+  const [fpsDisplay, setFpsDisplay] = useState(0)
   // Settled angles drive text reflow (expensive, only on animation end)
   const [openaiSettledAngle, setOpenaiSettledAngle] = useState(0)
   const [claudeSettledAngle, setClaudeSettledAngle] = useState(0)
@@ -491,6 +492,9 @@ export function DynamicLayoutPage() {
   const openaiSpinningMT = useMainThreadRef(false)
   const claudeSpinningMT = useMainThreadRef(false)
   const animatingMT = useMainThreadRef(false)
+  const fpsFrameCountMT = useMainThreadRef(0)
+  const fpsLastTimeMT = useMainThreadRef(0)
+  const fpsMT = useMainThreadRef(0)
 
   const onLayout = useCallback((e: any) => {
     setPageWidth(Math.floor(e.detail.width))
@@ -507,6 +511,17 @@ export function DynamicLayoutPage() {
     'main thread'
     const now = Date.now()
     let still = false
+
+    // FPS measurement
+    fpsFrameCountMT.current++
+    if (fpsLastTimeMT.current === 0) fpsLastTimeMT.current = now
+    const elapsed = now - fpsLastTimeMT.current
+    if (elapsed >= 500) {
+      fpsMT.current = Math.round((fpsFrameCountMT.current / elapsed) * 1000)
+      fpsFrameCountMT.current = 0
+      fpsLastTimeMT.current = now
+      runOnBackground(setFpsDisplay)(fpsMT.current)
+    }
 
     if (openaiSpinningMT.current) {
       const duration = 900
@@ -841,6 +856,12 @@ export function DynamicLayoutPage() {
               <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Total</text>
               <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
                 {`${headlineLines.length + totalBodyLines}`}
+              </text>
+            </view>
+            <view>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>FPS</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: fpsDisplay >= 50 ? '#4caf50' : fpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
+                {`${fpsDisplay}`}
               </text>
             </view>
           </view>

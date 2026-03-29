@@ -260,8 +260,12 @@ export function DynamicLayoutBTSPage() {
   const [showControls, setShowControls] = useState(false)
   const [openaiAngle, setOpenaiAngle] = useState(0)
   const [claudeAngle, setClaudeAngle] = useState(0)
+  const [fpsDisplay, setFpsDisplay] = useState(0)
 
   const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
+  const fpsFrameCountRef = useRef(0)
+  const fpsLastTimeRef = useRef(0)
+  const fpsValueRef = useRef(0)
   const openaiSpinRef = useRef<SpinState | null>(null)
   const claudeSpinRef = useRef<SpinState | null>(null)
   const rafRef = useRef<number | null>(null)
@@ -279,6 +283,18 @@ export function DynamicLayoutBTSPage() {
   // Pure BTS animation loop — requestAnimationFrame + setState every frame
   const tick = useCallback(() => {
     const now = Date.now()
+
+    // FPS measurement
+    fpsFrameCountRef.current++
+    if (fpsLastTimeRef.current === 0) fpsLastTimeRef.current = now
+    const fpsElapsed = now - fpsLastTimeRef.current
+    if (fpsElapsed >= 500) {
+      fpsValueRef.current = Math.round((fpsFrameCountRef.current / fpsElapsed) * 1000)
+      fpsFrameCountRef.current = 0
+      fpsLastTimeRef.current = now
+      setFpsDisplay(fpsValueRef.current)
+    }
+
     let still = false
     let nextOpenai = openaiAngle
     let nextClaude = claudeAngle
@@ -455,6 +471,12 @@ export function DynamicLayoutBTSPage() {
             <view>
               <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Lines</text>
               <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{`${headlineLines.length + totalBodyLines}`}</text>
+            </view>
+            <view>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>FPS</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: fpsDisplay >= 50 ? '#4caf50' : fpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
+                {`${fpsDisplay}`}
+              </text>
             </view>
           </view>
         </view>
