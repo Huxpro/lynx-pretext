@@ -82,3 +82,17 @@ Started: 2026-03-29
   - No need for getMeasureContext() / OffscreenCanvas / Canvas — getTextInfo is synchronous on main thread
   - getCorrectedSegmentWidth simply returns metrics.width when emojiCorrection=0 (same as original fast path)
 ---
+
+## 2026-03-29 - US-006
+- Ported line-break.ts 1:1 from pretext — zero platform dependencies, only import paths changed
+- Exported: countPreparedLines, walkPreparedLines, layoutNextLineRange, normalizeLineStart
+- Types exported: LineBreakCursor, PreparedLineBreakData, InternalLayoutLine
+- Internal helpers: countPreparedLinesSimple, walkPreparedLinesSimple, layoutNextLineRangeSimple (fast paths for simple text)
+- Full path handles: soft-hyphen, tab, hard-break, preserved-space, trailing whitespace hang, grapheme-level word overflow
+- Files changed: src/line-break.ts (new, 1056 lines)
+- **Learnings for future iterations:**
+  - line-break.ts has zero platform dependencies — truly pure arithmetic over PreparedLineBreakData
+  - Only imports: SegmentBreakKind type from analysis, getEngineProfile from measurement
+  - The simple fast path (countPreparedLinesSimple, walkPreparedLinesSimple, layoutNextLineRangeSimple) handles text+space+ZWSP only
+  - The full path adds soft-hyphen, tab, hard-break, preserved-space support via chunk-based iteration
+---

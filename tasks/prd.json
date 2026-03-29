@@ -111,7 +111,7 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/line-break.ts. Direct copy with only import path changes — zero platform dependencies."
     },
     {
