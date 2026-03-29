@@ -187,7 +187,7 @@ function buildLayout(pageWidth: number, pageHeight: number, lineHeight: number, 
     const headlineWidth = pageWidth - gutter * 2
     const headlineFontSize = Math.min(32, fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared))
     const headlineLineHeight = Math.round(headlineFontSize * 0.92)
-    const claudeSize = Math.round(Math.min(92, pageWidth * 0.23, pageHeight * 0.11))
+    const claudeSize = Math.round(Math.min(184, pageWidth * 0.46, pageHeight * 0.22))
     const openaiSize = Math.round(Math.min(138, pageWidth * 0.34))
     return {
       isNarrow, gutter, pageWidth, pageHeight, centerGap: 0, columnWidth,
@@ -207,7 +207,7 @@ function buildLayout(pageWidth: number, pageHeight: number, lineHeight: number, 
   const headlineLineHeight = Math.round(headlineFontSize * 0.92)
   const openaiShrinkT = Math.max(0, Math.min(1, (960 - pageWidth) / 260))
   const openaiSize = Math.round(Math.min(400 - openaiShrinkT * 56, pageHeight * 0.43))
-  const claudeSize = Math.round(Math.max(276, Math.min(500, pageWidth * 0.355, pageHeight * 0.45)))
+  const claudeSize = Math.round(Math.max(552, Math.min(1000, pageWidth * 0.71, pageHeight * 0.9)))
   return {
     isNarrow, gutter, pageWidth, pageHeight, centerGap, columnWidth,
     headlineRegion: { x: gutter, y: headlineTop, width: headlineWidth, height: pageHeight - headlineTop - gutter },

@@ -255,7 +255,7 @@ function buildLayout(
     const headlineFont = `700 ${headlineFontSize}px ${HEADLINE_FONT_FAMILY}`
     const creditGap = Math.round(Math.max(12, lineHeight * 0.5))
     const copyGap = Math.round(Math.max(18, lineHeight * 0.7))
-    const claudeSize = Math.round(Math.min(92, pageWidth * 0.23, pageHeight * 0.11))
+    const claudeSize = Math.round(Math.min(184, pageWidth * 0.46, pageHeight * 0.22))
     const openaiSize = Math.round(Math.min(138, pageWidth * 0.34))
     const headlineRegion: Rect = {
       x: gutter,
@@ -296,7 +296,7 @@ function buildLayout(
   const openaiShrinkT = Math.max(0, Math.min(1, (960 - pageWidth) / 260))
   const OPENAI_SIZE = 400 - openaiShrinkT * 56
   const openaiSize = Math.round(Math.min(OPENAI_SIZE, pageHeight * 0.43))
-  const claudeSize = Math.round(Math.max(276, Math.min(500, pageWidth * 0.355, pageHeight * 0.45)))
+  const claudeSize = Math.round(Math.max(552, Math.min(1000, pageWidth * 0.71, pageHeight * 0.9)))
   const headlineRegion: Rect = {
     x: gutter,
     y: headlineTop,
