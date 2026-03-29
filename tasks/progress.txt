@@ -1,3 +1,26 @@
 # Ralph Progress Log
 Started: 2026-03-29
+
+## Codebase Patterns
+- Rspeedy project uses `lynx.config.ts` (not `rspeedy.config.ts`) for build configuration
+- Entry point is `src/index.tsx`, demo pages live under `pages/`
+- `src/tsconfig.json` includes `../pages/**/*.tsx` so pages are typechecked with src
+- `@formatjs/intl-segmenter` v12.x is the current major (v11 is no longer available)
+- `tsc --build` is the typecheck command (project references mode)
+- Rspeedy build output goes to `dist/main.lynx.bundle`
+
+---
+
+## 2026-03-29 - US-001
+- Scaffolded Rspeedy project with TypeScript using `create-rspeedy` react-ts template as reference
+- Created `src/` for library code and `pages/` for demo pages
+- Hello-world page at `pages/hello-world.tsx` renders `<text>` elements
+- Entry point at `src/index.tsx` renders the hello-world page
+- Installed `@formatjs/intl-segmenter` ^12.2.1 as dependency
+- Files changed: package.json, lynx.config.ts, tsconfig.json, tsconfig.node.json, src/tsconfig.json, src/rspeedy-env.d.ts, src/index.tsx, pages/hello-world.tsx, .gitignore
+- **Learnings for future iterations:**
+  - `create-rspeedy` supports non-interactive mode: `pnpm create rspeedy@latest <dir> --template react-ts`
+  - The scaffold template puts everything in `src/` — we split library code (src/) from pages (pages/) for this project
+  - `@lynx-js/react` provides React primitives (useState, useEffect, etc.) — import from there, not `react`
+  - Build and typecheck both pass with zero config beyond the template defaults
 ---
