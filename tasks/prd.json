@@ -131,7 +131,7 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/layout.ts (types, measureAnalysis, prepareInternal, prepare, layout, clearCache, setLocale). Port PreparedCore type, measureAnalysis(), and the prepare/layout public API."
     },
     {

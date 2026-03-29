@@ -96,3 +96,17 @@ Started: 2026-03-29
   - The simple fast path (countPreparedLinesSimple, walkPreparedLinesSimple, layoutNextLineRangeSimple) handles text+space+ZWSP only
   - The full path adds soft-hyphen, tab, hard-break, preserved-space support via chunk-based iteration
 ---
+
+## 2026-03-29 - US-007
+- Ported layout.ts from pretext: core prepare/layout API and all rich-path functions
+- Stubbed computeSegmentLevels (bidi) to return null for MVP
+- Exported public API: prepare, prepareWithSegments, layout, layoutWithLines, walkLineRanges, layoutNextLine, clearCache, setLocale
+- Exported types: PreparedText, PreparedTextWithSegments, LayoutCursor, LayoutResult, LayoutLine, LayoutLineRange, LayoutLinesResult, PrepareOptions, PreparedLineChunk
+- Internal helpers: measureAnalysis, mapAnalysisChunksToPreparedChunks, prepareInternal, createEmptyPrepared, buildLineTextFromRange, materializeLayoutLine, toLayoutLineRange
+- Files changed: src/layout.ts (new, 621 lines)
+- **Learnings for future iterations:**
+  - layout.ts has zero direct platform calls — all measurement goes through measurement.ts
+  - computeSegmentLevels (bidi) stubbed to null — safe because line-break engine never reads segLevels
+  - Included both US-007 (prepare/layout) and US-008 (rich-path: layoutWithLines, walkLineRanges, layoutNextLine, prepareWithSegments) in same file since they're tightly coupled in the original
+  - The WeakMap<PreparedTextWithSegments, Map<number, string[]>> pattern caches grapheme splits per prepared handle without leaking memory
+---
