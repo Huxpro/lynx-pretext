@@ -62,9 +62,6 @@ export function DynamicLayoutMTSPage() {
   const [pageHeight, setPageHeight] = useState(700)
   const [showControls, setShowControls] = useState(false)
   const [mtsFpsDisplay, setMtsFpsDisplay] = useState(0)
-  const [btsFpsDisplay, setBtsFpsDisplay] = useState(0)
-  const btsFpsFrameCountRef = useRef(0)
-  const btsFpsLastTimeRef = useRef(0)
 
   const onLayout = useCallback((e: any) => {
     setPageWidth(Math.floor(e.detail.width))
@@ -75,18 +72,6 @@ export function DynamicLayoutMTSPage() {
   const increaseWidth = useCallback(() => setPageWidth(w => Math.min(1200, w + 40)), [])
   const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(400, h - 40)), [])
   const increaseHeight = useCallback(() => setPageHeight(h => Math.min(1200, h + 40)), [])
-
-  // BTS FPS: count render calls
-  btsFpsFrameCountRef.current++
-  const btsNow = Date.now()
-  if (btsFpsLastTimeRef.current === 0) btsFpsLastTimeRef.current = btsNow
-  const btsElapsed = btsNow - btsFpsLastTimeRef.current
-  if (btsElapsed >= 500) {
-    const fps = Math.round((btsFpsFrameCountRef.current / btsElapsed) * 1000)
-    btsFpsFrameCountRef.current = 0
-    btsFpsLastTimeRef.current = btsNow
-    setBtsFpsDisplay(fps)
-  }
 
   // --- Element pool refs ---
   const hView0 = useMainThreadRef<MainThread.Element>(null)
@@ -133,6 +118,8 @@ export function DynamicLayoutMTSPage() {
   const creditWidthMT = useMainThreadRef(0)
   const fpsFrameCountMT = useMainThreadRef(0)
   const fpsLastTimeMT = useMainThreadRef(0)
+  const prevBodyCountMT = useMainThreadRef(0)
+  const fpsTextRef = useMainThreadRef<MainThread.Element>(null)
 
   // MTS-side prepared text cache (state-isolated from BTS).
   // Initialized lazily on MTS — Map is not JSON-serializable so can't be passed as initial value.
@@ -262,6 +249,30 @@ export function DynamicLayoutMTSPage() {
       claudeRect: { x: pWidth - Math.round(claudeSize * 0.69), y: -Math.round(claudeSize * 0.22), width: claudeSize, height: claudeSize } }
   }
 
+  // --- Helpers (like editorial-mts pattern) ---
+
+  function positionTextLine(viewRef: any, textRef: any, line: PositionedLine | null, height: number, fontSize?: number): void {
+    'main thread'
+    const view = viewRef.current
+    if (!view) return
+    if (line === null) { view.setStyleProperty('display', 'none'); return }
+    view.setStyleProperties({ display: 'flex', left: `${line.x}px`, top: `${line.y}px`, height: `${height}px` })
+    const text = textRef.current
+    if (!text) return
+    if (fontSize !== undefined) text.setStyleProperty('font-size', `${fontSize}px`)
+    text.setAttribute('textContent', line.text)
+  }
+
+  function positionLogo(ref: any, rect: Rect, angle: number): void {
+    'main thread'
+    if (!ref.current) return
+    ref.current.setStyleProperties({
+      left: `${rect.x}px`, top: `${rect.y}px`,
+      width: `${rect.width}px`, height: `${rect.height}px`,
+      transform: `rotate(${angle * 180 / Math.PI}deg)`,
+    })
+  }
+
   // Full evaluate + apply to pool — ALL on MTS, zero cross-thread
   function evaluateAndApply(openaiAngle: number, claudeAngle: number): void {
     'main thread'
@@ -302,38 +313,25 @@ export function DynamicLayoutMTSPage() {
 
     // Apply headline
     for (let i = 0; i < HEADLINE_POOL; i++) {
-      const view = hViewRefs[i]!.current; if (!view) continue
-      if (i < headlineLines.length) {
-        const line = headlineLines[i]!
-        view.setStyleProperty('display', 'flex'); view.setStyleProperty('left', `${line.x}px`); view.setStyleProperty('top', `${line.y}px`); view.setStyleProperty('height', `${layout.headlineLineHeight}px`)
-        const text = hTextRefs[i]!.current
-        if (text) { text.setStyleProperty('font-size', `${layout.headlineFontSize}px`); text.setAttribute('text', line.text) }
-      } else { view.setStyleProperty('display', 'none') }
+      positionTextLine(hViewRefs[i], hTextRefs[i], i < headlineLines.length ? headlineLines[i]! : null, layout.headlineLineHeight, layout.headlineFontSize)
     }
     // Apply credit
-    if (creditViewRef.current) { creditViewRef.current.setStyleProperty('left', `${creditLeft}px`); creditViewRef.current.setStyleProperty('top', `${creditTop}px`) }
-    // Apply body
+    if (creditViewRef.current) {
+      creditViewRef.current.setStyleProperties({ left: `${creditLeft}px`, top: `${creditTop}px` })
+    }
+    // Apply body — only hide the delta from previous frame
     const allBody = leftLines.concat(rightLines)
-    for (let i = 0; i < BODY_POOL; i++) {
-      const view = bViewRefs[i]!.current; if (!view) continue
-      if (i < allBody.length) {
-        const line = allBody[i]!
-        view.setStyleProperty('display', 'flex'); view.setStyleProperty('left', `${line.x}px`); view.setStyleProperty('top', `${line.y}px`)
-        const text = bTextRefs[i]!.current
-        if (text) text.setAttribute('text', line.text)
-      } else { view.setStyleProperty('display', 'none') }
+    for (let i = 0; i < allBody.length; i++) {
+      positionTextLine(bViewRefs[i], bTextRefs[i], allBody[i]!, BODY_LINE_HEIGHT)
     }
+    for (let i = allBody.length; i < prevBodyCountMT.current; i++) {
+      const view = bViewRefs[i]?.current
+      if (view) view.setStyleProperty('display', 'none')
+    }
+    prevBodyCountMT.current = allBody.length
     // Apply logos
-    if (openaiLogoRef.current) {
-      openaiLogoRef.current.setStyleProperty('left', `${layout.openaiRect.x}px`); openaiLogoRef.current.setStyleProperty('top', `${layout.openaiRect.y}px`)
-      openaiLogoRef.current.setStyleProperty('width', `${layout.openaiRect.width}px`); openaiLogoRef.current.setStyleProperty('height', `${layout.openaiRect.height}px`)
-      openaiLogoRef.current.setStyleProperty('transform', `rotate(${openaiAngle * 180 / Math.PI}deg)`)
-    }
-    if (claudeLogoRef.current) {
-      claudeLogoRef.current.setStyleProperty('left', `${layout.claudeRect.x}px`); claudeLogoRef.current.setStyleProperty('top', `${layout.claudeRect.y}px`)
-      claudeLogoRef.current.setStyleProperty('width', `${layout.claudeRect.width}px`); claudeLogoRef.current.setStyleProperty('height', `${layout.claudeRect.height}px`)
-      claudeLogoRef.current.setStyleProperty('transform', `rotate(${claudeAngle * 180 / Math.PI}deg)`)
-    }
+    positionLogo(openaiLogoRef, layout.openaiRect, openaiAngle)
+    positionLogo(claudeLogoRef, layout.claudeRect, claudeAngle)
   }
 
   // ======= ANIMATION =======
@@ -349,6 +347,8 @@ export function DynamicLayoutMTSPage() {
     if (fpsElapsed >= 500) {
       const fps = Math.round((fpsFrameCountMT.current / fpsElapsed) * 1000)
       fpsFrameCountMT.current = 0; fpsLastTimeMT.current = now
+      // Update FPS display directly on MTS — no cross-thread
+      if (fpsTextRef.current) fpsTextRef.current.setAttribute('textContent', `${fps}`)
       runOnBackground(setMtsFpsDisplay)(fps)
     }
 
@@ -471,11 +471,7 @@ export function DynamicLayoutMTSPage() {
             </view>
             <view>
               <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>MTS fps</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: mtsFpsDisplay >= 50 ? '#4caf50' : mtsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>{`${mtsFpsDisplay}`}</text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>BTS fps</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: btsFpsDisplay >= 50 ? '#4caf50' : btsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>{`${btsFpsDisplay}`}</text>
+              <text main-thread:ref={fpsTextRef} style={{ fontSize: '14px', fontWeight: 'bold', color: mtsFpsDisplay >= 50 ? '#4caf50' : mtsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>{`${mtsFpsDisplay}`}</text>
             </view>
           </view>
         </view>
