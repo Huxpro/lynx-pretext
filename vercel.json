@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "pnpm build && cd website && pnpm build",
+  "outputDirectory": "website/dist",
   "cleanUrls": true,
   "headers": [
     {
