@@ -15,6 +15,9 @@ export default defineConfig({
       accuracy: './pages/accuracy.tsx',
       bubbles: './pages/demos/bubbles.tsx',
       'dynamic-layout': './pages/demos/dynamic-layout.tsx',
+      'editorial-engine': './pages/demos/editorial-engine.tsx',
+      'dynamic-layout-mts': './pages/demos/dynamic-layout-mts.tsx',
+      'dynamic-layout-bts': './pages/demos/dynamic-layout-bts.tsx',
     },
   },
   plugins: [
