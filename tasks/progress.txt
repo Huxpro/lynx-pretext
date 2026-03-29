@@ -2,12 +2,13 @@
 Started: 2026-03-29
 
 ## Codebase Patterns
-- Root tsconfig.json targets ES2020 with lib ES2020 — supports Set, Map, codePointAt, Array.from, Unicode regex flag
+- Root tsconfig.json targets ES2020 with lib ES2020 + ES2022.Intl — supports Set, Map, codePointAt, Array.from, Unicode regex flag, Intl.Segmenter types
 - Rspeedy project uses `lynx.config.ts` (not `rspeedy.config.ts`) for build configuration
 - Entry point is `src/index.tsx`, demo pages live under `pages/`
 - `src/tsconfig.json` includes `../pages/**/*.tsx` so pages are typechecked with src
 - `@formatjs/intl-segmenter` v12.x is the current major (v11 is no longer available)
 - `tsc --build` is the typecheck command (project references mode)
+- `import '@formatjs/intl-segmenter/polyfill-force.js'` patches Intl.Segmenter globally; use `ES2022.Intl` in lib for TS types
 - Rspeedy build output goes to `dist/main.lynx.bundle`
 
 ---
@@ -46,4 +47,19 @@ Started: 2026-03-29
   - Default TS target is ES3 which lacks Set, codePointAt, Array.from, and Unicode regex flag `u` — needed to add `"target": "ES2020"` and `"lib": ["ES2020"]` to root tsconfig.json
   - Used Unicode escape codes (e.g. `\u201C`) instead of literal smart quotes to avoid encoding issues — functionally identical
   - The `decimalDigitRe` and other internal helpers are only used by the merge pipeline (US-004) but were included here since they're part of the same character-set block
+---
+
+## 2026-03-29 - US-004
+- Ported full merge pipeline and analyzeText from pretext/src/analysis.ts (lines 320-1008)
+- Added `import '@formatjs/intl-segmenter/polyfill-force.js'` to patch Intl.Segmenter globally
+- Added word segmenter management: sharedWordSegmenter, getSharedWordSegmenter, clearAnalysisCaches, setAnalysisLocale
+- Ported all merge functions: mergeUrlLikeRuns, mergeUrlQueryRuns, mergeNumericRuns, mergeAsciiPunctuationChains, splitHyphenatedNumericRuns, mergeGlueConnectedTextRuns, carryTrailingForwardStickyAcrossCJKBoundary
+- Ported buildMergedSegmentation, compileAnalysisChunks, analyzeText
+- Files changed: src/analysis.ts (appended ~648 lines), tsconfig.json (added ES2022.Intl to lib)
+- **Learnings for future iterations:**
+  - `@formatjs/intl-segmenter/polyfill-force.js` patches `Intl.Segmenter` globally at runtime, but TS needs `ES2022.Intl` in the lib array for type definitions
+  - The polyfill's `polyfill-force.d.ts` only exports `{}` — it doesn't augment the Intl namespace
+  - The original uses `'—'` literal em-dash in buildMergedSegmentation; used `'\u2014'` escape for consistency
+  - The `×` multiplication sign in numericJoinerChars was escaped as `'\u00D7'`
+  - All merge functions are 1:1 ports with zero adaptation needed — they operate on pure MergedSegmentation data
 ---

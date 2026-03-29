@@ -69,7 +69,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/analysis.ts (lines 320-1008). Port buildMergedSegmentation, all merge* functions, compileAnalysisChunks, analyzeText. Replace native Intl.Segmenter with @formatjs/intl-segmenter polyfill."
     },
     {
