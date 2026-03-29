@@ -204,7 +204,7 @@
         "Verify in Lynx DevTool that lines are correctly positioned"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "Demonstrates the rich layout API. Key point: prepare() is called once, layout is re-run on width change."
     },
     {

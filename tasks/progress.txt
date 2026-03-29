@@ -162,3 +162,18 @@ Started: 2026-03-29
   - Native height = nativeLineCount * lineHeight matches the pretext convention
   - Lynx <view> supports gap property for flexbox spacing
 ---
+
+## 2026-03-29 - US-011
+- Created layoutWithLines manual rendering demo at pages/layout-with-lines.tsx
+- Uses prepareWithSegments() (memoized via useMemo) + layoutWithLines() on every width change
+- Each line rendered as absolutely positioned <text> element within a sized container
+- Line details table shows line index, text content, width, and segment range
+- Native <text> comparison block at bottom for visual verification
+- +/− buttons change maxWidth (80–500px in 20px steps)
+- Updated src/index.tsx to render LayoutWithLinesPage
+- Files changed: pages/layout-with-lines.tsx (new), src/index.tsx (updated), tasks/prd.json (updated)
+- **Learnings for future iterations:**
+  - useMemo with empty deps array memoizes prepare() across re-renders — layout is pure arithmetic on cached data
+  - position: 'absolute' with top: i * lineHeight positions lines correctly in Lynx
+  - LayoutLine.start/end LayoutCursor gives segment-level debugging info (segmentIndex, graphemeIndex)
+---
