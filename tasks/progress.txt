@@ -194,3 +194,20 @@ Started: 2026-03-29
   - The bubbles-shared.ts in pretext has the same pattern (collectWrapMetrics + findTightWrapMetrics)
   - Shrinkwrap is purely arithmetic — no native calls in the resize path
 ---
+
+## 2026-03-29 - US-013
+- Created variable-width flow demo at pages/variable-flow.tsx
+- Uses layoutNextLine in a loop with varying maxWidth per line to flow text around a rectangular obstacle
+- Lines overlapping the obstacle (top-right, 120x100px) get narrower width; lines below get full maxWidth
+- Each line rendered as absolutely positioned <text> element
+- Cursor continuity: line.end becomes next line's start cursor
+- +/- buttons change container maxWidth (200-500px); flow recalculates on every change
+- Summary shows total/narrow/full-width line counts; line detail table shows per-line width info
+- Updated src/index.tsx to render VariableFlowPage
+- Files changed: pages/variable-flow.tsx (new), src/index.tsx (updated)
+- **Learnings for future iterations:**
+  - layoutNextLine(prepared, cursor, maxWidth) returns LayoutLine | null — the streaming API
+  - Variable-width flow: compute available width per line based on Y position, pass different maxWidth each iteration
+  - The obstacle overlap check: `y < obstacleHeight + gap` determines if a line is beside the obstacle
+  - This pattern (varying maxWidth per line) is the key differentiator vs native <text> layout
+---

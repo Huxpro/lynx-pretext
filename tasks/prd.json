@@ -238,7 +238,7 @@
         "Verify in Lynx DevTool that text correctly wraps around the obstacle"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "Demonstrates the streaming variable-width API. This is the key differentiator vs native <text> layout."
     },
     {
