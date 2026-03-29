@@ -1,4 +1,5 @@
-import '@formatjs/intl-segmenter/polyfill-force.js'
+import './intl-shim'
+import './segmenter-polyfill'
 
 export type WhiteSpaceMode = 'normal' | 'pre-wrap'
 

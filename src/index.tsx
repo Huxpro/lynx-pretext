@@ -1,8 +1,7 @@
 import { root } from '@lynx-js/react'
+import { VariableFlowPage } from '../pages/variable-flow'
 
-import { DynamicLayoutPage } from '../pages/demos/dynamic-layout.js'
-
-root.render(<DynamicLayoutPage />)
+root.render(<VariableFlowPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()
