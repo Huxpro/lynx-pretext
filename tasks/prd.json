@@ -91,7 +91,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/measurement.ts. Key adaptation: replace getMeasureContext()/OffscreenCanvas with lynx.getTextInfo(). Add parseFontFamily(). Emoji correction set to 0 for MVP. getEngineProfile() returns single Lynx profile instead of UA-sniffing."
     },
     {

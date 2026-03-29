@@ -2,6 +2,8 @@
 Started: 2026-03-29
 
 ## Codebase Patterns
+- lynx.getTextInfo(text, { fontSize: "16px", fontFamily?: "Inter" }) returns { width: number, content?: string[] } — synchronous on main thread
+- Module-level font context (currentFontSizeStr, currentFontFamily) must be set before calling getSegmentMetrics
 - Root tsconfig.json targets ES2020 with lib ES2020 + ES2022.Intl — supports Set, Map, codePointAt, Array.from, Unicode regex flag, Intl.Segmenter types
 - Rspeedy project uses `lynx.config.ts` (not `rspeedy.config.ts`) for build configuration
 - Entry point is `src/index.tsx`, demo pages live under `pages/`
@@ -62,4 +64,21 @@ Started: 2026-03-29
   - The original uses `'—'` literal em-dash in buildMergedSegmentation; used `'\u2014'` escape for consistency
   - The `×` multiplication sign in numericJoinerChars was escaped as `'\u00D7'`
   - All merge functions are 1:1 ports with zero adaptation needed — they operate on pure MergedSegmentation data
+---
+
+## 2026-03-29 - US-005
+- Ported measurement.ts from pretext, replacing Canvas measureText() with lynx.getTextInfo()
+- Added parseFontFamily() to extract font family from CSS font shorthand strings
+- getEngineProfile() returns single Lynx profile (no UA sniffing): lineFitEpsilon=0.005, all booleans false
+- Emoji correction set to 0 for MVP — skipped getEmojiCorrection, countEmojiGraphemes, isEmojiGrapheme
+- Module-level currentFontSizeStr/currentFontFamily replaces Canvas ctx.font context
+- getFontMeasurementState sets module-level font context before getSegmentMetrics calls getTextInfo
+- Files changed: src/measurement.ts (new)
+- **Learnings for future iterations:**
+  - lynx.getTextInfo(text, { fontSize: string, fontFamily?: string }) returns { width: number, content?: string[] }
+  - fontSize must be a string with unit like "16px", not a bare number
+  - fontFamily is optional — omit it to use system default
+  - The `lynx` global is typed via @lynx-js/types transitively through @lynx-js/rspeedy/client reference
+  - No need for getMeasureContext() / OffscreenCanvas / Canvas — getTextInfo is synchronous on main thread
+  - getCorrectedSegmentWidth simply returns metrics.width when emojiCorrection=0 (same as original fast path)
 ---
