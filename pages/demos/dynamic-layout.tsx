@@ -542,13 +542,14 @@ export function DynamicLayoutPage() {
       }
     }
 
+    // Push current angles to React for text reflow every frame
+    runOnBackground(setOpenaiSettledAngle)(openaiAngleMT.current)
+    runOnBackground(setClaudeSettledAngle)(claudeAngleMT.current)
+
     if (still) {
       requestAnimationFrame(spinTick)
     } else {
       animatingMT.current = false
-      // Animation done — tell React to reflow text at final angles
-      runOnBackground(setOpenaiSettledAngle)(openaiAngleMT.current)
-      runOnBackground(setClaudeSettledAngle)(claudeAngleMT.current)
     }
   }
 
