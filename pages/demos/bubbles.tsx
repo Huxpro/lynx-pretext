@@ -73,10 +73,10 @@ export function BubblesPage() {
             </view>
             <view style={{
               width: containerWidth,
-              padding: 12,
-              borderRadius: 12,
-              backgroundColor: '#2c2c2e',
-              gap: 6,
+              padding: 16,
+              borderRadius: 14,
+              backgroundColor: '#1c1c1e',
+              gap: 8,
             }}>
               {BUBBLE_TEXTS.map((text, i) => {
                 const isSent = BUBBLE_DIRECTIONS[i]!
@@ -92,10 +92,10 @@ export function BubblesPage() {
                       paddingBottom: PADDING_V,
                       paddingLeft: PADDING_H,
                       paddingRight: PADDING_H,
-                      borderRadius: 14,
-                      borderBottomRightRadius: isSent ? 4 : 14,
-                      borderBottomLeftRadius: isSent ? 14 : 4,
-                      backgroundColor: isSent ? '#0b84fe' : '#3a3a3c',
+                      borderRadius: 16,
+                      borderBottomRightRadius: isSent ? 4 : 16,
+                      borderBottomLeftRadius: isSent ? 16 : 4,
+                      backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
                     }}
                   >
                     <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
@@ -124,10 +124,10 @@ export function BubblesPage() {
             </view>
             <view style={{
               width: containerWidth,
-              padding: 12,
-              borderRadius: 12,
-              backgroundColor: '#2c2c2e',
-              gap: 6,
+              padding: 16,
+              borderRadius: 14,
+              backgroundColor: '#1c1c1e',
+              gap: 8,
             }}>
               {BUBBLE_TEXTS.map((text, i) => {
                 const isSent = BUBBLE_DIRECTIONS[i]!
@@ -143,10 +143,10 @@ export function BubblesPage() {
                       paddingBottom: PADDING_V,
                       paddingLeft: PADDING_H,
                       paddingRight: PADDING_H,
-                      borderRadius: 14,
-                      borderBottomRightRadius: isSent ? 4 : 14,
-                      borderBottomLeftRadius: isSent ? 14 : 4,
-                      backgroundColor: isSent ? '#0b84fe' : '#3a3a3c',
+                      borderRadius: 16,
+                      borderBottomRightRadius: isSent ? 4 : 16,
+                      borderBottomLeftRadius: isSent ? 16 : 4,
+                      backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
                     }}
                   >
                     <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>

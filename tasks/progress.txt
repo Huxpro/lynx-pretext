@@ -503,3 +503,13 @@ Started: 2026-03-29
   - Overlay elements (toggle button, controls panel) must be siblings of scroll-view, not inside it, for absolute positioning to work correctly
   - The Lynx `SystemInfo` global provides `pixelWidth`/`pixelHeight`/`pixelRatio` for screen dimensions
 ---
+
+## 2026-03-29 - US-021
+- Replaced colored circle placeholders in dynamic-layout with real `<image>` tags using pages/assets/openai-symbol.png and claude-symbol.png
+- Updated bubbles chat to iMessage style: borderRadius 16 on bubbles (with 4px tail corner), received bg #2c2c2e, chat container borderRadius 14, padding 16, gap 8, container bg #1c1c1e
+- Files changed: pages/demos/dynamic-layout.tsx, pages/demos/bubbles.tsx, tasks/prd.json
+- **Learnings for future iterations:**
+  - Lynx `<image>` element uses `src={require('../path/to/image.png')}` for local assets — Rspeedy handles asset bundling automatically
+  - `<image>` cannot have children and doesn't support `bindtap` directly — wrap in a `<view>` for tap handling
+  - PNG assets < 2KB are inlined as base64, larger ones are emitted as separate files in dist/static/image/
+---

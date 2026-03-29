@@ -642,7 +642,7 @@ export function DynamicLayoutPage() {
           </view>
         ))}
 
-        {/* OpenAI logo placeholder */}
+        {/* OpenAI logo */}
         <view
           bindtap={handleOpenaiTap}
           style={{
@@ -651,19 +651,19 @@ export function DynamicLayoutPage() {
             top: pageLayout.openaiRect.y,
             width: pageLayout.openaiRect.width,
             height: pageLayout.openaiRect.height,
-            borderRadius: pageLayout.openaiRect.width / 2,
-            backgroundColor: 'rgba(45, 88, 128, 0.18)',
             transform: `rotate(${openaiRotDeg}deg)`,
-            alignItems: 'center',
-            justifyContent: 'center',
           }}
         >
-          <text style={{ fontSize: Math.round(pageLayout.openaiRect.width * 0.18), color: '#2d5880', fontWeight: 'bold' }}>
-            OpenAI
-          </text>
+          <image
+            src={require('../assets/openai-symbol.png')}
+            style={{
+              width: pageLayout.openaiRect.width,
+              height: pageLayout.openaiRect.height,
+            }}
+          />
         </view>
 
-        {/* Claude logo placeholder */}
+        {/* Claude logo */}
         <view
           bindtap={handleClaudeTap}
           style={{
@@ -672,16 +672,16 @@ export function DynamicLayoutPage() {
             top: pageLayout.claudeRect.y,
             width: pageLayout.claudeRect.width,
             height: pageLayout.claudeRect.height,
-            borderRadius: pageLayout.claudeRect.width / 2,
-            backgroundColor: 'rgba(217, 119, 87, 0.22)',
             transform: `rotate(${claudeRotDeg}deg)`,
-            alignItems: 'center',
-            justifyContent: 'center',
           }}
         >
-          <text style={{ fontSize: Math.round(pageLayout.claudeRect.width * 0.14), color: '#d97757', fontWeight: 'bold' }}>
-            Claude
-          </text>
+          <image
+            src={require('../assets/claude-symbol.png')}
+            style={{
+              width: pageLayout.claudeRect.width,
+              height: pageLayout.claudeRect.height,
+            }}
+          />
         </view>
       </view>
 

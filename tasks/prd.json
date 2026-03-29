@@ -384,7 +384,7 @@
         "DevTool screenshot of bubbles shows iMessage-style dark chat with blue/gray bubbles"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "notes": "Logo PNGs already in pages/assets/ (200x200). Original bubble CSS: .msg { padding: 8px 12px; borderRadius: 16; font: 15px }. .msg.sent { background: #0b84fe; color: white; alignSelf: flex-end; borderBottomRightRadius: 4 }. .msg.recv { background: #2c2c2e; color: white; alignSelf: flex-start; borderBottomLeftRadius: 4 }. Chat container: { background: #1c1c1e; borderRadius: 14; padding: 16; gap: 8 }."
     }
   ],
