@@ -596,7 +596,7 @@ export function DynamicLayoutPage() {
         <text style={{ fontSize: 22, fontWeight: 'bold', color: '#201b18', marginTop: 4 }}>
           Dynamic Editorial Layout
         </text>
-        <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: 18 }}>
+        <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '18px' }}>
           {'Two-column text flows around rotatable logo obstacles. ' +
            'Headline font size is binary-search fitted. Tap logos to rotate.'}
         </text>
@@ -713,67 +713,56 @@ export function DynamicLayoutPage() {
         }}>
           {/* Headline lines */}
           {headlineLines.map((line, i) => (
-            <text
-              key={`h-${i}`}
-              style={{
-                position: 'absolute',
-                left: line.x,
-                top: line.y,
+            <view key={`h-${i}`} style={{
+              position: 'absolute', left: line.x, top: line.y,
+              height: layout.headlineLineHeight,
+            }}>
+              <text style={{
                 fontWeight: 'bold',
                 fontSize: layout.headlineFontSize,
-                lineHeight: layout.headlineLineHeight,
                 color: '#11100d',
-              }}
-            >
-              {line.text}
-            </text>
+              }}>
+                {line.text}
+              </text>
+            </view>
           ))}
 
           {/* Credit line */}
-          <text style={{
-            position: 'absolute',
-            left: creditLeft,
-            top: creditTop,
-            fontSize: 12,
-            lineHeight: CREDIT_LINE_HEIGHT,
-            color: 'rgba(17, 16, 13, 0.58)',
-            letterSpacing: 2,
+          <view style={{
+            position: 'absolute', left: creditLeft, top: creditTop,
+            height: CREDIT_LINE_HEIGHT,
           }}>
-            {CREDIT_TEXT}
-          </text>
+            <text style={{
+              fontSize: 12,
+              color: 'rgba(17, 16, 13, 0.58)',
+              letterSpacing: 2,
+            }}>
+              {CREDIT_TEXT}
+            </text>
+          </view>
 
           {/* Left column body lines */}
           {leftLines.map((line, i) => (
-            <text
-              key={`l-${i}`}
-              style={{
-                position: 'absolute',
-                left: line.x,
-                top: line.y,
-                fontSize: BODY_FONT_SIZE,
-                lineHeight: BODY_LINE_HEIGHT,
-                color: '#11100d',
-              }}
-            >
-              {line.text}
-            </text>
+            <view key={`l-${i}`} style={{
+              position: 'absolute', left: line.x, top: line.y,
+              height: BODY_LINE_HEIGHT,
+            }}>
+              <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
+                {line.text}
+              </text>
+            </view>
           ))}
 
           {/* Right column body lines */}
           {rightLines.map((line, i) => (
-            <text
-              key={`r-${i}`}
-              style={{
-                position: 'absolute',
-                left: line.x,
-                top: line.y,
-                fontSize: BODY_FONT_SIZE,
-                lineHeight: BODY_LINE_HEIGHT,
-                color: '#11100d',
-              }}
-            >
-              {line.text}
-            </text>
+            <view key={`r-${i}`} style={{
+              position: 'absolute', left: line.x, top: line.y,
+              height: BODY_LINE_HEIGHT,
+            }}>
+              <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
+                {line.text}
+              </text>
+            </view>
           ))}
 
           {/* OpenAI logo placeholder */}
@@ -827,7 +816,7 @@ export function DynamicLayoutPage() {
           <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
             How it works
           </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: 20 }}>
+          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '20px' }}>
             {'Everything is laid out in JS. The headline font size is binary-search ' +
              'fitted so no word breaks mid-line. Body text flows left column then right column ' +
              'via layoutNextLine cursor continuity. Both columns route around rotatable logo ' +

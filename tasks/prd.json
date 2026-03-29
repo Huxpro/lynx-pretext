@@ -308,8 +308,8 @@
         "DevTool screenshot of the demo page shows expected rendering (visual verification)"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "Source: ../pretext/pages/demos/wrap-geometry.ts. The hull extraction (getWrapHull) uses OffscreenCanvas.getImageData() which Lynx likely lacks. Fallback: precompute hull points as static JSON from the browser version. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Source: ../pretext/pages/demos/wrap-geometry.ts. The hull extraction (getWrapHull) uses OffscreenCanvas.getImageData() which Lynx likely lacks. Fallback: precompute hull points as static JSON from the browser version."
     },
     {
       "id": "US-017",
@@ -328,8 +328,8 @@
         "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/."
     },
     {
       "id": "US-018",

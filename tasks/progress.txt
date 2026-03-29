@@ -449,3 +449,11 @@ Started: 2026-03-29
   - In Lynx, `lineHeight: 20` means 20× the font size (multiplier), not 20px — always use string `'20px'` for pixel-based line heights
   - This is different from React Native where numeric lineHeight is treated as pixels
 ---
+
+## 2026-03-29 - US-016 & US-017 (VERIFIED)
+- US-016: wrap-geometry.ts and hull-data.ts already complete, build passes, marked as passing
+- US-017: Fixed dynamic-layout.tsx — numeric lineHeight → string px values, wrapped all `<text>` with `position: 'absolute'` in `<view>` wrappers
+- DevTool screenshot verified: headline "SITUATIONAL AWARENESS: THE DECADE AHEAD" rendered, Claude logo placeholder visible, single-column mode (400px < 760px breakpoint), summary stats correct (Mode: Single, Headline: 48px, Left: 13, Total: 17)
+- tsc --build passes, pnpm build passes (1413.0 kB total)
+- Files changed: pages/demos/dynamic-layout.tsx (lineHeight + positioning fix), tasks/prd.json (mark US-016 + US-017 passes: true)
+---
