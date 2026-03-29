@@ -187,7 +187,7 @@ function fitHeadlineFontSize(
   getPrepared: (text: string, font: string) => PreparedTextWithSegments,
 ): number {
   let low = Math.ceil(Math.max(22, pageWidth * 0.026))
-  let high = Math.floor(Math.min(94.4, Math.max(55.2, pageWidth * 0.055)))
+  let high = Math.floor(Math.min(32, Math.max(24, pageWidth * 0.03)))
   let best = low
 
   while (low <= high) {
@@ -250,7 +250,7 @@ function buildLayout(
     const columnWidth = Math.round(Math.min(pageWidth - gutter * 2, NARROW_COLUMN_MAX_WIDTH))
     const headlineTop = 28
     const headlineWidth = pageWidth - gutter * 2
-    const headlineFontSize = Math.min(48, fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared))
+    const headlineFontSize = Math.min(32, fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared))
     const headlineLineHeight = Math.round(headlineFontSize * 0.92)
     const headlineFont = `700 ${headlineFontSize}px ${HEADLINE_FONT_FAMILY}`
     const creditGap = Math.round(Math.max(12, lineHeight * 0.5))

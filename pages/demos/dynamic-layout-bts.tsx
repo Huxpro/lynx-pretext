@@ -156,7 +156,7 @@ function fitHeadlineFontSize(
   getPrepared: (text: string, font: string) => PreparedTextWithSegments,
 ): number {
   let low = Math.ceil(Math.max(22, pageWidth * 0.026))
-  let high = Math.floor(Math.min(94.4, Math.max(55.2, pageWidth * 0.055)))
+  let high = Math.floor(Math.min(32, Math.max(24, pageWidth * 0.03)))
   let best = low
   while (low <= high) {
     const size = Math.floor((low + high) / 2)
@@ -185,7 +185,7 @@ function buildLayout(pageWidth: number, pageHeight: number, lineHeight: number, 
     const gutter = Math.round(Math.max(18, Math.min(28, pageWidth * 0.06)))
     const columnWidth = Math.round(Math.min(pageWidth - gutter * 2, NARROW_COLUMN_MAX_WIDTH))
     const headlineWidth = pageWidth - gutter * 2
-    const headlineFontSize = Math.min(48, fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared))
+    const headlineFontSize = Math.min(32, fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared))
     const headlineLineHeight = Math.round(headlineFontSize * 0.92)
     const claudeSize = Math.round(Math.min(92, pageWidth * 0.23, pageHeight * 0.11))
     const openaiSize = Math.round(Math.min(138, pageWidth * 0.34))
