@@ -211,3 +211,17 @@ Started: 2026-03-29
   - The obstacle overlap check: `y < obstacleHeight + gap` determines if a line is beside the obstacle
   - This pattern (varying maxWidth per line) is the key differentiator vs native <text> layout
 ---
+
+## 2026-03-29 - US-014
+- Ported bubbles-shared.ts from pretext/pages/demos/bubbles-shared.ts
+- Pure logic port — no DOM APIs, only import path changed ('../../src/layout.ts' → '../../src/layout')
+- Exported: prepareBubbleTexts, collectWrapMetrics, findTightWrapMetrics, computeBubbleRender, getMaxChatWidth, formatPixelCount
+- Exported types: WrapMetrics, PreparedBubble, BubbleRenderWidths, BubbleRenderState
+- Exported constants: FONT, LINE_HEIGHT, PADDING_H, PADDING_V, BUBBLE_MAX_RATIO, PAGE_MAX_WIDTH, DESKTOP_PAGE_MARGIN, MOBILE_PAGE_MARGIN, GRID_GAP, PANEL_PADDING_X
+- Created pages/demos/ directory (first file in this subdirectory)
+- Files changed: pages/demos/bubbles-shared.ts (new)
+- **Learnings for future iterations:**
+  - bubbles-shared.ts is 100% platform-agnostic — uses only layout/walkLineRanges/prepareWithSegments from src/layout
+  - findTightWrapMetrics uses binary search on layout() lineCount — same pattern as shrinkwrap.tsx demo
+  - pages/demos/*.ts files are included in typecheck via src/tsconfig.json include pattern "../pages/**/*.ts"
+---

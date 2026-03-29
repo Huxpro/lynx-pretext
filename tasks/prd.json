@@ -254,7 +254,7 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/pages/demos/bubbles-shared.ts. Pure logic port — no rendering. Import paths change from '../../src/layout.ts' to '../../src/layout'."
     },
     {
