@@ -1,8 +1,8 @@
 import { root } from '@lynx-js/react'
 
-import { LayoutWithLinesPage } from '../pages/layout-with-lines.js'
+import { ShrinkwrapPage } from '../pages/shrinkwrap.js'
 
-root.render(<LayoutWithLinesPage />)
+root.render(<ShrinkwrapPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()
