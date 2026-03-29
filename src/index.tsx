@@ -1,8 +1,8 @@
 import { root } from '@lynx-js/react'
 
-import { AccuracyPage } from '../pages/accuracy.js'
+import { BasicHeightPage } from '../pages/basic-height.js'
 
-root.render(<AccuracyPage />)
+root.render(<BasicHeightPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()
