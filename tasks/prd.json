@@ -187,7 +187,7 @@
         "Verify in Lynx DevTool that page renders correctly"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "First demo. Uses prepare() + layout() — the simplest API. Native height can be obtained from the <text> layout event."
     },
     {

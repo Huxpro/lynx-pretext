@@ -144,3 +144,21 @@ Started: 2026-03-29
   - Empty texts are skipped (getTextInfo with empty string may return no content)
   - The accuracy page is the primary verification gate before building demos
 ---
+
+## 2026-03-29 - US-010
+- Created basic height measurement demo page at pages/basic-height.tsx
+- Uses prepare() + layout() to compute pretext height and lineCount
+- Uses lynx.getTextInfo() with maxWidth as native oracle for comparison
+- +/− buttons to change maxWidth in 20px steps (80px–500px range)
+- Shows native <text> element rendered at constrained width
+- Side-by-side comparison cards: pretext vs native height/lineCount
+- MATCH/MISMATCH status indicator with height diff details
+- Native line breakdown shows per-line text content
+- Updated src/index.tsx to render BasicHeightPage
+- Files changed: pages/basic-height.tsx (new), src/index.tsx (updated)
+- **Learnings for future iterations:**
+  - prepare() is called on every render for simplicity; for perf, memoize with useMemo keyed on text+font
+  - lynx.getTextInfo with maxWidth returns content[] which gives native line count directly
+  - Native height = nativeLineCount * lineHeight matches the pretext convention
+  - Lynx <view> supports gap property for flexbox spacing
+---
