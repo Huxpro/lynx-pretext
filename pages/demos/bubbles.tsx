@@ -53,8 +53,8 @@ export function BubblesPage() {
   }
 
   return (
-    <view style={{ flex: 1, backgroundColor: '#1c1c1e' }} bindlayoutchange={onLayout}>
-      <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
+    <view style={{ width: '100%', height: '100%', backgroundColor: '#1c1c1e' }} bindlayoutchange={onLayout}>
+      <scroll-view scroll-orientation="vertical" style={{ width: '100%', height: '100%' }}>
         <view style={{ padding: '16px', gap: '24px' }}>
           {/* CSS fit-content chat */}
           <view>
