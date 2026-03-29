@@ -1,4 +1,4 @@
-import { useState, useEffect } from '@lynx-js/react'
+import { root, useState, useEffect } from '@lynx-js/react'
 
 import {
   prepareWithSegments,
@@ -214,4 +214,10 @@ export function AccuracyPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<AccuracyPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

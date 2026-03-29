@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from '@lynx-js/react'
+import { root, useState, useCallback, useMemo } from '@lynx-js/react'
 
 import {
   computeBubbleRender,
@@ -279,4 +279,10 @@ export function BubblesPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<BubblesPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

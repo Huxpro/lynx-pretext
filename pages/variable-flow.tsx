@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from '@lynx-js/react'
+import { root, useState, useCallback, useMemo } from '@lynx-js/react'
 
 import { prepareWithSegments, layoutNextLine, type LayoutCursor, type LayoutLine } from '../src/layout'
 
@@ -264,4 +264,10 @@ export function VariableFlowPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<VariableFlowPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

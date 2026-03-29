@@ -81,15 +81,45 @@ If you discover a **reusable pattern**, add it to the `## Codebase Patterns` sec
 - Keep changes focused and minimal
 - Follow existing code patterns from ~/github/pretext
 
-## Lynx DevTool Verification
+## Lynx DevTool Verification (MANDATORY for demo stories)
 
-For any story that changes UI, verify it renders correctly in Lynx:
+For any demo story (US-010 through US-017), you MUST:
 
-1. Use lynx-devtool skills to connect to the running app
-2. Inspect element positions and sizes
-3. Verify layout matches expected behavior
+1. Run `pnpm build` — must pass
+2. Start dev server in background: `rspeedy dev &`
+3. Wait for dev server to be ready (check for "http://localhost:3004" in output)
+4. Verify device connected:
+   ```
+   node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs list-clients
+   ```
+   Expected: at least one client at localhost:8901
+5. Open the demo page (use the `open` command, NOT `open-url`):
+   ```
+   node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs open "http://localhost:<port>/<page-name>.lynx.bundle" --client localhost:8901
+   ```
+6. Wait 3 seconds for page to render, then list sessions:
+   ```
+   node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs list-sessions --client localhost:8901
+   ```
+7. Take screenshot:
+   ```
+   node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs take-screenshot --client localhost:8901 --session <session_id> --output /tmp/screenshot-<page-name>.png
+   ```
+8. Verify screenshot exists and is non-empty: `ls -la /tmp/screenshot-<page-name>.png`
 
-A frontend story is NOT complete until Lynx DevTool verification passes.
+**IMPORTANT:** Do NOT use `npx devtool` — use the exact path above.
+**IMPORTANT:** A demo story is NOT complete until screenshot is taken and verified.
+**IMPORTANT:** Kill the dev server after verification: `kill %1` or `pkill -f "rspeedy dev"`
+
+Demo page names (use in <page-name>):
+- US-010: basic-height
+- US-011: layout-with-lines
+- US-012: shrinkwrap
+- US-013: variable-flow
+- US-014: bubbles (shared logic, no separate page — verify via US-015)
+- US-015: bubbles
+- US-016: dynamic-layout (geometry data)
+- US-017: dynamic-layout
 
 ## Stop Condition
 

@@ -5,6 +5,18 @@ import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
 import { pluginTypeCheck } from '@rsbuild/plugin-type-check'
 
 export default defineConfig({
+  source: {
+    entry: {
+      main: './src/index.tsx',
+      'basic-height': './pages/basic-height.tsx',
+      'layout-with-lines': './pages/layout-with-lines.tsx',
+      shrinkwrap: './pages/shrinkwrap.tsx',
+      'variable-flow': './pages/variable-flow.tsx',
+      accuracy: './pages/accuracy.tsx',
+      bubbles: './pages/demos/bubbles.tsx',
+      'dynamic-layout': './pages/demos/dynamic-layout.tsx',
+    },
+  },
   plugins: [
     pluginQRCode({
       schema(url) {

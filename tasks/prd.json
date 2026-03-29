@@ -12,7 +12,8 @@
         "@formatjs/intl-segmenter installed as dependency",
         "A hello-world page entry exists under pages/ and renders a <text> element",
         "rspeedy dev launches without errors",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 1,
       "passes": true,
@@ -28,7 +29,8 @@
         "normalizeWhitespacePreWrap() normalizes \\r\\n to \\n and \\r/\\f to \\n, preserves spaces and tabs",
         "classifySegmentBreakChar() correctly classifies NBSP as 'glue', ZWSP as 'zero-width-break', soft-hyphen as 'soft-hyphen', etc.",
         "splitSegmentByBreakKind() splits a segment string into pieces by break kind",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 2,
       "passes": true,
@@ -46,7 +48,8 @@
         "isLeftStickyPunctuationSegment(), isForwardStickyClusterSegment(), isEscapedQuoteClusterSegment() work correctly",
         "splitTrailingForwardStickyCluster() splits trailing opening brackets/quotes from a CJK segment",
         "endsWithClosingQuote() detects trailing closing quotes including CJK brackets",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 3,
       "passes": true,
@@ -66,7 +69,8 @@
         "analyzeText('hello world', profile) returns TextAnalysis with 3 segments: 'hello', ' ', 'world'",
         "analyzeText works with pre-wrap mode preserving hard breaks",
         "setAnalysisLocale() and clearAnalysisCaches() exported and functional",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 4,
       "passes": true,
@@ -88,7 +92,8 @@
         "getEngineProfile() returns a single Lynx profile (no UA sniffing): { lineFitEpsilon: 0.005, carryCJKAfterClosingQuote: false, preferPrefixWidthsForBreakableRuns: false, preferEarlySoftHyphenBreak: false }",
         "clearMeasurementCaches() clears all caches",
         "textMayContainEmoji() regex check exported",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 5,
       "passes": true,
@@ -108,7 +113,8 @@
         "Full path handles soft-hyphen (discretionary hyphen width added at break), tab (tab-stop advance), hard-break, preserved-space",
         "Trailing whitespace hangs past maxWidth without triggering line break",
         "Words wider than maxWidth break at grapheme boundaries using breakableWidths",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 6,
       "passes": true,
@@ -128,7 +134,8 @@
         "layout() calls countPreparedLines() — zero native calls, pure arithmetic",
         "clearCache() resets analysis + measurement + grapheme caches",
         "setLocale(locale?) retargets the word segmenter and clears caches",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 7,
       "passes": true,
@@ -146,7 +153,8 @@
         "layoutNextLine(prepared, start, maxWidth) returns LayoutLine or null for streaming variable-width layout",
         "Soft-hyphen lines include visible trailing '-' in line.text",
         "All types exported: PreparedText, PreparedTextWithSegments, LayoutCursor, LayoutResult, LayoutLine, LayoutLineRange, LayoutLinesResult, PrepareOptions",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 8,
       "passes": true,
@@ -167,7 +175,8 @@
         "Overall pass rate displayed as percentage",
         "Target: > 90% match rate for English text, document all mismatches",
         "If mismatches found: log the text, width, expected line content, actual line content for debugging",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 9,
       "passes": true,
@@ -183,8 +192,9 @@
         "Below it, displays pretext-computed height and lineCount",
         "A slider or text input changes maxWidth, pretext recomputes in real time",
         "Shows side-by-side comparison: native <text> actual height vs pretext height",
-        "Typecheck passes",
-        "Verify in Lynx DevTool that page renders correctly"
+        "Verify in Lynx DevTool that page renders correctly",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 10,
       "passes": true,
@@ -200,12 +210,13 @@
         "Each line rendered as an individual <text> element positioned absolutely",
         "Shows line index, line text, and line width for each line",
         "Slider changes maxWidth, only layoutWithLines re-runs (not prepare), lines update in real time",
-        "Typecheck passes",
-        "Verify in Lynx DevTool that lines are correctly positioned"
+        "Verify in Lynx DevTool that lines are correctly positioned",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 11,
-      "passes": true,
-      "notes": "Demonstrates the rich layout API. Key point: prepare() is called once, layout is re-run on width change."
+      "passes": false,
+      "notes": "Demonstrates the rich layout API. Key point: prepare() is called once, layout is re-run on width change. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-012",
@@ -217,12 +228,13 @@
         "Uses walkLineRanges to find the widest line (shrinkwrap width)",
         "Visual comparison: container at maxWidth vs container at shrinkwrap width side by side",
         "Pixel difference (wasted space) shown numerically",
-        "Typecheck passes",
-        "Verify in Lynx DevTool that shrinkwrap container is visually tighter"
+        "Verify in Lynx DevTool that shrinkwrap container is visually tighter",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 12,
-      "passes": true,
-      "notes": "Demonstrates a capability missing from native Lynx layout — multiline shrinkwrap."
+      "passes": false,
+      "notes": "Demonstrates a capability missing from native Lynx layout — multiline shrinkwrap. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-013",
@@ -234,12 +246,13 @@
         "Lines beside the obstacle are narrower, lines below it are full width",
         "Each line rendered as an individually positioned <text> element",
         "layoutNextLine loop uses cursor continuity: each line's end becomes the next line's start",
-        "Typecheck passes",
-        "Verify in Lynx DevTool that text correctly wraps around the obstacle"
+        "Verify in Lynx DevTool that text correctly wraps around the obstacle",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 13,
-      "passes": true,
-      "notes": "Demonstrates the streaming variable-width API. This is the key differentiator vs native <text> layout."
+      "passes": false,
+      "notes": "Demonstrates the streaming variable-width API. This is the key differentiator vs native <text> layout. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-014",
@@ -251,11 +264,13 @@
         "collectWrapMetrics(prepared, maxWidth) uses walkLineRanges to find max line width and line count",
         "findTightWrapMetrics(prepared, maxWidth) binary-searches the minimum width that preserves line count",
         "computeBubbleRender(preparedBubbles, chatWidth) computes per-bubble CSS width, tight width, and total wasted pixels",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)",
+        "DevTool screenshot of the demo page shows expected rendering (visual verification)"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": "Source: ../pretext/pages/demos/bubbles-shared.ts. Pure logic port — no rendering. Import paths change from '../../src/layout.ts' to '../../src/layout'."
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/bubbles-shared.ts. Pure logic port — no rendering. Import paths change from '../../src/layout.ts' to '../../src/layout'. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-015",
@@ -268,12 +283,13 @@
         "Slider changes chat container width, all bubbles reflow live",
         "Shows wasted pixels comparison: CSS maxWidth vs shrinkwrap width",
         "Adapt DOM manipulation to Lynx elements (replace document.getElementById etc.)",
-        "Typecheck passes",
-        "Verify in Lynx DevTool that bubbles shrinkwrap correctly"
+        "Verify in Lynx DevTool that bubbles shrinkwrap correctly",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 15,
-      "passes": true,
-      "notes": "Source: ../pretext/pages/demos/bubbles.ts + ../pretext/pages/demos/bubbles.html. Replace DOM APIs (document.getElementById, HTMLDivElement, etc.) with Lynx/ReactLynx equivalents."
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/bubbles.ts + ../pretext/pages/demos/bubbles.html. Replace DOM APIs (document.getElementById, HTMLDivElement, etc.) with Lynx/ReactLynx equivalents. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-016",
@@ -287,11 +303,13 @@
         "transformWrapPoints() applies rotation + translation to hull points",
         "isPointInPolygon() tests if a point is inside a polygon (for hit testing)",
         "getWrapHull() extracts convex hull from rasterized SVG alpha — adapt from canvas ImageData to Lynx equivalent or precompute hulls as static data",
-        "Typecheck passes"
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)",
+        "DevTool screenshot of the demo page shows expected rendering (visual verification)"
       ],
       "priority": 16,
-      "passes": true,
-      "notes": "Source: ../pretext/pages/demos/wrap-geometry.ts. The hull extraction (getWrapHull) uses OffscreenCanvas.getImageData() which Lynx likely lacks. Fallback: precompute hull points as static JSON from the browser version."
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/wrap-geometry.ts. The hull extraction (getWrapHull) uses OffscreenCanvas.getImageData() which Lynx likely lacks. Fallback: precompute hull points as static JSON from the browser version. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-017",
@@ -305,12 +323,13 @@
         "Tap on logo triggers rotation animation with text reflow",
         "Viewport resize changes column layout and triggers full reflow",
         "DOM manipulation replaced with Lynx element APIs or ReactLynx components",
-        "Typecheck passes",
-        "Verify in Lynx DevTool that editorial layout looks correct"
+        "Verify in Lynx DevTool that editorial layout looks correct",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 17,
-      "passes": true,
-      "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/."
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/. [RESET: needs build + screenshot verification]"
     },
     {
       "id": "US-018",
@@ -330,24 +349,15 @@
       "priority": 18,
       "passes": true,
       "notes": "PrimJS (Lynx's JS engine) does not support ES2018 Unicode property escapes. Use hardcoded Unicode ranges. Can use regenerate-unicode-properties npm package at build time to generate ranges, or hardcode the most common ranges manually."
-    },
-    {
-      "id": "US-019",
-      "title": "DevTool verification — all demo pages render correctly",
-      "description": "As a developer, I want to verify all demo pages render correctly in Lynx using DevTool screenshots.",
-      "acceptanceCriteria": [
-        "pnpm build passes",
-        "rspeedy dev starts successfully",
-        "Lynx DevTool connects to the running app",
-        "hello-world page renders text elements correctly (screenshot saved to /tmp/pretext-hello.png)",
-        "shrinkwrap demo page renders and interactive controls work (screenshot saved to /tmp/pretext-shrinkwrap.png)",
-        "variable-flow demo page renders with obstacle layout (screenshot saved to /tmp/pretext-variable-flow.png)",
-        "bubbles demo page renders chat bubbles with shrinkwrap (screenshot saved to /tmp/pretext-bubbles.png)",
-        "dynamic-layout demo page renders two-column editorial layout (screenshot saved to /tmp/pretext-dynamic-layout.png)"
-      ],
-      "priority": 19,
-      "passes": false,
-      "notes": "Use lynx-devtool skill to connect and screenshot. Do NOT use agent-browser — this is a Lynx app. If any page has rendering issues, document them but still take the screenshot."
     }
-  ]
+  ],
+  "qualityGates": {
+    "everyStory": [
+      "tsc --build passes with zero errors",
+      "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
+    ],
+    "demoStories": [
+      "DevTool screenshot shows expected rendering (visual verification via rspeedy dev + DevTool take-screenshot)"
+    ]
+  }
 }

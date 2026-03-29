@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from '@lynx-js/react'
+import { root, useState, useCallback, useMemo } from '@lynx-js/react'
 
 import { layout, prepareWithSegments, walkLineRanges, layoutWithLines } from '../src/layout'
 
@@ -255,4 +255,10 @@ export function ShrinkwrapPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<ShrinkwrapPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

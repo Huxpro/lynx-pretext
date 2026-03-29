@@ -1,4 +1,4 @@
-import { useState, useCallback } from '@lynx-js/react'
+import { root, useState, useCallback } from '@lynx-js/react'
 
 import { prepare, layout, clearCache } from '../src/layout'
 
@@ -185,4 +185,10 @@ export function BasicHeightPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<BasicHeightPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from '@lynx-js/react'
+import { root, useState, useCallback, useMemo } from '@lynx-js/react'
 
 import { prepareWithSegments, layoutWithLines } from '../src/layout'
 
@@ -188,4 +188,10 @@ export function LayoutWithLinesPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<LayoutWithLinesPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

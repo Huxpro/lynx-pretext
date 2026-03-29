@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from '@lynx-js/react'
+import { root, useState, useCallback, useMemo, useRef, useEffect } from '@lynx-js/react'
 import {
   layoutNextLine,
   prepareWithSegments,
@@ -838,4 +838,10 @@ export function DynamicLayoutPage() {
       </view>
     </scroll-view>
   )
+}
+
+root.render(<DynamicLayoutPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

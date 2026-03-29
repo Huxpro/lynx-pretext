@@ -14,6 +14,9 @@ Started: 2026-03-29
 - Rspeedy build output goes to `dist/main.lynx.bundle`
 - lynx.getTextInfo supports maxWidth as string ("300px") and returns content?: string[] with line-broken text
 - TextInfo type: { fontSize: string, fontFamily?: string, maxWidth?: string, maxLine?: number }
+- PrimJS does not have the `Intl` global — must create `globalThis.Intl = {}` before `@formatjs/intl-segmenter/polyfill-force.js`
+- Multi-entry Rspeedy config: `source.entry: { 'page-name': './pages/page-name.tsx' }` → produces `page-name.lynx.bundle`
+- Each entry page file must call `root.render(<Component />)` + `import.meta.webpackHot.accept()`
 
 ---
 
@@ -299,4 +302,102 @@ Started: 2026-03-29
   - Unicode property escapes were proactively replaced during US-003 (character sets) and US-005 (measurement) — good practice to do at port time
   - The combiningMarkRe expanded form is very long (~2KB) but compresses well in the bundle
   - Always verify pnpm build after typecheck — PrimJS compilation catches things tsc doesn't
+---
+
+## 2026-03-29 - US-019 (BLOCKED)
+- **Status:** Cannot complete — no Lynx device connected for DevTool verification
+- Verified: pnpm build passes (538.4 kB bundle)
+- Verified: rspeedy dev starts successfully (http://172.20.5.50:3004/main.lynx.bundle)
+- Verified: All 8 demo page files exist (hello-world, accuracy, basic-height, layout-with-lines, shrinkwrap, variable-flow, bubbles, dynamic-layout)
+- Verified: tsc --build passes with zero errors
+- **BLOCKED:** `list-clients` returns [] — no Lynx client connected, cannot take screenshots
+- **To complete:** Connect a Lynx-enabled device/simulator, then use devtool take-screenshot for each page
+- Files changed: tasks/progress.txt (this entry)
+---
+
+## 2026-03-29 - QUALITY GATE ENFORCEMENT (Round 2)
+- **ALL stories** now require: `tsc --build` + `pnpm build` in acceptance criteria
+- **Demo stories (US-010 to US-017)** now also require: DevTool screenshot verification
+- Reset US-010 through US-017 to passes=false — they need build + screenshot re-verification
+- Removed US-019 (redundant — screenshot gate folded into each demo story)
+- Library stories (US-001 to US-009, US-018) remain passes=true — build confirmed passing at US-018
+- **To verify a demo story:**
+  1. Run `pnpm build` — must succeed
+  2. Run `rspeedy dev` to start dev server
+  3. Use DevTool `take-screenshot` on the demo page
+  4. Confirm the screenshot shows expected rendering
+---
+
+## 2026-03-29 - DEVICE AVAILABLE
+- Lynx Explorer connected: iOS 26.2, iPhone, port 8901
+- DevTool screenshot verification is now unblocked
+- Command: `node ~/.agents/skills/devtool/scripts/index.mjs take-screenshot --client localhost:8901 --session <sid> --output <path>`
+- First: `node ~/.agents/skills/devtool/scripts/index.mjs list-sessions --client localhost:8901` to find sessions
+- To open a page: `node ~/.agents/skills/devtool/scripts/index.mjs open-url --client localhost:8901 --url <bundle_url>`
+---
+
+## 2026-03-29 - DEVTOOL USAGE (CRITICAL - READ THIS)
+- **DO NOT use `npx devtool` — it does not exist in this project**
+- **USE THIS EXACT COMMAND** to list clients:
+  ```
+  node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs list-clients
+  ```
+- To list sessions for a client:
+  ```
+  node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs list-sessions --client localhost:8901
+  ```
+- To open a URL in the connected Lynx Explorer:
+  ```
+  node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs open-url --client localhost:8901 --url "http://localhost:3004/main.lynx.bundle?launchUrl=pages/demos/hello-world"
+  ```
+- To take a screenshot:
+  ```
+  node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs take-screenshot --client localhost:8901 --session <session_id> --output /tmp/screenshot-<page>.png
+  ```
+- **Workflow for each demo story verification:**
+  1. `pnpm build` — must pass
+  2. Start dev server: `rspeedy dev` (background it)
+  3. `node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs list-clients` — verify device connected
+  4. `node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs open-url --client localhost:8901 --url "http://localhost:3004/main.lynx.bundle?launchUrl=pages/demos/<page-name>"` — load the page
+  5. `node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs list-sessions --client localhost:8901` — get session id
+  6. `node /Users/bytedance/.agents/skills/devtool/scripts/index.mjs take-screenshot --client localhost:8901 --session <sid> --output /tmp/screenshot-<page>.png` — capture
+  7. Verify screenshot shows expected content
+- **Device is currently connected:** iOS 26.2 iPhone Simulator at localhost:8901
+---
+
+## 2026-03-29 - MULTI-ENTRY PROBLEM (MUST FIX FIRST)
+- **Problem:** Only `src/index.tsx` is compiled into `main.lynx.bundle`. Demo pages under `pages/` are NOT accessible.
+- **Impact:** DevTool screenshot verification is impossible because demo pages have no URL to open.
+- **Required fix:** Configure Rspeedy for multi-page output so each demo page gets its own bundle.
+- **Rspeedy multi-page docs:** Use `environments` config in rspeedy.config.ts. Each entry produces a separate `.lynx.bundle`.
+- **Example config pattern:**
+  ```ts
+  import { defineConfig } from '@lynx-js/rspeedy'
+  export default defineConfig({
+    environments: {
+      'basic-height': { source: { entry: { index: './pages/basic-height.tsx' } } },
+      'layout-with-lines': { source: { entry: { index: './pages/layout-with-lines.tsx' } } },
+      // ... etc for each demo page
+    },
+    plugins: [...]
+  })
+  ```
+- After build, each page would be at: `http://localhost:<port>/<page-name>.lynx.bundle`
+- **Alternatively:** Make src/index.tsx a simple page router that dynamically imports based on a URL parameter.
+- **This must be fixed before any demo story can be verified with screenshots.**
+---
+
+## 2026-03-29 - US-010 (VERIFIED)
+- Fixed multi-entry problem: configured `source.entry` in lynx.config.ts for all 8 pages (main, accuracy, basic-height, layout-with-lines, shrinkwrap, variable-flow, bubbles, dynamic-layout)
+- Added `root.render()` + HMR accept to all page entry files to make them standalone entries
+- Fixed critical Intl polyfill crash: created `src/intl-shim.ts` to ensure `globalThis.Intl` exists before `@formatjs/intl-segmenter/polyfill-force.js` runs (PrimJS has no `Intl` global)
+- Uncommented the `@formatjs/intl-segmenter/polyfill-force.js` import in `src/analysis.ts`
+- DevTool screenshot verified: page renders title, width controls (+/− buttons), native `<text>` rendering, comparison cards
+- Files changed: lynx.config.ts, src/intl-shim.ts (new), src/analysis.ts, pages/basic-height.tsx, pages/layout-with-lines.tsx, pages/shrinkwrap.tsx, pages/variable-flow.tsx, pages/accuracy.tsx, pages/demos/bubbles.tsx, pages/demos/dynamic-layout.tsx
+- **Learnings for future iterations:**
+  - PrimJS does not provide the `Intl` global — must create `globalThis.Intl = {}` before any polyfill that assumes it exists
+  - `import './intl-shim'` before `import '@formatjs/intl-segmenter/polyfill-force.js'` works because ES module imports are evaluated in source order
+  - Rspeedy multi-entry uses `source.entry` object syntax in lynx.config.ts — each key becomes `<key>.lynx.bundle`
+  - Old dev server processes can hold port 3000; kill them with `pkill -f "rspeedy dev"` before restarting
+  - DevTool screenshot only works on non-crashed sessions — check `get-console` for errors if screenshot times out
 ---
