@@ -1,8 +1,8 @@
 import { root } from '@lynx-js/react'
 
-import { ShrinkwrapPage } from '../pages/shrinkwrap.js'
+import { VariableFlowPage } from '../pages/variable-flow.js'
 
-root.render(<ShrinkwrapPage />)
+root.render(<VariableFlowPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()
