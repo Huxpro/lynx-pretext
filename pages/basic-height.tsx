@@ -1,6 +1,6 @@
 import { root, useState, useCallback } from '@lynx-js/react'
 
-import { prepare, layout, clearCache } from '../src/layout'
+import { prepare, layout } from '../src/layout'
 
 const SAMPLE_TEXT =
   'The quick brown fox jumps over the lazy dog. ' +
@@ -10,118 +10,54 @@ const SAMPLE_TEXT =
 const FONT_SIZE = 16
 const LINE_HEIGHT = 24
 const FONT = `${FONT_SIZE}px`
-const MIN_WIDTH = 80
-const MAX_WIDTH = 500
-const WIDTH_STEP = 20
 
 export function BasicHeightPage() {
-  const [maxWidth, setMaxWidth] = useState(300)
+  const [maxWidth, setMaxWidth] = useState(360)
+  const [showControls, setShowControls] = useState(false)
 
-  const decrease = useCallback(() => {
-    setMaxWidth(w => Math.max(MIN_WIDTH, w - WIDTH_STEP))
+  const onLayout = useCallback((e: any) => {
+    setMaxWidth(Math.floor(e.detail.width))
   }, [])
-  const increase = useCallback(() => {
-    setMaxWidth(w => Math.min(MAX_WIDTH, w + WIDTH_STEP))
-  }, [])
+  const toggleControls = useCallback(() => setShowControls(v => !v), [])
+  const decrease = useCallback(() => setMaxWidth(w => Math.max(80, w - 20)), [])
+  const increase = useCallback(() => setMaxWidth(w => Math.min(1200, w + 20)), [])
 
-  // Pretext measurement
+  const contentWidth = Math.max(80, maxWidth - 32)
+  const halfWidth = Math.floor((contentWidth - 12) / 2)
   const prepared = prepare(SAMPLE_TEXT, FONT)
-  const result = layout(prepared, maxWidth, LINE_HEIGHT)
+  const result = layout(prepared, contentWidth, LINE_HEIGHT)
 
-  // Native oracle via getTextInfo
   const native = lynx.getTextInfo(SAMPLE_TEXT, {
     fontSize: `${FONT_SIZE}px`,
-    maxWidth: `${maxWidth}px`,
+    maxWidth: `${contentWidth}px`,
   })
   const nativeLineCount = native.content?.length ?? 1
   const nativeHeight = nativeLineCount * LINE_HEIGHT
-
-  const heightDiff = Math.abs(result.height - nativeHeight)
   const match = result.lineCount === nativeLineCount
 
   return (
-    <scroll-view style={{ flex: 1 }}>
+    <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
+      {/* Demo content */}
+      <scroll-view style={{ flex: 1 }}>
       <view style={{ padding: 16 }}>
-        {/* Header */}
-        <text style={{ fontSize: 22, fontWeight: 'bold', color: '#222' }}>
-          Basic Height Measurement
-        </text>
-        <text style={{ fontSize: 13, color: '#888', marginTop: 4 }}>
-          {`prepare() + layout() vs native getTextInfo | ${FONT_SIZE}px`}
-        </text>
-
-        {/* Width control */}
-        <view style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: 16,
-          gap: 12,
-        }}>
-          <view
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: maxWidth <= MIN_WIDTH ? '#ccc' : '#1976d2',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={decrease}
-          >
-            <text style={{ fontSize: 22, color: '#fff', fontWeight: 'bold' }}>−</text>
-          </view>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#333', minWidth: 80, textAlign: 'center' }}>
-            {`${maxWidth}px`}
-          </text>
-          <view
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: maxWidth >= MAX_WIDTH ? '#ccc' : '#1976d2',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={increase}
-          >
-            <text style={{ fontSize: 22, color: '#fff', fontWeight: 'bold' }}>+</text>
-          </view>
-        </view>
-
         {/* Native text rendering */}
-        <text style={{ fontSize: 14, fontWeight: 'bold', color: '#555', marginTop: 20 }}>
-          Native &lt;text&gt; rendering:
-        </text>
         <view style={{
-          width: maxWidth,
-          marginTop: 8,
+          width: contentWidth,
           padding: 8,
           borderWidth: 1,
-          borderColor: '#ddd',
-          borderRadius: 4,
+          borderColor: '#e0e0e0',
+          borderRadius: 6,
           backgroundColor: '#fafafa',
         }}>
-          <text style={{ fontSize: FONT_SIZE, lineHeight: LINE_HEIGHT, color: '#333' }}>
+          <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#333' }}>
             {SAMPLE_TEXT}
           </text>
         </view>
 
-        {/* Comparison */}
-        <view style={{
-          flexDirection: 'row',
-          marginTop: 16,
-          gap: 12,
-        }}>
-          {/* Pretext result */}
-          <view style={{
-            flex: 1,
-            padding: 12,
-            borderRadius: 8,
-            backgroundColor: '#e3f2fd',
-          }}>
-            <text style={{ fontSize: 13, fontWeight: 'bold', color: '#1565c0' }}>
-              Pretext
-            </text>
+        {/* Comparison cards */}
+        <view style={{ flexDirection: 'row', marginTop: 16 }}>
+          <view style={{ width: halfWidth, padding: 12, borderRadius: 8, backgroundColor: '#e3f2fd', marginRight: 12 }}>
+            <text style={{ fontSize: 13, fontWeight: 'bold', color: '#1565c0' }}>Pretext</text>
             <text style={{ fontSize: 28, fontWeight: 'bold', color: '#0d47a1', marginTop: 4 }}>
               {`${result.height}px`}
             </text>
@@ -129,17 +65,8 @@ export function BasicHeightPage() {
               {`${result.lineCount} lines`}
             </text>
           </view>
-
-          {/* Native result */}
-          <view style={{
-            flex: 1,
-            padding: 12,
-            borderRadius: 8,
-            backgroundColor: '#f3e5f5',
-          }}>
-            <text style={{ fontSize: 13, fontWeight: 'bold', color: '#7b1fa2' }}>
-              Native
-            </text>
+          <view style={{ width: halfWidth, padding: 12, borderRadius: 8, backgroundColor: '#f3e5f5' }}>
+            <text style={{ fontSize: 13, fontWeight: 'bold', color: '#7b1fa2' }}>Native</text>
             <text style={{ fontSize: 28, fontWeight: 'bold', color: '#4a148c', marginTop: 4 }}>
               {`${nativeHeight}px`}
             </text>
@@ -166,24 +93,97 @@ export function BasicHeightPage() {
           <text style={{ fontSize: 13, color: '#555', marginTop: 4 }}>
             {match
               ? `Both agree: ${result.lineCount} lines, ${result.height}px height`
-              : `Height diff: ${heightDiff}px | Lines: pretext=${result.lineCount} native=${nativeLineCount}`}
+              : `Height diff: ${Math.abs(result.height - nativeHeight)}px | Lines: pretext=${result.lineCount} native=${nativeLineCount}`}
           </text>
         </view>
-
-        {/* Native line content */}
-        <text style={{ fontSize: 14, fontWeight: 'bold', color: '#555', marginTop: 20 }}>
-          Native line breakdown:
-        </text>
-        {(native.content ?? [SAMPLE_TEXT]).map((line, i) => (
-          <text
-            key={`line-${i}`}
-            style={{ fontSize: 12, color: '#666', marginTop: 2, paddingLeft: 8 }}
-          >
-            {`L${i + 1}: "${line.trim()}"`}
-          </text>
-        ))}
       </view>
-    </scroll-view>
+      </scroll-view>
+
+      {/* Toggle button */}
+      <view
+        bindtap={toggleControls}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <text style={{
+          fontSize: 20,
+          color: showControls ? '#333' : '#fff',
+          fontWeight: 'bold',
+        }}>
+          {showControls ? '\u00D7' : '\u2261'}
+        </text>
+      </view>
+
+      {/* Controls overlay */}
+      {showControls && (
+        <view style={{
+          position: 'absolute',
+          top: 56,
+          left: 12,
+          right: 12,
+          backgroundColor: 'rgba(0,0,0,0.88)',
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            Basic Height Measurement
+          </text>
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+            {`prepare() + layout() vs native getTextInfo | ${FONT_SIZE}px`}
+          </text>
+
+          {/* Width stepper */}
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
+            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+            <view
+              bindtap={decrease}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+            </view>
+            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+              {`${maxWidth}px`}
+            </text>
+            <view
+              bindtap={increase}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+            </view>
+          </view>
+
+          {/* Native line breakdown */}
+          <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff', marginTop: 12 }}>
+            Native line breakdown:
+          </text>
+          {(native.content ?? [SAMPLE_TEXT]).map((line, i) => (
+            <text
+              key={`line-${i}`}
+              style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}
+            >
+              {`L${i + 1}: "${line.trim()}"`}
+            </text>
+          ))}
+        </view>
+      )}
+    </view>
   )
 }
 

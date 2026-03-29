@@ -20,6 +20,9 @@ Started: 2026-03-29
 - Lynx `<text>` does NOT support `position: 'absolute'` — wrap in `<view>` for positioning
 - For manually rendering lines: use stacked `<view>` with `height: LINE_HEIGHT` instead of absolute positioning
 - In Lynx, numeric `lineHeight` (e.g. `lineHeight: 20`) is treated as a MULTIPLIER, not pixels — use string `'20px'` for pixel values
+- Use `bindlayoutchange` on a `<view>` to get container dimensions: `(e: any) => { e.detail.width, e.detail.height }`
+- `flexDirection: 'row'` with `flex: 1` children does NOT work reliably in Lynx — use explicit `width` on children or auto-sized content instead
+- `scroll-view` with `flex: 1` is preferred for scrollable demo content; overlay elements should be siblings (not inside scroll-view) for absolute positioning
 
 ---
 
@@ -456,4 +459,47 @@ Started: 2026-03-29
 - DevTool screenshot verified: headline "SITUATIONAL AWARENESS: THE DECADE AHEAD" rendered, Claude logo placeholder visible, single-column mode (400px < 760px breakpoint), summary stats correct (Mode: Single, Headline: 48px, Left: 13, Total: 17)
 - tsc --build passes, pnpm build passes (1413.0 kB total)
 - Files changed: pages/demos/dynamic-layout.tsx (lineHeight + positioning fix), tasks/prd.json (mark US-016 + US-017 passes: true)
+---
+
+## 2026-03-29 - ALL 18 STORIES COMPLETE (Ralph R2)
+- Ralph completed all 18 stories in 2 iterations
+- All demos verified with DevTool screenshots
+---
+
+## 2026-03-29 - US-020 ADDED (UI Polish)
+- New requirement: Demo pages should be fullscreen visual experiences, not debug tools
+- Controls (title, W/H steppers, stats) should be collapsible, hidden by default
+- Demo content should use viewport dimensions from layout events, not manual steppers
+- This matches the original Pretext demo style (fullscreen editorial pages)
+- Specific issues to fix:
+  - All demos: remove prominent title/subtitle/stepper bar, make it a small toggle overlay
+  - All demos: use onLayout or layout events to get actual container width, not useState with +/- buttons
+  - dynamic-layout: default to viewport width (should trigger dual-column on wider screens)
+  - bubbles: fill screen width naturally
+  - All demos: demo content should be the ONLY thing visible by default
+---
+
+## 2026-03-29 - LOGO ASSETS ADDED
+- Copied real logo SVGs from ~/github/pretext/pages/assets/ to pages/assets/
+- Also converted to PNG (200x200) for Lynx compatibility: claude-symbol.png, openai-symbol.png
+- **dynamic-layout.tsx should use `<image>` tag with these real logos instead of colored circle placeholders**
+- Lynx `<image>` syntax: `<image src={require('./assets/claude-symbol.png')} style={{width: W, height: H}} />`
+- Or use URL if bundled via Rspeedy asset handling
+---
+
+## 2026-03-29 - US-020
+- Rewrote all 6 demo pages for fullscreen display with collapsible controls overlay
+- Each page now uses `bindlayoutchange` on the root view to get viewport dimensions
+- Controls, title, and description hidden behind a toggle button (≡/×) in the top-right corner
+- Demo content fills the viewport by default with no visible debug chrome
+- Pages updated: basic-height, layout-with-lines, shrinkwrap, variable-flow, bubbles, dynamic-layout
+- dynamic-layout uses full viewport width+height, automatically shows two-column on wide screens (>760px)
+- bubbles fills screen width with dark chat UI background
+- Fixed lineHeight usage: changed numeric `lineHeight: 24` to string `lineHeight: '24px'` for pixel values
+- Files changed: pages/basic-height.tsx, pages/layout-with-lines.tsx, pages/shrinkwrap.tsx, pages/variable-flow.tsx, pages/demos/bubbles.tsx, pages/demos/dynamic-layout.tsx
+- **Learnings for future iterations:**
+  - `bindlayoutchange` fires when element layout changes; event has `e.detail.width` and `e.detail.height`
+  - `flexDirection: 'row'` with `flex: 1` children does NOT work reliably in Lynx's Yoga layout engine — children stack vertically instead of horizontally. Use explicit widths or auto-sized content instead.
+  - Overlay elements (toggle button, controls panel) must be siblings of scroll-view, not inside it, for absolute positioning to work correctly
+  - The Lynx `SystemInfo` global provides `pixelWidth`/`pixelHeight`/`pixelRatio` for screen dimensions
 ---

@@ -15,9 +15,6 @@ const SAMPLE_TEXT =
 const FONT_SIZE = 16
 const LINE_HEIGHT = 24
 const FONT = `${FONT_SIZE}px`
-const MIN_WIDTH = 200
-const MAX_WIDTH = 500
-const WIDTH_STEP = 20
 
 // Obstacle dimensions (the "image" block in the top-right)
 const OBSTACLE_W = 120
@@ -26,10 +23,6 @@ const OBSTACLE_GAP = 8
 
 type FlowLine = LayoutLine & { y: number; availableWidth: number }
 
-/**
- * Layout text using layoutNextLine with variable width per line.
- * Lines overlapping the obstacle get narrower width; lines below it get full width.
- */
 function layoutVariableFlow(
   prepared: ReturnType<typeof prepareWithSegments>,
   maxWidth: number,
@@ -41,7 +34,6 @@ function layoutVariableFlow(
 
   while (true) {
     const y = lineIndex * lineHeight
-    // Lines whose vertical extent overlaps the obstacle get reduced width
     const overlapsObstacle = y < OBSTACLE_H + OBSTACLE_GAP
     const lineWidth = overlapsObstacle
       ? Math.max(60, maxWidth - OBSTACLE_W - OBSTACLE_GAP)
@@ -60,117 +52,37 @@ function layoutVariableFlow(
 
 export function VariableFlowPage() {
   const [maxWidth, setMaxWidth] = useState(360)
+  const [showControls, setShowControls] = useState(false)
 
-  const decrease = useCallback(() => {
-    setMaxWidth(w => Math.max(MIN_WIDTH, w - WIDTH_STEP))
+  const onLayout = useCallback((e: any) => {
+    setMaxWidth(Math.floor(e.detail.width))
   }, [])
-  const increase = useCallback(() => {
-    setMaxWidth(w => Math.min(MAX_WIDTH, w + WIDTH_STEP))
-  }, [])
+  const toggleControls = useCallback(() => setShowControls(v => !v), [])
+  const decrease = useCallback(() => setMaxWidth(w => Math.max(200, w - 20)), [])
+  const increase = useCallback(() => setMaxWidth(w => Math.min(1200, w + 20)), [])
 
+  const contentWidth = Math.max(200, maxWidth - 32)
   const prepared = useMemo(() => prepareWithSegments(SAMPLE_TEXT, FONT), [])
-
-  const flowLines = layoutVariableFlow(prepared, maxWidth, LINE_HEIGHT)
+  const flowLines = layoutVariableFlow(prepared, contentWidth, LINE_HEIGHT)
   const totalHeight = flowLines.length > 0
     ? flowLines[flowLines.length - 1]!.y + LINE_HEIGHT
     : 0
-
-  // Count how many lines are beside the obstacle
-  const narrowLineCount = flowLines.filter(l => l.availableWidth < maxWidth).length
+  const narrowLineCount = flowLines.filter(l => l.availableWidth < contentWidth).length
 
   return (
-    <scroll-view style={{ flex: 1 }}>
-      <view style={{ padding: 16 }}>
-        {/* Header */}
-        <text style={{ fontSize: 22, fontWeight: 'bold', color: '#222' }}>
-          Variable-Width Flow
-        </text>
-        <text style={{ fontSize: 13, color: '#888', marginTop: 4 }}>
-          layoutNextLine with different maxWidth per line
-        </text>
-
-        {/* Width control */}
+    <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
+      {/* Demo content — flow layout with obstacle */}
+      <view style={{ flex: 1, padding: 16 }}>
         <view style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: 16,
-          gap: 12,
-        }}>
-          <view
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: maxWidth <= MIN_WIDTH ? '#ccc' : '#1976d2',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={decrease}
-          >
-            <text style={{ fontSize: 22, color: '#fff', fontWeight: 'bold' }}>−</text>
-          </view>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#333', minWidth: 80, textAlign: 'center' }}>
-            {`${maxWidth}px`}
-          </text>
-          <view
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: maxWidth >= MAX_WIDTH ? '#ccc' : '#1976d2',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={increase}
-          >
-            <text style={{ fontSize: 22, color: '#fff', fontWeight: 'bold' }}>+</text>
-          </view>
-        </view>
-
-        {/* Summary */}
-        <view style={{
-          marginTop: 16,
-          padding: 12,
-          borderRadius: 8,
-          backgroundColor: '#e8eaf6',
-          flexDirection: 'row',
-          gap: 24,
-        }}>
-          <view>
-            <text style={{ fontSize: 12, color: '#283593' }}>Total lines</text>
-            <text style={{ fontSize: 24, fontWeight: 'bold', color: '#1a237e' }}>
-              {`${flowLines.length}`}
-            </text>
-          </view>
-          <view>
-            <text style={{ fontSize: 12, color: '#283593' }}>Narrow</text>
-            <text style={{ fontSize: 24, fontWeight: 'bold', color: '#e65100' }}>
-              {`${narrowLineCount}`}
-            </text>
-          </view>
-          <view>
-            <text style={{ fontSize: 12, color: '#283593' }}>Full-width</text>
-            <text style={{ fontSize: 24, fontWeight: 'bold', color: '#2e7d32' }}>
-              {`${flowLines.length - narrowLineCount}`}
-            </text>
-          </view>
-        </view>
-
-        {/* Flow layout with obstacle */}
-        <text style={{ fontSize: 14, fontWeight: 'bold', color: '#555', marginTop: 20 }}>
-          Text flowing around obstacle:
-        </text>
-        <view style={{
-          width: maxWidth,
+          width: contentWidth,
           height: Math.max(totalHeight, OBSTACLE_H + OBSTACLE_GAP),
-          marginTop: 8,
           borderWidth: 1,
           borderColor: '#5c6bc0',
           borderRadius: 4,
           backgroundColor: '#fafafa',
           overflow: 'hidden',
         }}>
-          {/* The rectangular "image" obstacle */}
+          {/* Obstacle */}
           <view style={{
             position: 'absolute',
             top: 0,
@@ -186,11 +98,11 @@ export function VariableFlowPage() {
               Image
             </text>
             <text style={{ fontSize: 11, color: '#5c6bc0' }}>
-              {`${OBSTACLE_W}×${OBSTACLE_H}`}
+              {`${OBSTACLE_W}\u00D7${OBSTACLE_H}`}
             </text>
           </view>
 
-          {/* Each line as a positioned <view> wrapping a <text> */}
+          {/* Flow lines */}
           {flowLines.map((line, i) => (
             <view
               key={`flow-${i}`}
@@ -208,61 +120,116 @@ export function VariableFlowPage() {
           ))}
         </view>
 
-        {/* Line details */}
-        <text style={{ fontSize: 14, fontWeight: 'bold', color: '#555', marginTop: 20 }}>
-          Line details:
-        </text>
-        {flowLines.map((line, i) => {
-          const isNarrow = line.availableWidth < maxWidth
-          return (
-            <view
-              key={`detail-${i}`}
-              style={{
-                flexDirection: 'row',
-                marginTop: 4,
-                padding: 8,
-                borderRadius: 4,
-                backgroundColor: isNarrow ? '#fff3e0' : (i % 2 === 0 ? '#f5f5f5' : '#fff'),
-                alignItems: 'center',
-              }}
-            >
-              <text style={{
-                fontSize: 12,
-                fontWeight: 'bold',
-                color: isNarrow ? '#e65100' : '#1976d2',
-                width: 32,
-              }}>
-                {`L${i + 1}`}
-              </text>
-              <view style={{ flex: 1 }}>
-                <text style={{ fontSize: 13, color: '#333' }}>
-                  {`"${line.text}"`}
-                </text>
-                <text style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
-                  {`width: ${line.width.toFixed(1)}px / ${line.availableWidth}px${isNarrow ? ' (beside obstacle)' : ''}`}
-                </text>
-              </view>
-            </view>
-          )
-        })}
-
-        {/* Explanation */}
+        {/* Summary */}
         <view style={{
-          marginTop: 20,
-          padding: 12,
+          marginTop: 12,
+          padding: 10,
           borderRadius: 8,
           backgroundColor: '#e8eaf6',
+          flexDirection: 'row',
+          gap: 24,
         }}>
-          <text style={{ fontSize: 13, color: '#283593', lineHeight: 20 }}>
-            {'How it works: layoutNextLine() takes a cursor and maxWidth, returning one line at a time. ' +
-             'Each line\'s end cursor becomes the next line\'s start. ' +
-             'Lines overlapping the obstacle get a narrower width (' + (maxWidth - OBSTACLE_W - OBSTACLE_GAP) + 'px), ' +
-             'lines below it get full width (' + maxWidth + 'px). ' +
-             'This variable-width flow is impossible with native <text> layout.'}
-          </text>
+          <view>
+            <text style={{ fontSize: 12, color: '#283593' }}>Total</text>
+            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#1a237e' }}>
+              {`${flowLines.length}`}
+            </text>
+          </view>
+          <view>
+            <text style={{ fontSize: 12, color: '#283593' }}>Narrow</text>
+            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#e65100' }}>
+              {`${narrowLineCount}`}
+            </text>
+          </view>
+          <view>
+            <text style={{ fontSize: 12, color: '#283593' }}>Full</text>
+            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#2e7d32' }}>
+              {`${flowLines.length - narrowLineCount}`}
+            </text>
+          </view>
         </view>
       </view>
-    </scroll-view>
+
+      {/* Toggle button */}
+      <view
+        bindtap={toggleControls}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <text style={{
+          fontSize: 20,
+          color: showControls ? '#333' : '#fff',
+          fontWeight: 'bold',
+        }}>
+          {showControls ? '\u00D7' : '\u2261'}
+        </text>
+      </view>
+
+      {/* Controls overlay */}
+      {showControls && (
+        <view style={{
+          position: 'absolute',
+          top: 56,
+          left: 12,
+          right: 12,
+          backgroundColor: 'rgba(0,0,0,0.88)',
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            Variable-Width Flow
+          </text>
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+            layoutNextLine with different maxWidth per line
+          </text>
+
+          {/* Width stepper */}
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
+            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+            <view
+              bindtap={decrease}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+            </view>
+            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+              {`${maxWidth}px`}
+            </text>
+            <view
+              bindtap={increase}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+            </view>
+          </view>
+
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: '18px' }}>
+            {'Each line\'s end cursor becomes the next line\'s start. ' +
+             'Lines overlapping the obstacle get narrower width (' +
+             (contentWidth - OBSTACLE_W - OBSTACLE_GAP) + 'px), ' +
+             'lines below get full width (' + contentWidth + 'px). ' +
+             'This is impossible with native <text> layout.'}
+          </text>
+        </view>
+      )}
+    </view>
   )
 }
 

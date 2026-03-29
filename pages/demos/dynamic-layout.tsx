@@ -37,13 +37,6 @@ const HINT_PILL_SAFE_TOP = 72
 const NARROW_BREAKPOINT = 760
 const NARROW_COLUMN_MAX_WIDTH = 430
 
-const MIN_PAGE_WIDTH = 360
-const MAX_PAGE_WIDTH = 1100
-const WIDTH_STEP = 40
-const MIN_PAGE_HEIGHT = 400
-const MAX_PAGE_HEIGHT = 1000
-const HEIGHT_STEP = 40
-
 // --- Types ---
 
 type PositionedLine = { x: number; y: number; width: number; text: string }
@@ -474,7 +467,7 @@ function evaluateLayout(
 export function DynamicLayoutPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
-  // renderTick triggers re-renders during animation
+  const [showControls, setShowControls] = useState(false)
   const [renderTick, setRenderTick] = useState(0)
 
   const openaiAngleRef = useRef(0)
@@ -483,10 +476,19 @@ export function DynamicLayoutPage() {
   const claudeSpinRef = useRef<SpinState | null>(null)
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
-  // Ref to hold the latest animation tick function
   const animateFnRef = useRef<() => void>(() => {})
 
-  // Animation tick — updates angle refs and triggers re-render
+  const onLayout = useCallback((e: any) => {
+    setPageWidth(Math.floor(e.detail.width))
+    setPageHeight(Math.floor(e.detail.height))
+  }, [])
+  const toggleControls = useCallback(() => setShowControls(v => !v), [])
+  const decreaseWidth = useCallback(() => setPageWidth(w => Math.max(360, w - 40)), [])
+  const increaseWidth = useCallback(() => setPageWidth(w => Math.min(1200, w + 40)), [])
+  const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(400, h - 40)), [])
+  const increaseHeight = useCallback(() => setPageHeight(h => Math.min(1200, h + 40)), [])
+
+  // Animation tick
   animateFnRef.current = () => {
     const now = Date.now()
     let stillAnimating = false
@@ -524,7 +526,6 @@ export function DynamicLayoutPage() {
     }
   }
 
-  // Cleanup animation timer on unmount
   useEffect(() => {
     return () => {
       if (animTimerRef.current !== null) {
@@ -533,7 +534,6 @@ export function DynamicLayoutPage() {
     }
   }, [])
 
-  // Start a logo spin animation
   const startSpin = useCallback((kind: 'openai' | 'claude', direction: 1 | -1) => {
     const angleRef = kind === 'openai' ? openaiAngleRef : claudeAngleRef
     const spinRef = kind === 'openai' ? openaiSpinRef : claudeSpinRef
@@ -551,12 +551,6 @@ export function DynamicLayoutPage() {
   const handleOpenaiTap = useCallback(() => startSpin('openai', -1), [startSpin])
   const handleClaudeTap = useCallback(() => startSpin('claude', 1), [startSpin])
 
-  // Width/height controls
-  const decreaseWidth = useCallback(() => setPageWidth(w => Math.max(MIN_PAGE_WIDTH, w - WIDTH_STEP)), [])
-  const increaseWidth = useCallback(() => setPageWidth(w => Math.min(MAX_PAGE_WIDTH, w + WIDTH_STEP)), [])
-  const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(MIN_PAGE_HEIGHT, h - HEIGHT_STEP)), [])
-  const increaseHeight = useCallback(() => setPageHeight(h => Math.min(MAX_PAGE_HEIGHT, h + HEIGHT_STEP)), [])
-
   // Prepared text cache accessor
   const getPreparedCached = useCallback((text: string, font: string): PreparedTextWithSegments => {
     const key = `${font}::${text}`
@@ -571,14 +565,13 @@ export function DynamicLayoutPage() {
   const preparedCredit = useMemo(() => getPreparedCached(CREDIT_TEXT, CREDIT_FONT), [getPreparedCached])
   const creditWidth = useMemo(() => Math.ceil(getPreparedSingleLineWidth(preparedCredit)), [preparedCredit])
 
-  // Compute layout — re-runs on every render (dimensions or angle change)
   const openaiAngle = openaiAngleRef.current
   const claudeAngle = claudeAngleRef.current
-  void renderTick // used to trigger re-render during animation
+  void renderTick
 
-  const layout = buildLayout(pageWidth, pageHeight, BODY_LINE_HEIGHT, getPreparedCached)
+  const pageLayout = buildLayout(pageWidth, pageHeight, BODY_LINE_HEIGHT, getPreparedCached)
   const { headlineLines, creditLeft, creditTop, leftLines, rightLines } = evaluateLayout(
-    layout, BODY_LINE_HEIGHT, preparedBody, creditWidth,
+    pageLayout, BODY_LINE_HEIGHT, preparedBody, creditWidth,
     openaiAngle, claudeAngle, getPreparedCached,
   )
 
@@ -587,245 +580,247 @@ export function DynamicLayoutPage() {
   const claudeRotDeg = claudeAngle * 180 / Math.PI
 
   return (
-    <scroll-view style={{ flex: 1, backgroundColor: '#f6f0e6' }}>
-      <view style={{ padding: 16 }}>
-        {/* Header */}
-        <text style={{ fontSize: 11, color: '#955f3b', letterSpacing: 1 }}>
-          DEMO
-        </text>
-        <text style={{ fontSize: 22, fontWeight: 'bold', color: '#201b18', marginTop: 4 }}>
-          Dynamic Editorial Layout
-        </text>
-        <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '18px' }}>
-          {'Two-column text flows around rotatable logo obstacles. ' +
-           'Headline font size is binary-search fitted. Tap logos to rotate.'}
-        </text>
-
-        {/* Width control */}
-        <view style={{
-          flexDirection: 'row', alignItems: 'center', marginTop: 14, gap: 10,
-          padding: 10, borderRadius: 12, backgroundColor: '#fffdf8',
-          borderWidth: 1, borderColor: '#d8cec3',
-        }}>
-          <text style={{ fontSize: 12, color: '#6d645d' }}>W:</text>
-          <view
-            style={{
-              width: 32, height: 32, borderRadius: 16,
-              backgroundColor: pageWidth <= MIN_PAGE_WIDTH ? '#ccc' : '#955f3b',
-              alignItems: 'center', justifyContent: 'center',
-            }}
-            bindtap={decreaseWidth}
-          >
-            <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-          </view>
-          <text style={{ fontSize: 14, fontWeight: 'bold', color: '#201b18', minWidth: 55, textAlign: 'center' }}>
-            {`${pageWidth}px`}
-          </text>
-          <view
-            style={{
-              width: 32, height: 32, borderRadius: 16,
-              backgroundColor: pageWidth >= MAX_PAGE_WIDTH ? '#ccc' : '#955f3b',
-              alignItems: 'center', justifyContent: 'center',
-            }}
-            bindtap={increaseWidth}
-          >
-            <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>+</text>
-          </view>
-
-          <view style={{ width: 1, height: 20, backgroundColor: '#d8cec3', marginLeft: 4, marginRight: 4 }} />
-
-          <text style={{ fontSize: 12, color: '#6d645d' }}>H:</text>
-          <view
-            style={{
-              width: 32, height: 32, borderRadius: 16,
-              backgroundColor: pageHeight <= MIN_PAGE_HEIGHT ? '#ccc' : '#955f3b',
-              alignItems: 'center', justifyContent: 'center',
-            }}
-            bindtap={decreaseHeight}
-          >
-            <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-          </view>
-          <text style={{ fontSize: 14, fontWeight: 'bold', color: '#201b18', minWidth: 55, textAlign: 'center' }}>
-            {`${pageHeight}px`}
-          </text>
-          <view
-            style={{
-              width: 32, height: 32, borderRadius: 16,
-              backgroundColor: pageHeight >= MAX_PAGE_HEIGHT ? '#ccc' : '#955f3b',
-              alignItems: 'center', justifyContent: 'center',
-            }}
-            bindtap={increaseHeight}
-          >
-            <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>+</text>
-          </view>
-        </view>
-
-        {/* Summary stats */}
-        <view style={{
-          marginTop: 10, padding: 10, borderRadius: 10, backgroundColor: '#fffdf8',
-          borderWidth: 1, borderColor: '#d8cec3',
-          flexDirection: 'row', gap: 16,
-        }}>
-          <view>
-            <text style={{ fontSize: 11, color: '#955f3b' }}>Mode</text>
-            <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
-              {layout.isNarrow ? 'Single' : 'Two-col'}
-            </text>
-          </view>
-          <view>
-            <text style={{ fontSize: 11, color: '#955f3b' }}>Headline</text>
-            <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
-              {`${layout.headlineFontSize}px`}
-            </text>
-          </view>
-          <view>
-            <text style={{ fontSize: 11, color: '#955f3b' }}>Left</text>
-            <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
-              {`${leftLines.length}`}
-            </text>
-          </view>
-          {rightLines.length > 0 && (
-            <view>
-              <text style={{ fontSize: 11, color: '#955f3b' }}>Right</text>
-              <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
-                {`${rightLines.length}`}
-              </text>
-            </view>
-          )}
-          <view>
-            <text style={{ fontSize: 11, color: '#955f3b' }}>Total</text>
-            <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
-              {`${headlineLines.length + totalBodyLines}`}
-            </text>
-          </view>
-        </view>
-
-        {/* The editorial page */}
-        <view style={{
-          width: pageWidth,
-          height: pageHeight,
-          marginTop: 12,
-          overflow: 'hidden',
-          backgroundColor: '#f6f0e6',
-          borderWidth: 1,
-          borderColor: '#b8a99a',
-          borderRadius: 4,
-        }}>
-          {/* Headline lines */}
-          {headlineLines.map((line, i) => (
-            <view key={`h-${i}`} style={{
-              position: 'absolute', left: line.x, top: line.y,
-              height: layout.headlineLineHeight,
-            }}>
-              <text style={{
-                fontWeight: 'bold',
-                fontSize: layout.headlineFontSize,
-                color: '#11100d',
-              }}>
-                {line.text}
-              </text>
-            </view>
-          ))}
-
-          {/* Credit line */}
-          <view style={{
-            position: 'absolute', left: creditLeft, top: creditTop,
-            height: CREDIT_LINE_HEIGHT,
+    <view style={{ flex: 1, backgroundColor: '#f6f0e6' }} bindlayoutchange={onLayout}>
+      {/* Editorial page — fills entire viewport */}
+      <view style={{
+        width: pageWidth,
+        height: pageHeight,
+        overflow: 'hidden',
+        backgroundColor: '#f6f0e6',
+      }}>
+        {/* Headline lines */}
+        {headlineLines.map((line, i) => (
+          <view key={`h-${i}`} style={{
+            position: 'absolute', left: line.x, top: line.y,
+            height: pageLayout.headlineLineHeight,
           }}>
             <text style={{
-              fontSize: 12,
-              color: 'rgba(17, 16, 13, 0.58)',
-              letterSpacing: 2,
+              fontWeight: 'bold',
+              fontSize: pageLayout.headlineFontSize,
+              color: '#11100d',
             }}>
-              {CREDIT_TEXT}
+              {line.text}
             </text>
           </view>
+        ))}
 
-          {/* Left column body lines */}
-          {leftLines.map((line, i) => (
-            <view key={`l-${i}`} style={{
-              position: 'absolute', left: line.x, top: line.y,
-              height: BODY_LINE_HEIGHT,
-            }}>
-              <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
-                {line.text}
-              </text>
-            </view>
-          ))}
-
-          {/* Right column body lines */}
-          {rightLines.map((line, i) => (
-            <view key={`r-${i}`} style={{
-              position: 'absolute', left: line.x, top: line.y,
-              height: BODY_LINE_HEIGHT,
-            }}>
-              <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
-                {line.text}
-              </text>
-            </view>
-          ))}
-
-          {/* OpenAI logo placeholder */}
-          <view
-            bindtap={handleOpenaiTap}
-            style={{
-              position: 'absolute',
-              left: layout.openaiRect.x,
-              top: layout.openaiRect.y,
-              width: layout.openaiRect.width,
-              height: layout.openaiRect.height,
-              borderRadius: layout.openaiRect.width / 2,
-              backgroundColor: 'rgba(45, 88, 128, 0.18)',
-              transform: `rotate(${openaiRotDeg}deg)`,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <text style={{ fontSize: Math.round(layout.openaiRect.width * 0.18), color: '#2d5880', fontWeight: 'bold' }}>
-              OpenAI
-            </text>
-          </view>
-
-          {/* Claude logo placeholder */}
-          <view
-            bindtap={handleClaudeTap}
-            style={{
-              position: 'absolute',
-              left: layout.claudeRect.x,
-              top: layout.claudeRect.y,
-              width: layout.claudeRect.width,
-              height: layout.claudeRect.height,
-              borderRadius: layout.claudeRect.width / 2,
-              backgroundColor: 'rgba(217, 119, 87, 0.22)',
-              transform: `rotate(${claudeRotDeg}deg)`,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <text style={{ fontSize: Math.round(layout.claudeRect.width * 0.14), color: '#d97757', fontWeight: 'bold' }}>
-              Claude
-            </text>
-          </view>
+        {/* Credit line */}
+        <view style={{
+          position: 'absolute', left: creditLeft, top: creditTop,
+          height: CREDIT_LINE_HEIGHT,
+        }}>
+          <text style={{
+            fontSize: 12,
+            color: 'rgba(17, 16, 13, 0.58)',
+            letterSpacing: 2,
+          }}>
+            {CREDIT_TEXT}
+          </text>
         </view>
 
-        {/* Explanation */}
-        <view style={{
-          marginTop: 12, padding: 14, borderRadius: 14,
-          backgroundColor: '#fffdf8', borderWidth: 1, borderColor: '#d8cec3',
-        }}>
-          <text style={{ fontSize: 15, fontWeight: 'bold', color: '#201b18' }}>
-            How it works
+        {/* Left column body lines */}
+        {leftLines.map((line, i) => (
+          <view key={`l-${i}`} style={{
+            position: 'absolute', left: line.x, top: line.y,
+            height: BODY_LINE_HEIGHT,
+          }}>
+            <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
+              {line.text}
+            </text>
+          </view>
+        ))}
+
+        {/* Right column body lines */}
+        {rightLines.map((line, i) => (
+          <view key={`r-${i}`} style={{
+            position: 'absolute', left: line.x, top: line.y,
+            height: BODY_LINE_HEIGHT,
+          }}>
+            <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
+              {line.text}
+            </text>
+          </view>
+        ))}
+
+        {/* OpenAI logo placeholder */}
+        <view
+          bindtap={handleOpenaiTap}
+          style={{
+            position: 'absolute',
+            left: pageLayout.openaiRect.x,
+            top: pageLayout.openaiRect.y,
+            width: pageLayout.openaiRect.width,
+            height: pageLayout.openaiRect.height,
+            borderRadius: pageLayout.openaiRect.width / 2,
+            backgroundColor: 'rgba(45, 88, 128, 0.18)',
+            transform: `rotate(${openaiRotDeg}deg)`,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <text style={{ fontSize: Math.round(pageLayout.openaiRect.width * 0.18), color: '#2d5880', fontWeight: 'bold' }}>
+            OpenAI
           </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '20px' }}>
-            {'Everything is laid out in JS. The headline font size is binary-search ' +
-             'fitted so no word breaks mid-line. Body text flows left column then right column ' +
-             'via layoutNextLine cursor continuity. Both columns route around rotatable logo ' +
-             'obstacles using polygon interval carving. Tap a logo to rotate it \u2014 text reflows ' +
-             'live around the new geometry. Increase width past 760px to see the two-column spread.'}
+        </view>
+
+        {/* Claude logo placeholder */}
+        <view
+          bindtap={handleClaudeTap}
+          style={{
+            position: 'absolute',
+            left: pageLayout.claudeRect.x,
+            top: pageLayout.claudeRect.y,
+            width: pageLayout.claudeRect.width,
+            height: pageLayout.claudeRect.height,
+            borderRadius: pageLayout.claudeRect.width / 2,
+            backgroundColor: 'rgba(217, 119, 87, 0.22)',
+            transform: `rotate(${claudeRotDeg}deg)`,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <text style={{ fontSize: Math.round(pageLayout.claudeRect.width * 0.14), color: '#d97757', fontWeight: 'bold' }}>
+            Claude
           </text>
         </view>
       </view>
-    </scroll-view>
+
+      {/* Toggle button */}
+      <view
+        bindtap={toggleControls}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.25)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <text style={{
+          fontSize: 20,
+          color: showControls ? '#333' : '#fff',
+          fontWeight: 'bold',
+        }}>
+          {showControls ? '\u00D7' : '\u2261'}
+        </text>
+      </view>
+
+      {/* Controls overlay */}
+      {showControls && (
+        <view style={{
+          position: 'absolute',
+          top: 56,
+          left: 12,
+          right: 12,
+          backgroundColor: 'rgba(0,0,0,0.88)',
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            Dynamic Editorial Layout
+          </text>
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: '18px' }}>
+            {'Two-column text flows around rotatable logo obstacles. ' +
+             'Tap logos to rotate. Width >760px shows two-column spread.'}
+          </text>
+
+          {/* W/H steppers */}
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 8 }}>
+            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+            <view
+              bindtap={decreaseWidth}
+              style={{
+                width: 28, height: 28, borderRadius: 14,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+            </view>
+            <text style={{ fontSize: 13, color: '#fff', minWidth: 55, textAlign: 'center' }}>
+              {`${pageWidth}px`}
+            </text>
+            <view
+              bindtap={increaseWidth}
+              style={{
+                width: 28, height: 28, borderRadius: 14,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>+</text>
+            </view>
+
+            <view style={{ width: 1, height: 16, backgroundColor: 'rgba(255,255,255,0.2)', marginLeft: 4, marginRight: 4 }} />
+
+            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>H:</text>
+            <view
+              bindtap={decreaseHeight}
+              style={{
+                width: 28, height: 28, borderRadius: 14,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+            </view>
+            <text style={{ fontSize: 13, color: '#fff', minWidth: 55, textAlign: 'center' }}>
+              {`${pageHeight}px`}
+            </text>
+            <view
+              bindtap={increaseHeight}
+              style={{
+                width: 28, height: 28, borderRadius: 14,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>+</text>
+            </view>
+          </view>
+
+          {/* Stats */}
+          <view style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Mode</text>
+              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                {pageLayout.isNarrow ? 'Single' : 'Two-col'}
+              </text>
+            </view>
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Headline</text>
+              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                {`${pageLayout.headlineFontSize}px`}
+              </text>
+            </view>
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Left</text>
+              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                {`${leftLines.length}`}
+              </text>
+            </view>
+            {rightLines.length > 0 && (
+              <view>
+                <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Right</text>
+                <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                  {`${rightLines.length}`}
+                </text>
+              </view>
+            )}
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Total</text>
+              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                {`${headlineLines.length + totalBodyLines}`}
+              </text>
+            </view>
+          </view>
+        </view>
+      )}
+    </view>
   )
 }
 

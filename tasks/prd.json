@@ -349,6 +349,43 @@
       "priority": 18,
       "passes": true,
       "notes": "PrimJS (Lynx's JS engine) does not support ES2018 Unicode property escapes. Use hardcoded Unicode ranges. Can use regenerate-unicode-properties npm package at build time to generate ranges, or hardcode the most common ranges manually."
+    },
+    {
+      "id": "US-020",
+      "title": "Demo UI polish — fullscreen demos with collapsible controls",
+      "description": "All demo pages should prioritize showing the actual demo content fullscreen, not debug controls. Title bar and width/height controls should be collapsible (default collapsed). Demo content should fill the viewport using layout events for responsive sizing, not manual stepper controls.",
+      "acceptanceCriteria": [
+        "All demo pages render the demo content fullscreen by default (no visible title/controls on initial load)",
+        "Title, description, and W/H stepper controls are hidden behind a small toggle button (e.g. gear icon or ≡ in corner)",
+        "Tapping the toggle reveals the controls overlay; tapping again hides them",
+        "Demo content uses the actual viewport dimensions from layout events (onLayout or similar), NOT hardcoded width/manual steppers",
+        "dynamic-layout demo shows dual-column layout on wider viewports (>760px) without user needing to adjust W manually",
+        "bubbles demo fills the screen width naturally",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors (PrimJS bytecode compilation succeeds)",
+        "DevTool screenshot of each demo page shows fullscreen demo content (no debug chrome visible)"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": "The current demos look like unit-test debug tools rather than visual demos. Original Pretext demos are fullscreen editorial experiences. Port should match that feel. Use Lynx layout events to get container dimensions instead of manual +/- steppers."
+    },
+    {
+      "id": "US-021",
+      "title": "Visual polish — real logos and iMessage-style bubbles",
+      "description": "Make demos visually match the original Pretext. Dynamic-layout should use real logo images instead of placeholder circles. Bubbles should look like iMessage (dark background, blue sent/gray received, asymmetric rounded corners).",
+      "acceptanceCriteria": [
+        "dynamic-layout uses <image> tags with pages/assets/claude-symbol.png and openai-symbol.png instead of colored circle placeholders",
+        "bubbles chat has dark background (#1c1c1e), sent messages are blue (#0b84fe) with border-bottom-right-radius: 4px, received messages are dark gray (#2c2c2e) with border-bottom-left-radius: 4px",
+        "bubbles messages have borderRadius: 16 with the asymmetric corner override for the tail",
+        "bubbles chat container has borderRadius: 14 and padding: 16",
+        "tsc --build passes with zero errors",
+        "pnpm build passes without errors",
+        "DevTool screenshot of dynamic-layout shows real OpenAI and Claude logos",
+        "DevTool screenshot of bubbles shows iMessage-style dark chat with blue/gray bubbles"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Logo PNGs already in pages/assets/ (200x200). Original bubble CSS: .msg { padding: 8px 12px; borderRadius: 16; font: 15px }. .msg.sent { background: #0b84fe; color: white; alignSelf: flex-end; borderBottomRightRadius: 4 }. .msg.recv { background: #2c2c2e; color: white; alignSelf: flex-start; borderBottomLeftRadius: 4 }. Chat container: { background: #1c1c1e; borderRadius: 14; padding: 16; gap: 8 }."
     }
   ],
   "qualityGates": {

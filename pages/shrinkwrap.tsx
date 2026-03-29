@@ -10,13 +10,7 @@ const SAMPLE_TEXT =
 const FONT_SIZE = 16
 const LINE_HEIGHT = 24
 const FONT = `${FONT_SIZE}px`
-const MIN_WIDTH = 80
-const MAX_WIDTH = 500
-const WIDTH_STEP = 20
 
-/**
- * Find the widest line width at the given maxWidth using walkLineRanges.
- */
 function getMaxLineWidth(prepared: ReturnType<typeof prepareWithSegments>, maxWidth: number): number {
   let maxLineWidth = 0
   walkLineRanges(prepared, maxWidth, line => {
@@ -25,149 +19,50 @@ function getMaxLineWidth(prepared: ReturnType<typeof prepareWithSegments>, maxWi
   return maxLineWidth
 }
 
-/**
- * Binary-search the tightest container width that preserves the same line count.
- */
 function findShrinkwrapWidth(prepared: ReturnType<typeof prepareWithSegments>, maxWidth: number): number {
   const initialLineCount = layout(prepared, maxWidth, LINE_HEIGHT).lineCount
   let lo = 1
   let hi = Math.max(1, Math.ceil(maxWidth))
-
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2)
-    const midLineCount = layout(prepared, mid, LINE_HEIGHT).lineCount
-    if (midLineCount <= initialLineCount) {
+    if (layout(prepared, mid, LINE_HEIGHT).lineCount <= initialLineCount) {
       hi = mid
     } else {
       lo = mid + 1
     }
   }
-
   return lo
 }
 
 export function ShrinkwrapPage() {
-  const [maxWidth, setMaxWidth] = useState(300)
+  const [maxWidth, setMaxWidth] = useState(360)
+  const [showControls, setShowControls] = useState(false)
 
-  const decrease = useCallback(() => {
-    setMaxWidth(w => Math.max(MIN_WIDTH, w - WIDTH_STEP))
+  const onLayout = useCallback((e: any) => {
+    setMaxWidth(Math.floor(e.detail.width))
   }, [])
-  const increase = useCallback(() => {
-    setMaxWidth(w => Math.min(MAX_WIDTH, w + WIDTH_STEP))
-  }, [])
+  const toggleControls = useCallback(() => setShowControls(v => !v), [])
+  const decrease = useCallback(() => setMaxWidth(w => Math.max(80, w - 20)), [])
+  const increase = useCallback(() => setMaxWidth(w => Math.min(1200, w + 20)), [])
 
+  const contentWidth = Math.max(80, maxWidth - 32)
   const prepared = useMemo(() => prepareWithSegments(SAMPLE_TEXT, FONT), [])
 
-  // Get max line width at current maxWidth (CSS-style fit-content)
-  const cssMaxLineWidth = getMaxLineWidth(prepared, maxWidth)
+  const cssMaxLineWidth = getMaxLineWidth(prepared, contentWidth)
   const cssWidth = Math.ceil(cssMaxLineWidth)
-
-  // Find tightest width preserving same line count
-  const shrinkwrapMaxWidth = findShrinkwrapWidth(prepared, maxWidth)
+  const shrinkwrapMaxWidth = findShrinkwrapWidth(prepared, contentWidth)
   const shrinkwrapLineWidth = getMaxLineWidth(prepared, shrinkwrapMaxWidth)
   const shrinkwrapWidth = Math.ceil(shrinkwrapLineWidth)
-
-  const lineCount = layout(prepared, maxWidth, LINE_HEIGHT).lineCount
+  const lineCount = layout(prepared, contentWidth, LINE_HEIGHT).lineCount
   const height = lineCount * LINE_HEIGHT
   const wastedPixels = Math.max(0, cssWidth - shrinkwrapMaxWidth) * height
 
   return (
-    <scroll-view style={{ flex: 1 }}>
-      <view style={{ padding: 16 }}>
-        {/* Header */}
-        <text style={{ fontSize: 22, fontWeight: 'bold', color: '#222' }}>
-          Shrinkwrap Demo
-        </text>
-        <text style={{ fontSize: 13, color: '#888', marginTop: 4 }}>
-          walkLineRanges finds widest line → tightest container width
-        </text>
-
-        {/* Width control */}
-        <view style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: 16,
-          gap: 12,
-        }}>
-          <view
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: maxWidth <= MIN_WIDTH ? '#ccc' : '#1976d2',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={decrease}
-          >
-            <text style={{ fontSize: 22, color: '#fff', fontWeight: 'bold' }}>−</text>
-          </view>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#333', minWidth: 80, textAlign: 'center' }}>
-            {`maxWidth: ${maxWidth}px`}
-          </text>
-          <view
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: maxWidth >= MAX_WIDTH ? '#ccc' : '#1976d2',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={increase}
-          >
-            <text style={{ fontSize: 22, color: '#fff', fontWeight: 'bold' }}>+</text>
-          </view>
-        </view>
-
-        {/* Metrics */}
-        <view style={{
-          marginTop: 16,
-          padding: 12,
-          borderRadius: 8,
-          backgroundColor: '#fff3e0',
-          gap: 8,
-        }}>
-          <view style={{ flexDirection: 'row', gap: 24 }}>
-            <view>
-              <text style={{ fontSize: 12, color: '#e65100' }}>CSS Width</text>
-              <text style={{ fontSize: 20, fontWeight: 'bold', color: '#bf360c' }}>
-                {`${cssWidth}px`}
-              </text>
-            </view>
-            <view>
-              <text style={{ fontSize: 12, color: '#2e7d32' }}>Shrinkwrap</text>
-              <text style={{ fontSize: 20, fontWeight: 'bold', color: '#1b5e20' }}>
-                {`${shrinkwrapMaxWidth}px`}
-              </text>
-            </view>
-            <view>
-              <text style={{ fontSize: 12, color: '#555' }}>Lines</text>
-              <text style={{ fontSize: 20, fontWeight: 'bold', color: '#333' }}>
-                {`${lineCount}`}
-              </text>
-            </view>
-          </view>
-          <view style={{
-            padding: 8,
-            borderRadius: 6,
-            backgroundColor: wastedPixels > 0 ? '#ffebee' : '#e8f5e9',
-          }}>
-            <text style={{ fontSize: 13, color: wastedPixels > 0 ? '#c62828' : '#2e7d32' }}>
-              {wastedPixels > 0
-                ? `Wasted: ${Math.round(wastedPixels).toLocaleString()} pixels\u00B2 (${cssWidth - shrinkwrapMaxWidth}px \u00D7 ${height}px)`
-                : 'No wasted space \u2014 already tight!'}
-            </text>
-          </view>
-        </view>
-
-        {/* Side-by-side comparison */}
-        <text style={{ fontSize: 14, fontWeight: 'bold', color: '#555', marginTop: 20 }}>
-          Side-by-side comparison:
-        </text>
-
-        {/* maxWidth container */}
-        <text style={{ fontSize: 12, color: '#e65100', marginTop: 8, marginBottom: 4 }}>
+    <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
+      {/* Demo content */}
+      <view style={{ flex: 1, padding: 16, justifyContent: 'center' }}>
+        {/* CSS fit-content container */}
+        <text style={{ fontSize: 12, color: '#e65100', marginBottom: 4 }}>
           {`CSS fit-content (${cssWidth}px)`}
         </text>
         <view style={{
@@ -185,7 +80,7 @@ export function ShrinkwrapPage() {
         </view>
 
         {/* Shrinkwrap container */}
-        <text style={{ fontSize: 12, color: '#2e7d32', marginTop: 12, marginBottom: 4 }}>
+        <text style={{ fontSize: 12, color: '#2e7d32', marginTop: 16, marginBottom: 4 }}>
           {`Shrinkwrap (${shrinkwrapMaxWidth}px)`}
         </text>
         <view style={{
@@ -202,22 +97,120 @@ export function ShrinkwrapPage() {
           </text>
         </view>
 
-        {/* Explanation */}
+        {/* Wasted space badge */}
         <view style={{
-          marginTop: 20,
+          marginTop: 16,
           padding: 12,
           borderRadius: 8,
-          backgroundColor: '#e3f2fd',
+          backgroundColor: wastedPixels > 0 ? '#ffebee' : '#e8f5e9',
         }}>
-          <text style={{ fontSize: 13, color: '#1565c0', lineHeight: 20 }}>
-            {'How it works: walkLineRanges() walks lines without materializing text. ' +
-             'The widest line gives the CSS fit-content width. ' +
-             'Binary search finds the tightest width preserving the same line count — the shrinkwrap width. ' +
-             'This is a capability missing from native Lynx layout.'}
+          <text style={{ fontSize: 14, fontWeight: 'bold', color: wastedPixels > 0 ? '#c62828' : '#2e7d32' }}>
+            {wastedPixels > 0
+              ? `Wasted: ${Math.round(wastedPixels).toLocaleString()} px\u00B2`
+              : 'No wasted space \u2014 already tight!'}
           </text>
+          {wastedPixels > 0 && (
+            <text style={{ fontSize: 12, color: '#c62828', marginTop: 2 }}>
+              {`${cssWidth - shrinkwrapMaxWidth}px \u00D7 ${height}px = ${lineCount} lines saved`}
+            </text>
+          )}
         </view>
       </view>
-    </scroll-view>
+
+      {/* Toggle button */}
+      <view
+        bindtap={toggleControls}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <text style={{
+          fontSize: 20,
+          color: showControls ? '#333' : '#fff',
+          fontWeight: 'bold',
+        }}>
+          {showControls ? '\u00D7' : '\u2261'}
+        </text>
+      </view>
+
+      {/* Controls overlay */}
+      {showControls && (
+        <view style={{
+          position: 'absolute',
+          top: 56,
+          left: 12,
+          right: 12,
+          backgroundColor: 'rgba(0,0,0,0.88)',
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            Shrinkwrap Demo
+          </text>
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+            walkLineRanges finds widest line, binary search finds tightest width
+          </text>
+
+          {/* Width stepper */}
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
+            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+            <view
+              bindtap={decrease}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+            </view>
+            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+              {`${maxWidth}px`}
+            </text>
+            <view
+              bindtap={increase}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+            </view>
+          </view>
+
+          {/* Metrics */}
+          <view style={{ flexDirection: 'row', gap: 20, marginTop: 12 }}>
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>CSS Width</text>
+              <text style={{ fontSize: 16, fontWeight: 'bold', color: '#ff9800' }}>{`${cssWidth}px`}</text>
+            </view>
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Shrinkwrap</text>
+              <text style={{ fontSize: 16, fontWeight: 'bold', color: '#4caf50' }}>{`${shrinkwrapMaxWidth}px`}</text>
+            </view>
+            <view>
+              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Lines</text>
+              <text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{`${lineCount}`}</text>
+            </view>
+          </view>
+
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: '18px' }}>
+            {'CSS only knows fit-content (widest line after wrapping). ' +
+             'Pretext binary-searches the tightest width preserving the same line count \u2014 ' +
+             'a capability missing from native layout.'}
+          </text>
+        </view>
+      )}
+    </view>
   )
 }
 

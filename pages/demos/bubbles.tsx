@@ -16,39 +16,33 @@ const BUBBLE_TEXTS = [
   'Yo did you see the new Pretext library?',
   'yeah! It measures text without the DOM. Pure JavaScript arithmetic',
   'That shrinkwrap demo is wild it finds the exact minimum width for multiline text. CSS can\'t do that.',
-  '성능 최적화가 정말 많이 되었더라고요 🎉',
+  '\uC131\uB2A5 \uCD5C\uC801\uD654\uAC00 \uC815\uB9D0 \uB9CE\uC774 \uB418\uC5C8\uB354\uB77C\uACE0\uC694 \uD83C\uDF89',
   'Oh wow it handles CJK and emoji too??',
-  'كل شيء! Mixed bidi, grapheme clusters, whatever you want. Try resizing',
+  '\u0643\u0644 \u0634\u064A\u0621! Mixed bidi, grapheme clusters, whatever you want. Try resizing',
   'the best part: zero layout reflow. You could shrinkwrap 10,000 bubbles and the browser wouldn\'t even blink',
 ]
 
-// true = sent (right-aligned, blue), false = received (left-aligned, gray)
 const BUBBLE_DIRECTIONS = [false, true, false, true, false, true, true]
-
-const MIN_WIDTH = 220
-const MAX_WIDTH = 500
-const WIDTH_STEP = 20
-
 const FONT_SIZE = 15
 
 export function BubblesPage() {
-  const [chatWidth, setChatWidth] = useState(340)
+  const [chatWidth, setChatWidth] = useState(360)
+  const [showControls, setShowControls] = useState(false)
 
-  const decrease = useCallback(() => {
-    setChatWidth(w => Math.max(MIN_WIDTH, w - WIDTH_STEP))
+  const onLayout = useCallback((e: any) => {
+    setChatWidth(Math.floor(e.detail.width))
   }, [])
-  const increase = useCallback(() => {
-    setChatWidth(w => Math.min(MAX_WIDTH, w + WIDTH_STEP))
-  }, [])
+  const toggleControls = useCallback(() => setShowControls(v => !v), [])
+  const decrease = useCallback(() => setChatWidth(w => Math.max(220, w - 20)), [])
+  const increase = useCallback(() => setChatWidth(w => Math.min(1200, w + 20)), [])
 
   const preparedBubbles = useMemo(() => prepareBubbleTexts(BUBBLE_TEXTS), [])
-
-  // Compute shrinkwrap render state
-  const renderState = computeBubbleRender(preparedBubbles, chatWidth)
+  const containerWidth = Math.max(220, chatWidth - 32)
+  const renderState = computeBubbleRender(preparedBubbles, containerWidth)
   const bubbleMaxWidth = renderState.bubbleMaxWidth
   const contentMaxWidth = bubbleMaxWidth - PADDING_H * 2
 
-  // Compute CSS-side wasted pixels (using css widths from renderState)
+  // Compute CSS-side wasted pixels
   let cssWastedPixels = 0
   for (let i = 0; i < renderState.widths.length; i++) {
     const w = renderState.widths[i]!
@@ -59,225 +53,195 @@ export function BubblesPage() {
   }
 
   return (
-    <scroll-view style={{ flex: 1, backgroundColor: '#f4f1ea' }}>
-      <view style={{ padding: 16 }}>
-        {/* Header */}
-        <text style={{ fontSize: 11, color: '#955f3b', letterSpacing: 1 }}>
-          DEMO
-        </text>
-        <text style={{ fontSize: 24, fontWeight: 'bold', color: '#201b18', marginTop: 4 }}>
-          Shrinkwrap Showdown
-        </text>
-        <text style={{ fontSize: 14, color: '#6d645d', marginTop: 8, lineHeight: '20px' }}>
-          {'CSS fit-content sizes a bubble to its widest wrapped line, which leaves dead space. ' +
-           'Pretext finds the tightest width that wraps to the same line count.'}
-        </text>
+    <view style={{ flex: 1, backgroundColor: '#1c1c1e' }} bindlayoutchange={onLayout}>
+      <scroll-view style={{ flex: 1 }}>
+        <view style={{ padding: 16, gap: 24 }}>
+          {/* CSS fit-content chat */}
+          <view>
+            <view style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <text style={{ fontSize: 13, fontWeight: 'bold', color: '#ff9800' }}>
+                CSS fit-content
+              </text>
+              <view style={{
+                paddingLeft: 8, paddingRight: 8, paddingTop: 3, paddingBottom: 3,
+                borderRadius: 99, backgroundColor: 'rgba(255,152,0,0.2)',
+              }}>
+                <text style={{ fontSize: 11, color: '#ff9800' }}>
+                  {`${formatPixelCount(cssWastedPixels)} px\u00B2 wasted`}
+                </text>
+              </view>
+            </view>
+            <view style={{
+              width: containerWidth,
+              padding: 12,
+              borderRadius: 12,
+              backgroundColor: '#2c2c2e',
+              gap: 6,
+            }}>
+              {BUBBLE_TEXTS.map((text, i) => {
+                const isSent = BUBBLE_DIRECTIONS[i]!
+                const w = renderState.widths[i]!
+                return (
+                  <view
+                    key={`css-${i}`}
+                    style={{
+                      alignSelf: isSent ? 'flex-end' : 'flex-start',
+                      maxWidth: bubbleMaxWidth,
+                      width: w.cssWidth,
+                      paddingTop: PADDING_V,
+                      paddingBottom: PADDING_V,
+                      paddingLeft: PADDING_H,
+                      paddingRight: PADDING_H,
+                      borderRadius: 14,
+                      borderBottomRightRadius: isSent ? 4 : 14,
+                      borderBottomLeftRadius: isSent ? 14 : 4,
+                      backgroundColor: isSent ? '#0b84fe' : '#3a3a3c',
+                    }}
+                  >
+                    <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
+                      {text}
+                    </text>
+                  </view>
+                )
+              })}
+            </view>
+          </view>
 
-        {/* Width control */}
-        <view style={{
-          flexDirection: 'row',
+          {/* Pretext shrinkwrap chat */}
+          <view>
+            <view style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <text style={{ fontSize: 13, fontWeight: 'bold', color: '#4caf50' }}>
+                Pretext shrinkwrap
+              </text>
+              <view style={{
+                paddingLeft: 8, paddingRight: 8, paddingTop: 3, paddingBottom: 3,
+                borderRadius: 99, backgroundColor: 'rgba(76,175,80,0.2)',
+              }}>
+                <text style={{ fontSize: 11, color: '#4caf50' }}>
+                  0 px² wasted
+                </text>
+              </view>
+            </view>
+            <view style={{
+              width: containerWidth,
+              padding: 12,
+              borderRadius: 12,
+              backgroundColor: '#2c2c2e',
+              gap: 6,
+            }}>
+              {BUBBLE_TEXTS.map((text, i) => {
+                const isSent = BUBBLE_DIRECTIONS[i]!
+                const w = renderState.widths[i]!
+                return (
+                  <view
+                    key={`shrink-${i}`}
+                    style={{
+                      alignSelf: isSent ? 'flex-end' : 'flex-start',
+                      maxWidth: bubbleMaxWidth,
+                      width: w.tightWidth,
+                      paddingTop: PADDING_V,
+                      paddingBottom: PADDING_V,
+                      paddingLeft: PADDING_H,
+                      paddingRight: PADDING_H,
+                      borderRadius: 14,
+                      borderBottomRightRadius: isSent ? 4 : 14,
+                      borderBottomLeftRadius: isSent ? 14 : 4,
+                      backgroundColor: isSent ? '#0b84fe' : '#3a3a3c',
+                    }}
+                  >
+                    <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
+                      {text}
+                    </text>
+                  </view>
+                )
+              })}
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      {/* Toggle button */}
+      <view
+        bindtap={toggleControls}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.2)',
           alignItems: 'center',
-          marginTop: 16,
-          gap: 12,
-          padding: 12,
-          borderRadius: 14,
-          backgroundColor: '#fffdf8',
-          borderWidth: 1,
-          borderColor: '#d8cec3',
+          justifyContent: 'center',
+        }}
+      >
+        <text style={{
+          fontSize: 20,
+          color: showControls ? '#333' : '#fff',
+          fontWeight: 'bold',
         }}>
-          <text style={{ fontSize: 12, color: '#6d645d' }}>Container:</text>
-          <view
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: chatWidth <= MIN_WIDTH ? '#ccc' : '#955f3b',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={decrease}
-          >
-            <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>−</text>
-          </view>
-          <text style={{ fontSize: 16, fontWeight: 'bold', color: '#201b18', minWidth: 70, textAlign: 'center' }}>
-            {`${chatWidth}px`}
-          </text>
-          <view
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: chatWidth >= MAX_WIDTH ? '#ccc' : '#955f3b',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            bindtap={increase}
-          >
-            <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
-          </view>
-        </view>
-
-        {/* CSS fit-content panel */}
-        <view style={{
-          marginTop: 16,
-          padding: 14,
-          borderRadius: 16,
-          backgroundColor: '#fffdf8',
-          borderWidth: 1,
-          borderColor: '#d8cec3',
-        }}>
-          <text style={{ fontSize: 16, fontWeight: 'bold', color: '#201b18' }}>
-            CSS fit-content
-          </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '18px' }}>
-            {'The browser wraps text, then sizes the bubble to the longest line. ' +
-             'Shorter lines leave empty space.'}
-          </text>
-          <view style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginTop: 10,
-            padding: 6,
-            paddingLeft: 10,
-            paddingRight: 10,
-            borderRadius: 99,
-            backgroundColor: '#f0e4da',
-            alignSelf: 'flex-start',
-          }}>
-            <text style={{ fontSize: 11, color: '#201b18' }}>
-              {`Wasted: ${formatPixelCount(cssWastedPixels)} px²`}
-            </text>
-          </view>
-          {/* CSS chat container */}
-          <view style={{
-            width: chatWidth,
-            marginTop: 12,
-            padding: 12,
-            borderRadius: 12,
-            backgroundColor: '#1c1c1e',
-            gap: 6,
-          }}>
-            {BUBBLE_TEXTS.map((text, i) => {
-              const isSent = BUBBLE_DIRECTIONS[i]!
-              const w = renderState.widths[i]!
-              return (
-                <view
-                  key={`css-${i}`}
-                  style={{
-                    alignSelf: isSent ? 'flex-end' : 'flex-start',
-                    maxWidth: bubbleMaxWidth,
-                    width: w.cssWidth,
-                    paddingTop: PADDING_V,
-                    paddingBottom: PADDING_V,
-                    paddingLeft: PADDING_H,
-                    paddingRight: PADDING_H,
-                    borderRadius: 14,
-                    borderBottomRightRadius: isSent ? 4 : 14,
-                    borderBottomLeftRadius: isSent ? 14 : 4,
-                    backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
-                  }}
-                >
-                  <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
-                    {text}
-                  </text>
-                </view>
-              )
-            })}
-          </view>
-        </view>
-
-        {/* Pretext shrinkwrap panel */}
-        <view style={{
-          marginTop: 12,
-          padding: 14,
-          borderRadius: 16,
-          backgroundColor: '#fffdf8',
-          borderWidth: 1,
-          borderColor: '#d8cec3',
-        }}>
-          <text style={{ fontSize: 16, fontWeight: 'bold', color: '#201b18' }}>
-            Pretext shrinkwrap
-          </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '18px' }}>
-            {'Binary-searches the tightest width that produces the same line count. ' +
-             'Zero wasted pixels.'}
-          </text>
-          <view style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginTop: 10,
-            padding: 6,
-            paddingLeft: 10,
-            paddingRight: 10,
-            borderRadius: 99,
-            backgroundColor: '#e8f5e9',
-            alignSelf: 'flex-start',
-          }}>
-            <text style={{ fontSize: 11, color: '#1b5e20' }}>
-              Wasted: 0 px²
-            </text>
-          </view>
-          {/* Shrinkwrap chat container */}
-          <view style={{
-            width: chatWidth,
-            marginTop: 12,
-            padding: 12,
-            borderRadius: 12,
-            backgroundColor: '#1c1c1e',
-            gap: 6,
-          }}>
-            {BUBBLE_TEXTS.map((text, i) => {
-              const isSent = BUBBLE_DIRECTIONS[i]!
-              const w = renderState.widths[i]!
-              return (
-                <view
-                  key={`shrink-${i}`}
-                  style={{
-                    alignSelf: isSent ? 'flex-end' : 'flex-start',
-                    maxWidth: bubbleMaxWidth,
-                    width: w.tightWidth,
-                    paddingTop: PADDING_V,
-                    paddingBottom: PADDING_V,
-                    paddingLeft: PADDING_H,
-                    paddingRight: PADDING_H,
-                    borderRadius: 14,
-                    borderBottomRightRadius: isSent ? 4 : 14,
-                    borderBottomLeftRadius: isSent ? 14 : 4,
-                    backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
-                  }}
-                >
-                  <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
-                    {text}
-                  </text>
-                </view>
-              )
-            })}
-          </view>
-        </view>
-
-        {/* Explanation section */}
-        <view style={{
-          marginTop: 12,
-          padding: 14,
-          borderRadius: 16,
-          backgroundColor: '#fffdf8',
-          borderWidth: 1,
-          borderColor: '#d8cec3',
-        }}>
-          <text style={{ fontSize: 17, fontWeight: 'bold', color: '#201b18' }}>
-            Why can't CSS do this?
-          </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 8, lineHeight: '20px' }}>
-            {'CSS only knows fit-content, which is the width of the widest line after wrapping. ' +
-             'If a paragraph wraps to 3 lines and the last line is short, CSS still sizes the ' +
-             'container to the longest line. There\'s no CSS property to say "find the narrowest ' +
-             'width that still produces exactly 3 lines." That requires measuring the text at ' +
-             'multiple widths and comparing line counts — exactly what Pretext\'s walkLineRanges() ' +
-             'does, without DOM text measurement in the resize path.'}
-          </text>
-        </view>
+          {showControls ? '\u00D7' : '\u2261'}
+        </text>
       </view>
-    </scroll-view>
+
+      {/* Controls overlay */}
+      {showControls && (
+        <view style={{
+          position: 'absolute',
+          top: 56,
+          left: 12,
+          right: 12,
+          backgroundColor: 'rgba(0,0,0,0.92)',
+          borderRadius: 12,
+          padding: 16,
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.1)',
+        }}>
+          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            Shrinkwrap Showdown
+          </text>
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: '18px' }}>
+            {'CSS fit-content sizes a bubble to its widest wrapped line, leaving dead space. ' +
+             'Pretext finds the tightest width that wraps to the same line count.'}
+          </text>
+
+          {/* Width stepper */}
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
+            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+            <view
+              bindtap={decrease}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+            </view>
+            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+              {`${chatWidth}px`}
+            </text>
+            <view
+              bindtap={increase}
+              style={{
+                width: 32, height: 32, borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+            </view>
+          </view>
+
+          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: '18px' }}>
+            {'CSS only knows fit-content (the width of the widest line). ' +
+             'There\'s no CSS property to say "find the narrowest width that ' +
+             'still produces the same line count." That requires measuring text ' +
+             'at multiple widths \u2014 exactly what Pretext does.'}
+          </text>
+        </view>
+      )}
+    </view>
   )
 }
 
