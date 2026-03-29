@@ -19,6 +19,7 @@ Started: 2026-03-29
 - Each entry page file must call `root.render(<Component />)` + `import.meta.webpackHot.accept()`
 - Lynx `<text>` does NOT support `position: 'absolute'` — wrap in `<view>` for positioning
 - For manually rendering lines: use stacked `<view>` with `height: LINE_HEIGHT` instead of absolute positioning
+- In Lynx, numeric `lineHeight` (e.g. `lineHeight: 20`) is treated as a MULTIPLIER, not pixels — use string `'20px'` for pixel values
 
 ---
 
@@ -436,4 +437,15 @@ Started: 2026-03-29
 - DevTool screenshot verified: text flows around obstacle, narrow lines beside it, full-width below
 - tsc --build passes, pnpm build passes
 - Files changed: pages/variable-flow.tsx (fixed line rendering), tasks/prd.json (mark passes: true)
+---
+
+## 2026-03-29 - US-014 & US-015 (VERIFIED)
+- US-014: bubbles-shared.ts already complete, build passes, marked as passing
+- US-015: Fixed lineHeight in bubbles.tsx — numeric `lineHeight: 20` was treated as 20× multiplier, causing huge gaps; changed to string `'20px'`
+- DevTool screenshot verified: chat bubbles render with correct alignment (sent=right/blue, received=left/gray), CJK/emoji/Arabic text, wasted pixel count
+- tsc --build passes, pnpm build passes
+- Files changed: pages/demos/bubbles.tsx (lineHeight fix), tasks/prd.json (mark US-014 + US-015 passes: true)
+- **Learnings for future iterations:**
+  - In Lynx, `lineHeight: 20` means 20× the font size (multiplier), not 20px — always use string `'20px'` for pixel-based line heights
+  - This is different from React Native where numeric lineHeight is treated as pixels
 ---

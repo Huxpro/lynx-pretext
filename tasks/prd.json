@@ -269,8 +269,8 @@
         "DevTool screenshot of the demo page shows expected rendering (visual verification)"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "Source: ../pretext/pages/demos/bubbles-shared.ts. Pure logic port — no rendering. Import paths change from '../../src/layout.ts' to '../../src/layout'. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Source: ../pretext/pages/demos/bubbles-shared.ts. Pure logic port — no rendering. Import paths change from '../../src/layout.ts' to '../../src/layout'."
     },
     {
       "id": "US-015",
@@ -288,8 +288,8 @@
         "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "Source: ../pretext/pages/demos/bubbles.ts + ../pretext/pages/demos/bubbles.html. Replace DOM APIs (document.getElementById, HTMLDivElement, etc.) with Lynx/ReactLynx equivalents. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Source: ../pretext/pages/demos/bubbles.ts + ../pretext/pages/demos/bubbles.html. Replace DOM APIs (document.getElementById, HTMLDivElement, etc.) with Lynx/ReactLynx equivalents."
     },
     {
       "id": "US-016",

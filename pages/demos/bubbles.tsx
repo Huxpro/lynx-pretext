@@ -68,7 +68,7 @@ export function BubblesPage() {
         <text style={{ fontSize: 24, fontWeight: 'bold', color: '#201b18', marginTop: 4 }}>
           Shrinkwrap Showdown
         </text>
-        <text style={{ fontSize: 14, color: '#6d645d', marginTop: 8, lineHeight: 20 }}>
+        <text style={{ fontSize: 14, color: '#6d645d', marginTop: 8, lineHeight: '20px' }}>
           {'CSS fit-content sizes a bubble to its widest wrapped line, which leaves dead space. ' +
            'Pretext finds the tightest width that wraps to the same line count.'}
         </text>
@@ -129,7 +129,7 @@ export function BubblesPage() {
           <text style={{ fontSize: 16, fontWeight: 'bold', color: '#201b18' }}>
             CSS fit-content
           </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: 18 }}>
+          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '18px' }}>
             {'The browser wraps text, then sizes the bubble to the longest line. ' +
              'Shorter lines leave empty space.'}
           </text>
@@ -177,7 +177,7 @@ export function BubblesPage() {
                     backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
                   }}
                 >
-                  <text style={{ fontSize: FONT_SIZE, lineHeight: LINE_HEIGHT, color: '#fff' }}>
+                  <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
                     {text}
                   </text>
                 </view>
@@ -198,7 +198,7 @@ export function BubblesPage() {
           <text style={{ fontSize: 16, fontWeight: 'bold', color: '#201b18' }}>
             Pretext shrinkwrap
           </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: 18 }}>
+          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 6, lineHeight: '18px' }}>
             {'Binary-searches the tightest width that produces the same line count. ' +
              'Zero wasted pixels.'}
           </text>
@@ -246,7 +246,7 @@ export function BubblesPage() {
                     backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
                   }}
                 >
-                  <text style={{ fontSize: FONT_SIZE, lineHeight: LINE_HEIGHT, color: '#fff' }}>
+                  <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
                     {text}
                   </text>
                 </view>
@@ -267,7 +267,7 @@ export function BubblesPage() {
           <text style={{ fontSize: 17, fontWeight: 'bold', color: '#201b18' }}>
             Why can't CSS do this?
           </text>
-          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 8, lineHeight: 20 }}>
+          <text style={{ fontSize: 13, color: '#6d645d', marginTop: 8, lineHeight: '20px' }}>
             {'CSS only knows fit-content, which is the width of the widest line after wrapping. ' +
              'If a paragraph wraps to 3 lines and the last line is short, CSS still sizes the ' +
              'container to the longest line. There\'s no CSS property to say "find the narrowest ' +
