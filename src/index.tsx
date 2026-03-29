@@ -1,8 +1,8 @@
 import { root } from '@lynx-js/react'
 
-import { BubblesPage } from '../pages/demos/bubbles.js'
+import { DynamicLayoutPage } from '../pages/demos/dynamic-layout.js'
 
-root.render(<BubblesPage />)
+root.render(<DynamicLayoutPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()

@@ -309,7 +309,7 @@
         "Verify in Lynx DevTool that editorial layout looks correct"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/."
     }
   ]

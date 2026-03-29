@@ -258,3 +258,25 @@ Started: 2026-03-29
   - registerLogoHulls() must be called with the actual asset URLs before getWrapHull() is used
   - sharp npm package works well for Node.js SVG rasterization on macOS (prebuilt binaries)
 ---
+
+## 2026-03-29 - US-017
+- Created dynamic editorial layout page at pages/demos/dynamic-layout.tsx
+- Created BODY_COPY text at pages/demos/dynamic-layout-text.ts (direct port from reference)
+- Ported all pure layout functions 1:1 from reference: buildLayout, evaluateLayout, layoutColumn, fitHeadlineFontSize, getObstacleIntervals, getLogoProjection
+- Headline font size binary-search fitted to avoid mid-word breaks
+- Body text flows left column → right column via layoutNextLine cursor continuity
+- Both columns route around logo obstacles using polygon interval carving from wrap-geometry
+- Tap on logo triggers rotation animation with text reflow (setTimeout-based animation loop)
+- Width/height controls (+/−) allow viewport resize; switches between single-column (<760px) and two-column (≥760px) modes
+- Logo placeholders rendered as colored circular views (SVG images not available in Lynx; hulls are precomputed)
+- Replaced all DOM APIs (document.createElement, HTMLElement, requestAnimationFrame, window events) with ReactLynx state-driven components
+- Updated src/index.tsx to render DynamicLayoutPage
+- Files changed: pages/demos/dynamic-layout-text.ts (new), pages/demos/dynamic-layout.tsx (new), src/index.tsx (updated)
+- **Learnings for future iterations:**
+  - For animation in Lynx, use setTimeout loop + refs for mutable state + a renderTick counter via useState to trigger re-renders
+  - animateFnRef pattern: assign the latest closure to a ref every render, setTimeout calls animateFnRef.current() to always get the latest version
+  - Lynx transform property accepts CSS string format: `rotate(Xdeg)` — works on view elements
+  - Hull data can be imported directly from hull-data.ts instead of going through getWrapHull/registerLogoHulls when the keys are known at compile time
+  - For complex demos with many absolutely positioned text elements, the React reconciler handles key-based updates efficiently
+  - useMemo + useRef<Map> pattern works well for caching prepared texts across renders without re-measuring
+---
