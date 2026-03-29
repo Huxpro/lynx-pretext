@@ -110,3 +110,16 @@ Started: 2026-03-29
   - Included both US-007 (prepare/layout) and US-008 (rich-path: layoutWithLines, walkLineRanges, layoutNextLine, prepareWithSegments) in same file since they're tightly coupled in the original
   - The WeakMap<PreparedTextWithSegments, Map<number, string[]>> pattern caches grapheme splits per prepared handle without leaking memory
 ---
+
+## 2026-03-29 - US-008
+- All rich layout functions were already implemented in US-007 (same file, tightly coupled)
+- Verified: prepareWithSegments, layoutWithLines, walkLineRanges, layoutNextLine all present and exported
+- Verified: LayoutLine has { text, width, start: LayoutCursor, end: LayoutCursor }
+- Verified: buildLineTextFromRange appends '-' for soft-hyphen lines
+- Verified: All required types exported (PreparedText, PreparedTextWithSegments, LayoutCursor, LayoutResult, LayoutLine, LayoutLineRange, LayoutLinesResult, PrepareOptions)
+- Typecheck passes with zero errors
+- Files changed: none (already complete from US-007)
+- **Learnings for future iterations:**
+  - When stories are tightly coupled in the source, implementing them together avoids artificial splitting
+  - PrepareProfile/profilePrepare from reference are diagnostic-only exports, not needed for the core API
+---

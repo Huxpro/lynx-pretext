@@ -149,7 +149,7 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/layout.ts (rich-path: buildLineTextFromRange, materializeLayoutLine, toLayoutLineRange, walkLineRanges, layoutNextLine, layoutWithLines) + ../pretext/src/bidi.ts (stub computeSegmentLevels to return null for MVP)."
     },
     {
