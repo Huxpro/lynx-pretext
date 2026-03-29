@@ -49,7 +49,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Source: ../pretext/src/analysis.ts (lines 97-320). Port isCJK, kinsoku sets, punctuation sets, and merge helper predicates. These are used by the merge pipeline in the next story."
     },
     {

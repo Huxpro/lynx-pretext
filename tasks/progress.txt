@@ -2,6 +2,7 @@
 Started: 2026-03-29
 
 ## Codebase Patterns
+- Root tsconfig.json targets ES2020 with lib ES2020 — supports Set, Map, codePointAt, Array.from, Unicode regex flag
 - Rspeedy project uses `lynx.config.ts` (not `rspeedy.config.ts`) for build configuration
 - Entry point is `src/index.tsx`, demo pages live under `pages/`
 - `src/tsconfig.json` includes `../pages/**/*.tsx` so pages are typechecked with src
@@ -34,4 +35,15 @@ Started: 2026-03-29
   - The original analysis.ts has internal types (SegmentationPiece, WhiteSpaceProfile) that need to be included but aren't part of the public API
   - getWhiteSpaceProfile was made export since classifySegmentBreakChar and splitSegmentByBreakKind both take WhiteSpaceProfile as parameter — callers need a way to create one
   - US-003 and US-004 will add more to the same src/analysis.ts file (character sets, merge pipeline, analyzeText)
+---
+
+## 2026-03-29 - US-003
+- Ported character sets and merge helper predicates from pretext/src/analysis.ts (lines 97-319)
+- Exported: isCJK, kinsokuStart, kinsokuEnd, leftStickyPunctuation, isLeftStickyPunctuationSegment, isForwardStickyClusterSegment, isEscapedQuoteClusterSegment, splitTrailingForwardStickyCluster, endsWithClosingQuote
+- Internal helpers: containsArabicScript, isCJKLineStartProhibitedSegment, isRepeatedSingleCharRun, endsWithArabicNoSpacePunctuation, endsWithMyanmarMedialGlue, splitLeadingSpaceAndMarks, arabicScriptRe, combiningMarkRe, decimalDigitRe, forwardStickyGlue, arabicNoSpaceTrailingPunctuation, myanmarMedialGlue, closingQuoteChars
+- Files changed: src/analysis.ts (appended ~220 lines), tsconfig.json (added target/lib ES2020)
+- **Learnings for future iterations:**
+  - Default TS target is ES3 which lacks Set, codePointAt, Array.from, and Unicode regex flag `u` — needed to add `"target": "ES2020"` and `"lib": ["ES2020"]` to root tsconfig.json
+  - Used Unicode escape codes (e.g. `\u201C`) instead of literal smart quotes to avoid encoding issues — functionally identical
+  - The `decimalDigitRe` and other internal helpers are only used by the merge pipeline (US-004) but were included here since they're part of the same character-set block
 ---
