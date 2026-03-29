@@ -1,4 +1,5 @@
-import { root, useState, useCallback, useMemo, useRef, useEffect } from '@lynx-js/react'
+import { root, useState, useCallback, useMemo, useRef, useEffect, useMainThreadRef, runOnBackground } from '@lynx-js/react'
+import type { MainThread } from '@lynx-js/types'
 import {
   layoutNextLine,
   prepareWithSegments,
@@ -470,15 +471,26 @@ export function DynamicLayoutPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
   const [showControls, setShowControls] = useState(false)
-  const [renderTick, setRenderTick] = useState(0)
+  // Settled angles drive text reflow (expensive, only on animation end)
+  const [openaiSettledAngle, setOpenaiSettledAngle] = useState(0)
+  const [claudeSettledAngle, setClaudeSettledAngle] = useState(0)
 
-  const openaiAngleRef = useRef(0)
-  const claudeAngleRef = useRef(0)
-  const openaiSpinRef = useRef<SpinState | null>(null)
-  const claudeSpinRef = useRef<SpinState | null>(null)
-  const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
-  const animateFnRef = useRef<() => void>(() => {})
+
+  // Main-thread refs for smooth logo rotation without React re-renders
+  const openaiLogoRef = useMainThreadRef<MainThread.Element>(null)
+  const claudeLogoRef = useMainThreadRef<MainThread.Element>(null)
+  const openaiAngleMT = useMainThreadRef(0)
+  const claudeAngleMT = useMainThreadRef(0)
+  const openaiSpinFromMT = useMainThreadRef(0)
+  const openaiSpinToMT = useMainThreadRef(0)
+  const openaiSpinStartMT = useMainThreadRef(0)
+  const claudeSpinFromMT = useMainThreadRef(0)
+  const claudeSpinToMT = useMainThreadRef(0)
+  const claudeSpinStartMT = useMainThreadRef(0)
+  const openaiSpinningMT = useMainThreadRef(false)
+  const claudeSpinningMT = useMainThreadRef(false)
+  const animatingMT = useMainThreadRef(false)
 
   const onLayout = useCallback((e: any) => {
     setPageWidth(Math.floor(e.detail.width))
@@ -490,68 +502,80 @@ export function DynamicLayoutPage() {
   const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(400, h - 40)), [])
   const increaseHeight = useCallback(() => setPageHeight(h => Math.min(1200, h + 40)), [])
 
-  // Animation tick
-  animateFnRef.current = () => {
+  // Main-thread animation tick — runs via requestAnimationFrame, zero React involvement
+  function spinTick(_timestamp: number): void {
+    'main thread'
     const now = Date.now()
-    let stillAnimating = false
+    let still = false
 
-    if (openaiSpinRef.current) {
-      const spin = openaiSpinRef.current
-      const progress = Math.min(1, (now - spin.start) / spin.duration)
-      openaiAngleRef.current = spin.from + (spin.to - spin.from) * easeSpin(progress)
+    if (openaiSpinningMT.current) {
+      const duration = 900
+      const progress = Math.min(1, (now - openaiSpinStartMT.current) / duration)
+      const oneMinusT = 1 - progress
+      const eased = 1 - oneMinusT * oneMinusT * oneMinusT
+      openaiAngleMT.current = openaiSpinFromMT.current + (openaiSpinToMT.current - openaiSpinFromMT.current) * eased
       if (progress >= 1) {
-        openaiAngleRef.current = spin.to
-        openaiSpinRef.current = null
+        openaiAngleMT.current = openaiSpinToMT.current
+        openaiSpinningMT.current = false
       } else {
-        stillAnimating = true
+        still = true
+      }
+      if (openaiLogoRef.current) {
+        openaiLogoRef.current.setStyleProperty('transform', `rotate(${openaiAngleMT.current * 180 / Math.PI}deg)`)
       }
     }
 
-    if (claudeSpinRef.current) {
-      const spin = claudeSpinRef.current
-      const progress = Math.min(1, (now - spin.start) / spin.duration)
-      claudeAngleRef.current = spin.from + (spin.to - spin.from) * easeSpin(progress)
+    if (claudeSpinningMT.current) {
+      const duration = 900
+      const progress = Math.min(1, (now - claudeSpinStartMT.current) / duration)
+      const oneMinusT = 1 - progress
+      const eased = 1 - oneMinusT * oneMinusT * oneMinusT
+      claudeAngleMT.current = claudeSpinFromMT.current + (claudeSpinToMT.current - claudeSpinFromMT.current) * eased
       if (progress >= 1) {
-        claudeAngleRef.current = spin.to
-        claudeSpinRef.current = null
+        claudeAngleMT.current = claudeSpinToMT.current
+        claudeSpinningMT.current = false
       } else {
-        stillAnimating = true
+        still = true
+      }
+      if (claudeLogoRef.current) {
+        claudeLogoRef.current.setStyleProperty('transform', `rotate(${claudeAngleMT.current * 180 / Math.PI}deg)`)
       }
     }
 
-    setRenderTick(n => n + 1)
-
-    if (stillAnimating) {
-      animTimerRef.current = setTimeout(() => animateFnRef.current(), 16)
+    if (still) {
+      requestAnimationFrame(spinTick)
     } else {
-      animTimerRef.current = null
+      animatingMT.current = false
+      // Animation done — tell React to reflow text at final angles
+      runOnBackground(setOpenaiSettledAngle)(openaiAngleMT.current)
+      runOnBackground(setClaudeSettledAngle)(claudeAngleMT.current)
     }
   }
 
-  useEffect(() => {
-    return () => {
-      if (animTimerRef.current !== null) {
-        clearTimeout(animTimerRef.current)
-      }
+  // Main-thread tap handlers — start spin with zero latency
+  function handleOpenaiTapMT(_e: MainThread.TouchEvent): void {
+    'main thread'
+    openaiSpinFromMT.current = openaiAngleMT.current
+    openaiSpinToMT.current = openaiAngleMT.current + (-1) * Math.PI
+    openaiSpinStartMT.current = Date.now()
+    openaiSpinningMT.current = true
+    if (!animatingMT.current) {
+      animatingMT.current = true
+      requestAnimationFrame(spinTick)
     }
-  }, [])
+  }
 
-  const startSpin = useCallback((kind: 'openai' | 'claude', direction: 1 | -1) => {
-    const angleRef = kind === 'openai' ? openaiAngleRef : claudeAngleRef
-    const spinRef = kind === 'openai' ? openaiSpinRef : claudeSpinRef
-    spinRef.current = {
-      from: angleRef.current,
-      to: angleRef.current + direction * Math.PI,
-      start: Date.now(),
-      duration: 900,
+  function handleClaudeTapMT(_e: MainThread.TouchEvent): void {
+    'main thread'
+    claudeSpinFromMT.current = claudeAngleMT.current
+    claudeSpinToMT.current = claudeAngleMT.current + 1 * Math.PI
+    claudeSpinStartMT.current = Date.now()
+    claudeSpinningMT.current = true
+    if (!animatingMT.current) {
+      animatingMT.current = true
+      requestAnimationFrame(spinTick)
     }
-    if (animTimerRef.current === null) {
-      animateFnRef.current()
-    }
-  }, [])
-
-  const handleOpenaiTap = useCallback(() => startSpin('openai', -1), [startSpin])
-  const handleClaudeTap = useCallback(() => startSpin('claude', 1), [startSpin])
+  }
 
   // Prepared text cache accessor
   const getPreparedCached = useCallback((text: string, font: string): PreparedTextWithSegments => {
@@ -567,19 +591,16 @@ export function DynamicLayoutPage() {
   const preparedCredit = useMemo(() => getPreparedCached(CREDIT_TEXT, CREDIT_FONT), [getPreparedCached])
   const creditWidth = useMemo(() => Math.ceil(getPreparedSingleLineWidth(preparedCredit)), [preparedCredit])
 
-  const openaiAngle = openaiAngleRef.current
-  const claudeAngle = claudeAngleRef.current
-  void renderTick
-
+  // Text reflow uses settled angles (recomputed only when animation finishes)
   const pageLayout = buildLayout(pageWidth, pageHeight, BODY_LINE_HEIGHT, getPreparedCached)
   const { headlineLines, creditLeft, creditTop, leftLines, rightLines } = evaluateLayout(
     pageLayout, BODY_LINE_HEIGHT, preparedBody, creditWidth,
-    openaiAngle, claudeAngle, getPreparedCached,
+    openaiSettledAngle, claudeSettledAngle, getPreparedCached,
   )
 
   const totalBodyLines = leftLines.length + rightLines.length
-  const openaiRotDeg = openaiAngle * 180 / Math.PI
-  const claudeRotDeg = claudeAngle * 180 / Math.PI
+  const openaiRotDeg = openaiSettledAngle * 180 / Math.PI
+  const claudeRotDeg = claudeSettledAngle * 180 / Math.PI
 
   return (
     <view style={{ flex: 1, backgroundColor: '#f6f0e6' }} bindlayoutchange={onLayout}>
@@ -644,9 +665,10 @@ export function DynamicLayoutPage() {
           </view>
         ))}
 
-        {/* OpenAI logo */}
+        {/* OpenAI logo — main-thread ref for smooth rotation */}
         <view
-          bindtap={handleOpenaiTap}
+          main-thread:ref={openaiLogoRef}
+          main-thread:bindtap={handleOpenaiTapMT}
           style={{
             position: 'absolute',
             left: `${pageLayout.openaiRect.x}px`,
@@ -665,9 +687,10 @@ export function DynamicLayoutPage() {
           />
         </view>
 
-        {/* Claude logo */}
+        {/* Claude logo — main-thread ref for smooth rotation */}
         <view
-          bindtap={handleClaudeTap}
+          main-thread:ref={claudeLogoRef}
+          main-thread:bindtap={handleClaudeTapMT}
           style={{
             position: 'absolute',
             left: `${pageLayout.claudeRect.x}px`,
