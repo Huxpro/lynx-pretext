@@ -583,20 +583,20 @@ export function DynamicLayoutPage() {
     <view style={{ flex: 1, backgroundColor: '#f6f0e6' }} bindlayoutchange={onLayout}>
       {/* Editorial page — fills entire viewport */}
       <view style={{
-        width: pageWidth,
-        height: pageHeight,
+        width: `${pageWidth}px`,
+        height: `${pageHeight}px`,
         overflow: 'hidden',
         backgroundColor: '#f6f0e6',
       }}>
         {/* Headline lines */}
         {headlineLines.map((line, i) => (
           <view key={`h-${i}`} style={{
-            position: 'absolute', left: line.x, top: line.y,
-            height: pageLayout.headlineLineHeight,
+            position: 'absolute', left: `${line.x}px`, top: `${line.y}px`,
+            height: `${pageLayout.headlineLineHeight}px`,
           }}>
             <text style={{
               fontWeight: 'bold',
-              fontSize: pageLayout.headlineFontSize,
+              fontSize: `${pageLayout.headlineFontSize}px`,
               color: '#11100d',
             }}>
               {line.text}
@@ -606,13 +606,13 @@ export function DynamicLayoutPage() {
 
         {/* Credit line */}
         <view style={{
-          position: 'absolute', left: creditLeft, top: creditTop,
-          height: CREDIT_LINE_HEIGHT,
+          position: 'absolute', left: `${creditLeft}px`, top: `${creditTop}px`,
+          height: `${CREDIT_LINE_HEIGHT}px`,
         }}>
           <text style={{
-            fontSize: 12,
+            fontSize: '12px',
             color: 'rgba(17, 16, 13, 0.58)',
-            letterSpacing: 2,
+            letterSpacing: '2px',
           }}>
             {CREDIT_TEXT}
           </text>
@@ -621,10 +621,10 @@ export function DynamicLayoutPage() {
         {/* Left column body lines */}
         {leftLines.map((line, i) => (
           <view key={`l-${i}`} style={{
-            position: 'absolute', left: line.x, top: line.y,
-            height: BODY_LINE_HEIGHT,
+            position: 'absolute', left: `${line.x}px`, top: `${line.y}px`,
+            height: `${BODY_LINE_HEIGHT}px`,
           }}>
-            <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
+            <text style={{ fontSize: `${BODY_FONT_SIZE}px`, color: '#11100d' }}>
               {line.text}
             </text>
           </view>
@@ -633,10 +633,10 @@ export function DynamicLayoutPage() {
         {/* Right column body lines */}
         {rightLines.map((line, i) => (
           <view key={`r-${i}`} style={{
-            position: 'absolute', left: line.x, top: line.y,
-            height: BODY_LINE_HEIGHT,
+            position: 'absolute', left: `${line.x}px`, top: `${line.y}px`,
+            height: `${BODY_LINE_HEIGHT}px`,
           }}>
-            <text style={{ fontSize: BODY_FONT_SIZE, color: '#11100d' }}>
+            <text style={{ fontSize: `${BODY_FONT_SIZE}px`, color: '#11100d' }}>
               {line.text}
             </text>
           </view>
@@ -647,18 +647,18 @@ export function DynamicLayoutPage() {
           bindtap={handleOpenaiTap}
           style={{
             position: 'absolute',
-            left: pageLayout.openaiRect.x,
-            top: pageLayout.openaiRect.y,
-            width: pageLayout.openaiRect.width,
-            height: pageLayout.openaiRect.height,
+            left: `${pageLayout.openaiRect.x}px`,
+            top: `${pageLayout.openaiRect.y}px`,
+            width: `${pageLayout.openaiRect.width}px`,
+            height: `${pageLayout.openaiRect.height}px`,
             transform: `rotate(${openaiRotDeg}deg)`,
           }}
         >
           <image
             src={require('../assets/openai-symbol.png')}
             style={{
-              width: pageLayout.openaiRect.width,
-              height: pageLayout.openaiRect.height,
+              width: `${pageLayout.openaiRect.width}px`,
+              height: `${pageLayout.openaiRect.height}px`,
             }}
           />
         </view>
@@ -668,18 +668,18 @@ export function DynamicLayoutPage() {
           bindtap={handleClaudeTap}
           style={{
             position: 'absolute',
-            left: pageLayout.claudeRect.x,
-            top: pageLayout.claudeRect.y,
-            width: pageLayout.claudeRect.width,
-            height: pageLayout.claudeRect.height,
+            left: `${pageLayout.claudeRect.x}px`,
+            top: `${pageLayout.claudeRect.y}px`,
+            width: `${pageLayout.claudeRect.width}px`,
+            height: `${pageLayout.claudeRect.height}px`,
             transform: `rotate(${claudeRotDeg}deg)`,
           }}
         >
           <image
             src={require('../assets/claude-symbol.png')}
             style={{
-              width: pageLayout.claudeRect.width,
-              height: pageLayout.claudeRect.height,
+              width: `${pageLayout.claudeRect.width}px`,
+              height: `${pageLayout.claudeRect.height}px`,
             }}
           />
         </view>
@@ -690,18 +690,18 @@ export function DynamicLayoutPage() {
         bindtap={toggleControls}
         style={{
           position: 'absolute',
-          top: 12,
-          right: 12,
-          width: 36,
-          height: 36,
-          borderRadius: 18,
+          top: '12px',
+          right: '12px',
+          width: '36px',
+          height: '36px',
+          borderRadius: '18px',
           backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.25)',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <text style={{
-          fontSize: 20,
+          fontSize: '20px',
           color: showControls ? '#333' : '#fff',
           fontWeight: 'bold',
         }}>
@@ -713,107 +713,107 @@ export function DynamicLayoutPage() {
       {showControls && (
         <view style={{
           position: 'absolute',
-          top: 56,
-          left: 12,
-          right: 12,
+          top: '56px',
+          left: '12px',
+          right: '12px',
           backgroundColor: 'rgba(0,0,0,0.88)',
-          borderRadius: 12,
-          padding: 16,
+          borderRadius: '12px',
+          padding: '16px',
         }}>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
             Dynamic Editorial Layout
           </text>
-          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: '18px' }}>
+          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px', lineHeight: '18px' }}>
             {'Two-column text flows around rotatable logo obstacles. ' +
              'Tap logos to rotate. Width >760px shows two-column spread.'}
           </text>
 
           {/* W/H steppers */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 8 }}>
-            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
+            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decreaseWidth}
               style={{
-                width: 28, height: 28, borderRadius: 14,
+                width: '28px', height: '28px', borderRadius: '14px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
             </view>
-            <text style={{ fontSize: 13, color: '#fff', minWidth: 55, textAlign: 'center' }}>
+            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>
               {`${pageWidth}px`}
             </text>
             <view
               bindtap={increaseWidth}
               style={{
-                width: 28, height: 28, borderRadius: 14,
+                width: '28px', height: '28px', borderRadius: '14px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>+</text>
+              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
             </view>
 
-            <view style={{ width: 1, height: 16, backgroundColor: 'rgba(255,255,255,0.2)', marginLeft: 4, marginRight: 4 }} />
+            <view style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.2)', marginLeft: '4px', marginRight: '4px' }} />
 
-            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>H:</text>
+            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>H:</text>
             <view
               bindtap={decreaseHeight}
               style={{
-                width: 28, height: 28, borderRadius: 14,
+                width: '28px', height: '28px', borderRadius: '14px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
             </view>
-            <text style={{ fontSize: 13, color: '#fff', minWidth: 55, textAlign: 'center' }}>
+            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>
               {`${pageHeight}px`}
             </text>
             <view
               bindtap={increaseHeight}
               style={{
-                width: 28, height: 28, borderRadius: 14,
+                width: '28px', height: '28px', borderRadius: '14px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>+</text>
+              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
             </view>
           </view>
 
           {/* Stats */}
-          <view style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
+          <view style={{ flexDirection: 'row', gap: '16px', marginTop: '12px' }}>
             <view>
-              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Mode</text>
-              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Mode</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
                 {pageLayout.isNarrow ? 'Single' : 'Two-col'}
               </text>
             </view>
             <view>
-              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Headline</text>
-              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Headline</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
                 {`${pageLayout.headlineFontSize}px`}
               </text>
             </view>
             <view>
-              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Left</text>
-              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Left</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
                 {`${leftLines.length}`}
               </text>
             </view>
             {rightLines.length > 0 && (
               <view>
-                <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Right</text>
-                <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Right</text>
+                <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
                   {`${rightLines.length}`}
                 </text>
               </view>
             )}
             <view>
-              <text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Total</text>
-              <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Total</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
                 {`${headlineLines.length + totalBodyLines}`}
               </text>
             </view>

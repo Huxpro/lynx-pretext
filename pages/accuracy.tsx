@@ -125,8 +125,8 @@ export function AccuracyPage() {
 
   if (!summary) {
     return (
-      <view style={{ padding: 20 }}>
-        <text style={{ fontSize: 18, color: '#666' }}>Running accuracy check...</text>
+      <view style={{ padding: '20px' }}>
+        <text style={{ fontSize: '18px', color: '#666' }}>Running accuracy check...</text>
       </view>
     )
   }
@@ -137,39 +137,39 @@ export function AccuracyPage() {
 
   return (
     <scroll-view style={{ flex: 1 }}>
-      <view style={{ padding: 16 }}>
+      <view style={{ padding: '16px' }}>
         {/* Header */}
-        <text style={{ fontSize: 22, fontWeight: 'bold', color: '#222' }}>
+        <text style={{ fontSize: '22px', fontWeight: 'bold', color: '#222' }}>
           Accuracy Validation
         </text>
-        <text style={{ fontSize: 14, color: '#888', marginTop: 4 }}>
+        <text style={{ fontSize: '14px', color: '#888', marginTop: '4px' }}>
           {`${FONT_SIZE}px system font | ${WIDTHS.length} widths (${WIDTHS[0]}-${WIDTHS[WIDTHS.length - 1]}px) | ${TEXTS.length - 1} texts`}
         </text>
 
         {/* Summary */}
         <view style={{
-          marginTop: 12,
-          padding: 12,
-          borderRadius: 8,
+          marginTop: '12px',
+          padding: '12px',
+          borderRadius: '8px',
           backgroundColor: summary.failed === 0 ? '#e8f5e9' : '#fff3e0',
         }}>
-          <text style={{ fontSize: 28, fontWeight: 'bold', color: summary.failed === 0 ? '#2e7d32' : '#e65100' }}>
+          <text style={{ fontSize: '28px', fontWeight: 'bold', color: summary.failed === 0 ? '#2e7d32' : '#e65100' }}>
             {`${summary.passRate}%`}
           </text>
-          <text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>
+          <text style={{ fontSize: '14px', color: '#555', marginTop: '4px' }}>
             {`${summary.passed}/${summary.total} tests pass | ${summary.failed} mismatches`}
           </text>
-          <text style={{ fontSize: 14, color: '#555', marginTop: 2 }}>
+          <text style={{ fontSize: '14px', color: '#555', marginTop: '2px' }}>
             {`English: ${summary.englishPassRate}% (${summary.englishPassed}/${summary.englishTotal})`}
           </text>
         </view>
 
         {/* Toggle */}
         <view
-          style={{ marginTop: 12, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}
+          style={{ marginTop: '12px', padding: '8px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}
           bindtap={() => setShowFailuresOnly(!showFailuresOnly)}
         >
-          <text style={{ fontSize: 14, color: '#333' }}>
+          <text style={{ fontSize: '14px', color: '#333' }}>
             {showFailuresOnly ? `Showing ${displayResults.length} failures — tap to show all` : `Showing all ${displayResults.length} results — tap to show failures only`}
           </text>
         </view>
@@ -179,32 +179,32 @@ export function AccuracyPage() {
           <view
             key={`${r.label}-${r.width}-${idx}`}
             style={{
-              marginTop: 8,
-              padding: 8,
-              borderRadius: 4,
+              marginTop: '8px',
+              padding: '8px',
+              borderRadius: '4px',
               backgroundColor: r.pass ? '#f1f8e9' : '#fce4ec',
             }}
           >
             <view style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <text style={{ fontSize: 13, fontWeight: 'bold', color: r.pass ? '#33691e' : '#b71c1c' }}>
+              <text style={{ fontSize: '13px', fontWeight: 'bold', color: r.pass ? '#33691e' : '#b71c1c' }}>
                 {`${r.pass ? 'PASS' : 'FAIL'} ${r.label}`}
               </text>
-              <text style={{ fontSize: 12, color: '#666' }}>
+              <text style={{ fontSize: '12px', color: '#666' }}>
                 {`@${r.width}px`}
               </text>
             </view>
-            <text style={{ fontSize: 11, color: '#777', marginTop: 2 }}>
+            <text style={{ fontSize: '11px', color: '#777', marginTop: '2px' }}>
               {`Lines: native=${r.nativeLineCount} ours=${r.ourLineCount}`}
             </text>
             {r.firstDivergentLine !== null && (
-              <view style={{ marginTop: 4, padding: 4, backgroundColor: '#fff', borderRadius: 2 }}>
-                <text style={{ fontSize: 11, color: '#d32f2f' }}>
+              <view style={{ marginTop: '4px', padding: '4px', backgroundColor: '#fff', borderRadius: '2px' }}>
+                <text style={{ fontSize: '11px', color: '#d32f2f' }}>
                   {`L${r.firstDivergentLine + 1} diverges:`}
                 </text>
-                <text style={{ fontSize: 10, color: '#555', marginTop: 2 }}>
+                <text style={{ fontSize: '10px', color: '#555', marginTop: '2px' }}>
                   {`native: "${(r.nativeContent[r.firstDivergentLine] ?? '').slice(0, 60)}"`}
                 </text>
-                <text style={{ fontSize: 10, color: '#555', marginTop: 1 }}>
+                <text style={{ fontSize: '10px', color: '#555', marginTop: '1px' }}>
                   {`  ours: "${(r.ourContent[r.firstDivergentLine] ?? '').slice(0, 60)}"`}
                 </text>
               </view>

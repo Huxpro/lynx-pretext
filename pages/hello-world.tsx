@@ -6,11 +6,11 @@ export function HelloWorld() {
   }, [])
 
   return (
-    <view style={{ padding: 20 }}>
-      <text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>
+    <view style={{ padding: '20px' }}>
+      <text style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
         lynx-pretext
       </text>
-      <text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>
+      <text style={{ fontSize: '16px', color: '#666', marginTop: '8px' }}>
         Text measurement and layout library for Lynx
       </text>
     </view>

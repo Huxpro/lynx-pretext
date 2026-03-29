@@ -39,38 +39,38 @@ export function BasicHeightPage() {
     <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
       {/* Demo content */}
       <scroll-view style={{ flex: 1 }}>
-      <view style={{ padding: 16 }}>
+      <view style={{ padding: '16px' }}>
         {/* Native text rendering */}
         <view style={{
-          width: contentWidth,
-          padding: 8,
-          borderWidth: 1,
+          width: `${contentWidth}px`,
+          padding: '8px',
+          borderWidth: '1px',
           borderColor: '#e0e0e0',
-          borderRadius: 6,
+          borderRadius: '6px',
           backgroundColor: '#fafafa',
         }}>
-          <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#333' }}>
+          <text style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: '#333' }}>
             {SAMPLE_TEXT}
           </text>
         </view>
 
         {/* Comparison cards */}
-        <view style={{ flexDirection: 'row', marginTop: 16 }}>
-          <view style={{ width: halfWidth, padding: 12, borderRadius: 8, backgroundColor: '#e3f2fd', marginRight: 12 }}>
-            <text style={{ fontSize: 13, fontWeight: 'bold', color: '#1565c0' }}>Pretext</text>
-            <text style={{ fontSize: 28, fontWeight: 'bold', color: '#0d47a1', marginTop: 4 }}>
+        <view style={{ flexDirection: 'row', marginTop: '16px' }}>
+          <view style={{ width: `${halfWidth}px`, padding: '12px', borderRadius: '8px', backgroundColor: '#e3f2fd', marginRight: '12px' }}>
+            <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#1565c0' }}>Pretext</text>
+            <text style={{ fontSize: '28px', fontWeight: 'bold', color: '#0d47a1', marginTop: '4px' }}>
               {`${result.height}px`}
             </text>
-            <text style={{ fontSize: 12, color: '#1976d2', marginTop: 2 }}>
+            <text style={{ fontSize: '12px', color: '#1976d2', marginTop: '2px' }}>
               {`${result.lineCount} lines`}
             </text>
           </view>
-          <view style={{ width: halfWidth, padding: 12, borderRadius: 8, backgroundColor: '#f3e5f5' }}>
-            <text style={{ fontSize: 13, fontWeight: 'bold', color: '#7b1fa2' }}>Native</text>
-            <text style={{ fontSize: 28, fontWeight: 'bold', color: '#4a148c', marginTop: 4 }}>
+          <view style={{ width: `${halfWidth}px`, padding: '12px', borderRadius: '8px', backgroundColor: '#f3e5f5' }}>
+            <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#7b1fa2' }}>Native</text>
+            <text style={{ fontSize: '28px', fontWeight: 'bold', color: '#4a148c', marginTop: '4px' }}>
               {`${nativeHeight}px`}
             </text>
-            <text style={{ fontSize: 12, color: '#7b1fa2', marginTop: 2 }}>
+            <text style={{ fontSize: '12px', color: '#7b1fa2', marginTop: '2px' }}>
               {`${nativeLineCount} lines`}
             </text>
           </view>
@@ -78,19 +78,19 @@ export function BasicHeightPage() {
 
         {/* Match status */}
         <view style={{
-          marginTop: 12,
-          padding: 12,
-          borderRadius: 8,
+          marginTop: '12px',
+          padding: '12px',
+          borderRadius: '8px',
           backgroundColor: match ? '#e8f5e9' : '#fff3e0',
         }}>
           <text style={{
-            fontSize: 16,
+            fontSize: '16px',
             fontWeight: 'bold',
             color: match ? '#2e7d32' : '#e65100',
           }}>
             {match ? 'MATCH' : 'MISMATCH'}
           </text>
-          <text style={{ fontSize: 13, color: '#555', marginTop: 4 }}>
+          <text style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>
             {match
               ? `Both agree: ${result.lineCount} lines, ${result.height}px height`
               : `Height diff: ${Math.abs(result.height - nativeHeight)}px | Lines: pretext=${result.lineCount} native=${nativeLineCount}`}
@@ -104,18 +104,18 @@ export function BasicHeightPage() {
         bindtap={toggleControls}
         style={{
           position: 'absolute',
-          top: 12,
-          right: 12,
-          width: 36,
-          height: 36,
-          borderRadius: 18,
+          top: '12px',
+          right: '12px',
+          width: '36px',
+          height: '36px',
+          borderRadius: '18px',
           backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <text style={{
-          fontSize: 20,
+          fontSize: '20px',
           color: showControls ? '#333' : '#fff',
           fontWeight: 'bold',
         }}>
@@ -127,56 +127,56 @@ export function BasicHeightPage() {
       {showControls && (
         <view style={{
           position: 'absolute',
-          top: 56,
-          left: 12,
-          right: 12,
+          top: '56px',
+          left: '12px',
+          right: '12px',
           backgroundColor: 'rgba(0,0,0,0.88)',
-          borderRadius: 12,
-          padding: 16,
+          borderRadius: '12px',
+          padding: '16px',
         }}>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
             Basic Height Measurement
           </text>
-          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
             {`prepare() + layout() vs native getTextInfo | ${FONT_SIZE}px`}
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
-            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}
               style={{
-                width: 32, height: 32, borderRadius: 16,
+                width: '32px', height: '32px', borderRadius: '16px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
             </view>
-            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+            <text style={{ fontSize: '14px', color: '#fff', minWidth: '70px', textAlign: 'center' }}>
               {`${maxWidth}px`}
             </text>
             <view
               bindtap={increase}
               style={{
-                width: 32, height: 32, borderRadius: 16,
+                width: '32px', height: '32px', borderRadius: '16px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>+</text>
             </view>
           </view>
 
           {/* Native line breakdown */}
-          <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff', marginTop: 12 }}>
+          <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff', marginTop: '12px' }}>
             Native line breakdown:
           </text>
           {(native.content ?? [SAMPLE_TEXT]).map((line, i) => (
             <text
               key={`line-${i}`}
-              style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}
+              style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}
             >
               {`L${i + 1}: "${line.trim()}"`}
             </text>

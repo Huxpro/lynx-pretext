@@ -72,32 +72,32 @@ export function VariableFlowPage() {
   return (
     <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
       {/* Demo content — flow layout with obstacle */}
-      <view style={{ flex: 1, padding: 16 }}>
+      <view style={{ flex: 1, padding: '16px' }}>
         <view style={{
-          width: contentWidth,
-          height: Math.max(totalHeight, OBSTACLE_H + OBSTACLE_GAP),
-          borderWidth: 1,
+          width: `${contentWidth}px`,
+          height: `${Math.max(totalHeight, OBSTACLE_H + OBSTACLE_GAP)}px`,
+          borderWidth: '1px',
           borderColor: '#5c6bc0',
-          borderRadius: 4,
+          borderRadius: '4px',
           backgroundColor: '#fafafa',
           overflow: 'hidden',
         }}>
           {/* Obstacle */}
           <view style={{
             position: 'absolute',
-            top: 0,
-            right: 0,
-            width: OBSTACLE_W,
-            height: OBSTACLE_H,
+            top: '0px',
+            right: '0px',
+            width: `${OBSTACLE_W}px`,
+            height: `${OBSTACLE_H}px`,
             backgroundColor: '#c5cae9',
-            borderBottomLeftRadius: 8,
+            borderBottomLeftRadius: '8px',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <text style={{ fontSize: 14, fontWeight: 'bold', color: '#3949ab' }}>
+            <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#3949ab' }}>
               Image
             </text>
-            <text style={{ fontSize: 11, color: '#5c6bc0' }}>
+            <text style={{ fontSize: '11px', color: '#5c6bc0' }}>
               {`${OBSTACLE_W}\u00D7${OBSTACLE_H}`}
             </text>
           </view>
@@ -108,12 +108,12 @@ export function VariableFlowPage() {
               key={`flow-${i}`}
               style={{
                 position: 'absolute',
-                top: line.y,
-                left: 0,
-                height: LINE_HEIGHT,
+                top: `${line.y}px`,
+                left: '0px',
+                height: `${LINE_HEIGHT}px`,
               }}
             >
-              <text style={{ fontSize: FONT_SIZE, color: '#333' }}>
+              <text style={{ fontSize: `${FONT_SIZE}px`, color: '#333' }}>
                 {line.text}
               </text>
             </view>
@@ -122,28 +122,28 @@ export function VariableFlowPage() {
 
         {/* Summary */}
         <view style={{
-          marginTop: 12,
-          padding: 10,
-          borderRadius: 8,
+          marginTop: '12px',
+          padding: '10px',
+          borderRadius: '8px',
           backgroundColor: '#e8eaf6',
           flexDirection: 'row',
-          gap: 24,
+          gap: '24px',
         }}>
           <view>
-            <text style={{ fontSize: 12, color: '#283593' }}>Total</text>
-            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#1a237e' }}>
+            <text style={{ fontSize: '12px', color: '#283593' }}>Total</text>
+            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#1a237e' }}>
               {`${flowLines.length}`}
             </text>
           </view>
           <view>
-            <text style={{ fontSize: 12, color: '#283593' }}>Narrow</text>
-            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#e65100' }}>
+            <text style={{ fontSize: '12px', color: '#283593' }}>Narrow</text>
+            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#e65100' }}>
               {`${narrowLineCount}`}
             </text>
           </view>
           <view>
-            <text style={{ fontSize: 12, color: '#283593' }}>Full</text>
-            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#2e7d32' }}>
+            <text style={{ fontSize: '12px', color: '#283593' }}>Full</text>
+            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#2e7d32' }}>
               {`${flowLines.length - narrowLineCount}`}
             </text>
           </view>
@@ -155,18 +155,18 @@ export function VariableFlowPage() {
         bindtap={toggleControls}
         style={{
           position: 'absolute',
-          top: 12,
-          right: 12,
-          width: 36,
-          height: 36,
-          borderRadius: 18,
+          top: '12px',
+          right: '12px',
+          width: '36px',
+          height: '36px',
+          borderRadius: '18px',
           backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <text style={{
-          fontSize: 20,
+          fontSize: '20px',
           color: showControls ? '#333' : '#fff',
           fontWeight: 'bold',
         }}>
@@ -178,49 +178,49 @@ export function VariableFlowPage() {
       {showControls && (
         <view style={{
           position: 'absolute',
-          top: 56,
-          left: 12,
-          right: 12,
+          top: '56px',
+          left: '12px',
+          right: '12px',
           backgroundColor: 'rgba(0,0,0,0.88)',
-          borderRadius: 12,
-          padding: 16,
+          borderRadius: '12px',
+          padding: '16px',
         }}>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
             Variable-Width Flow
           </text>
-          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
             layoutNextLine with different maxWidth per line
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
-            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}
               style={{
-                width: 32, height: 32, borderRadius: 16,
+                width: '32px', height: '32px', borderRadius: '16px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
             </view>
-            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+            <text style={{ fontSize: '14px', color: '#fff', minWidth: '70px', textAlign: 'center' }}>
               {`${maxWidth}px`}
             </text>
             <view
               bindtap={increase}
               style={{
-                width: 32, height: 32, borderRadius: 16,
+                width: '32px', height: '32px', borderRadius: '16px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>+</text>
             </view>
           </view>
 
-          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: '18px' }}>
+          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '12px', lineHeight: '18px' }}>
             {'Each line\'s end cursor becomes the next line\'s start. ' +
              'Lines overlapping the obstacle get narrower width (' +
              (contentWidth - OBSTACLE_W - OBSTACLE_GAP) + 'px), ' +

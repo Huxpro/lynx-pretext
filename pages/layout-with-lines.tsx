@@ -29,21 +29,21 @@ export function LayoutWithLinesPage() {
   return (
     <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
       {/* Demo content */}
-      <view style={{ flex: 1, padding: 16 }}>
+      <view style={{ flex: 1, padding: '16px' }}>
         {/* Manually rendered lines */}
         <view style={{
-          width: contentWidth,
-          borderWidth: 1,
+          width: `${contentWidth}px`,
+          borderWidth: '1px',
           borderColor: '#1976d2',
-          borderRadius: 4,
+          borderRadius: '4px',
           backgroundColor: '#fafafa',
         }}>
           {result.lines.map((line, i) => (
             <view
               key={`line-${i}`}
-              style={{ height: LINE_HEIGHT, justifyContent: 'center' }}
+              style={{ height: `${LINE_HEIGHT}px`, justifyContent: 'center' }}
             >
-              <text style={{ fontSize: FONT_SIZE, color: '#333' }}>
+              <text style={{ fontSize: `${FONT_SIZE}px`, color: '#333' }}>
                 {line.text}
               </text>
             </view>
@@ -52,22 +52,22 @@ export function LayoutWithLinesPage() {
 
         {/* Summary */}
         <view style={{
-          marginTop: 12,
-          padding: 10,
-          borderRadius: 8,
+          marginTop: '12px',
+          padding: '10px',
+          borderRadius: '8px',
           backgroundColor: '#e3f2fd',
           flexDirection: 'row',
-          gap: 24,
+          gap: '24px',
         }}>
           <view>
-            <text style={{ fontSize: 12, color: '#1565c0' }}>Lines</text>
-            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#0d47a1' }}>
+            <text style={{ fontSize: '12px', color: '#1565c0' }}>Lines</text>
+            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#0d47a1' }}>
               {`${result.lineCount}`}
             </text>
           </view>
           <view>
-            <text style={{ fontSize: 12, color: '#1565c0' }}>Height</text>
-            <text style={{ fontSize: 20, fontWeight: 'bold', color: '#0d47a1' }}>
+            <text style={{ fontSize: '12px', color: '#1565c0' }}>Height</text>
+            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#0d47a1' }}>
               {`${result.height}px`}
             </text>
           </view>
@@ -75,15 +75,15 @@ export function LayoutWithLinesPage() {
 
         {/* Native comparison */}
         <view style={{
-          width: contentWidth,
-          marginTop: 12,
-          padding: 8,
-          borderWidth: 1,
+          width: `${contentWidth}px`,
+          marginTop: '12px',
+          padding: '8px',
+          borderWidth: '1px',
           borderColor: '#ddd',
-          borderRadius: 4,
+          borderRadius: '4px',
           backgroundColor: '#fafafa',
         }}>
-          <text style={{ fontSize: FONT_SIZE, lineHeight: `${LINE_HEIGHT}px`, color: '#333' }}>
+          <text style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: '#333' }}>
             {SAMPLE_TEXT}
           </text>
         </view>
@@ -94,18 +94,18 @@ export function LayoutWithLinesPage() {
         bindtap={toggleControls}
         style={{
           position: 'absolute',
-          top: 12,
-          right: 12,
-          width: 36,
-          height: 36,
-          borderRadius: 18,
+          top: '12px',
+          right: '12px',
+          width: '36px',
+          height: '36px',
+          borderRadius: '18px',
           backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <text style={{
-          fontSize: 20,
+          fontSize: '20px',
           color: showControls ? '#333' : '#fff',
           fontWeight: 'bold',
         }}>
@@ -117,56 +117,56 @@ export function LayoutWithLinesPage() {
       {showControls && (
         <view style={{
           position: 'absolute',
-          top: 56,
-          left: 12,
-          right: 12,
+          top: '56px',
+          left: '12px',
+          right: '12px',
           backgroundColor: 'rgba(0,0,0,0.88)',
-          borderRadius: 12,
-          padding: 16,
+          borderRadius: '12px',
+          padding: '16px',
         }}>
-          <text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
             layoutWithLines Demo
           </text>
-          <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
             {`prepareWithSegments() once, layoutWithLines() on resize | ${FONT_SIZE}px`}
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 10 }}>
-            <text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>W:</text>
+          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}
               style={{
-                width: 32, height: 32, borderRadius: 16,
+                width: '32px', height: '32px', borderRadius: '16px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
             </view>
-            <text style={{ fontSize: 14, color: '#fff', minWidth: 70, textAlign: 'center' }}>
+            <text style={{ fontSize: '14px', color: '#fff', minWidth: '70px', textAlign: 'center' }}>
               {`${maxWidth}px`}
             </text>
             <view
               bindtap={increase}
               style={{
-                width: 32, height: 32, borderRadius: 16,
+                width: '32px', height: '32px', borderRadius: '16px',
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <text style={{ fontSize: 18, color: '#fff', fontWeight: 'bold' }}>+</text>
+              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>+</text>
             </view>
           </view>
 
           {/* Line details */}
-          <text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff', marginTop: 12 }}>
+          <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff', marginTop: '12px' }}>
             Line details:
           </text>
           {result.lines.map((line, i) => (
             <text
               key={`detail-${i}`}
-              style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}
+              style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}
             >
               {`L${i + 1}: w=${line.width.toFixed(1)}px seg ${line.start.segmentIndex}\u2192${line.end.segmentIndex}`}
             </text>
