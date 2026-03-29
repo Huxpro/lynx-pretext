@@ -136,7 +136,7 @@ export function AccuracyPage() {
     : summary.results
 
   return (
-    <scroll-view style={{ flex: 1 }}>
+    <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
       <view style={{ padding: '16px' }}>
         {/* Header */}
         <text style={{ fontSize: '22px', fontWeight: 'bold', color: '#222' }}>

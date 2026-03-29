@@ -13,6 +13,8 @@ import {
   openaiHit as openaiHitHull,
   claudeHit as claudeHitHull,
 } from './hull-data'
+import openaiLogoSrc from '../assets/openai-symbol.png'
+import claudeLogoSrc from '../assets/claude-symbol.png'
 import {
   carveTextLineSlots,
   getPolygonIntervalForBand,
@@ -655,7 +657,7 @@ export function DynamicLayoutPage() {
           }}
         >
           <image
-            src={require('../assets/openai-symbol.png')}
+            src={openaiLogoSrc}
             style={{
               width: `${pageLayout.openaiRect.width}px`,
               height: `${pageLayout.openaiRect.height}px`,
@@ -676,7 +678,7 @@ export function DynamicLayoutPage() {
           }}
         >
           <image
-            src={require('../assets/claude-symbol.png')}
+            src={claudeLogoSrc}
             style={{
               width: `${pageLayout.claudeRect.width}px`,
               height: `${pageLayout.claudeRect.height}px`,

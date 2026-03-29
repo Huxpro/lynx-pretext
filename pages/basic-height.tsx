@@ -38,7 +38,7 @@ export function BasicHeightPage() {
   return (
     <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
       {/* Demo content */}
-      <scroll-view style={{ flex: 1 }}>
+      <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
       <view style={{ padding: '16px' }}>
         {/* Native text rendering */}
         <view style={{
