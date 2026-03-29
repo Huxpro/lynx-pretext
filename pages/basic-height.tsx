@@ -55,7 +55,7 @@ export function BasicHeightPage() {
         </view>
 
         {/* Comparison cards */}
-        <view style={{ flexDirection: 'row', marginTop: '16px' }}>
+        <view style={{ display: 'flex', flexDirection: 'row', marginTop: '16px' }}>
           <view style={{ width: `${halfWidth}px`, padding: '12px', borderRadius: '8px', backgroundColor: '#e3f2fd', marginRight: '12px' }}>
             <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#1565c0' }}>Pretext</text>
             <text style={{ fontSize: '28px', fontWeight: 'bold', color: '#0d47a1', marginTop: '4px' }}>
@@ -142,7 +142,7 @@ export function BasicHeightPage() {
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
             <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}

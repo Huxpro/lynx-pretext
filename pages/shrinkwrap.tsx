@@ -160,7 +160,7 @@ export function ShrinkwrapPage() {
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
             <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}
@@ -188,7 +188,7 @@ export function ShrinkwrapPage() {
           </view>
 
           {/* Metrics */}
-          <view style={{ flexDirection: 'row', gap: '20px', marginTop: '12px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', gap: '20px', marginTop: '12px' }}>
             <view>
               <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>CSS Width</text>
               <text style={{ fontSize: '16px', fontWeight: 'bold', color: '#ff9800' }}>{`${cssWidth}px`}</text>

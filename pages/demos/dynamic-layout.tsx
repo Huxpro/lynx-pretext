@@ -731,7 +731,7 @@ export function DynamicLayoutPage() {
           </text>
 
           {/* W/H steppers */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
             <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decreaseWidth}
@@ -786,7 +786,7 @@ export function DynamicLayoutPage() {
           </view>
 
           {/* Stats */}
-          <view style={{ flexDirection: 'row', gap: '16px', marginTop: '12px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '12px' }}>
             <view>
               <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Mode</text>
               <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>

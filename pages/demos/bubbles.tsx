@@ -58,7 +58,7 @@ export function BubblesPage() {
         <view style={{ padding: '16px', gap: '24px' }}>
           {/* CSS fit-content chat */}
           <view>
-            <view style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff9800' }}>
                 CSS fit-content
               </text>
@@ -109,7 +109,7 @@ export function BubblesPage() {
 
           {/* Pretext shrinkwrap chat */}
           <view>
-            <view style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#4caf50' }}>
                 Pretext shrinkwrap
               </text>
@@ -206,7 +206,7 @@ export function BubblesPage() {
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
             <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}

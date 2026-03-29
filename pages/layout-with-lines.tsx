@@ -56,7 +56,7 @@ export function LayoutWithLinesPage() {
           padding: '10px',
           borderRadius: '8px',
           backgroundColor: '#e3f2fd',
-          flexDirection: 'row',
+          display: 'flex', flexDirection: 'row',
           gap: '24px',
         }}>
           <view>
@@ -132,7 +132,7 @@ export function LayoutWithLinesPage() {
           </text>
 
           {/* Width stepper */}
-          <view style={{ flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
+          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
             <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
             <view
               bindtap={decrease}

@@ -185,7 +185,7 @@ export function AccuracyPage() {
               backgroundColor: r.pass ? '#f1f8e9' : '#fce4ec',
             }}
           >
-            <view style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <view style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
               <text style={{ fontSize: '13px', fontWeight: 'bold', color: r.pass ? '#33691e' : '#b71c1c' }}>
                 {`${r.pass ? 'PASS' : 'FAIL'} ${r.label}`}
               </text>
