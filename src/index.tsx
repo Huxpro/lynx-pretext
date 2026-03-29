@@ -1,8 +1,8 @@
 import { root } from '@lynx-js/react'
 
-import { HelloWorld } from '../pages/hello-world.js'
+import { AccuracyPage } from '../pages/accuracy.js'
 
-root.render(<HelloWorld />)
+root.render(<AccuracyPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()

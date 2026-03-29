@@ -12,6 +12,8 @@ Started: 2026-03-29
 - `tsc --build` is the typecheck command (project references mode)
 - `import '@formatjs/intl-segmenter/polyfill-force.js'` patches Intl.Segmenter globally; use `ES2022.Intl` in lib for TS types
 - Rspeedy build output goes to `dist/main.lynx.bundle`
+- lynx.getTextInfo supports maxWidth as string ("300px") and returns content?: string[] with line-broken text
+- TextInfo type: { fontSize: string, fontFamily?: string, maxWidth?: string, maxLine?: number }
 
 ---
 
@@ -122,4 +124,23 @@ Started: 2026-03-29
 - **Learnings for future iterations:**
   - When stories are tightly coupled in the source, implementing them together avoids artificial splitting
   - PrepareProfile/profilePrepare from reference are diagnostic-only exports, not needed for the core API
+---
+
+## 2026-03-29 - US-009
+- Created accuracy validation page at pages/accuracy.tsx
+- Created shared test corpus at src/test-data.ts with 21 diverse texts (English, CJK, Japanese, Korean, emoji, mixed scripts, edge cases)
+- Tests 10 widths (50px-500px in 50px steps) per text at 16px font size
+- Uses lynx.getTextInfo(text, { fontSize, maxWidth }) as native oracle
+- Compares line-by-line: native.content[i].trim() vs layoutWithLines().lines[i].text.trim()
+- Reports: overall pass rate, English-specific pass rate, per-test pass/fail with first divergent line highlighted
+- Logs mismatches to console with text, width, expected/actual line content
+- Toggle to show all results or failures only
+- Updated src/index.tsx to render accuracy page
+- Build and typecheck pass
+- Files changed: src/test-data.ts (new), pages/accuracy.tsx (new), src/index.tsx (updated)
+- **Learnings for future iterations:**
+  - lynx.getTextInfo accepts maxWidth as string ("300px"), returns content?: string[] with native line-broken text
+  - TextInfo interface: { fontSize: string, fontFamily?: string, maxWidth?: string, maxLine?: number }
+  - Empty texts are skipped (getTextInfo with empty string may return no content)
+  - The accuracy page is the primary verification gate before building demos
 ---

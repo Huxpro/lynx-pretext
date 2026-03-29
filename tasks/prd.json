@@ -170,7 +170,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "CRITICAL: This is the verification gate. Run BEFORE building demos. The oracle is getTextInfo(fullText, { maxWidth }) which does its own native line breaking and returns content[]. Compare against layoutWithLines().lines[].text. Mismatches indicate either: (1) segment widths don't sum correctly (kerning/shaping), (2) line-break logic differs, or (3) analysis produced wrong segments. Each mismatch type has a different fix path. Start with lineFitEpsilon=0.005 and tune if needed."
     },
     {
