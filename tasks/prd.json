@@ -1,0 +1,316 @@
+{
+  "project": "lynx-pretext",
+  "branchName": "ralph/lynx-pretext",
+  "description": "Port chenglou/pretext to Lynx — pure JS text measurement & layout using main-thread lynx.getTextInfo() as measurement primitive. Reference source repo: ../pretext (~/github/pretext). Copy and adapt src/ files from there.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Rspeedy project scaffolding",
+      "description": "As a developer, I want a working Rspeedy project skeleton with TypeScript config, @formatjs/intl-segmenter dependency, and a hello-world entry point that renders on Lynx.",
+      "acceptanceCriteria": [
+        "Rspeedy project initialized with TypeScript config and src/ + pages/ directories",
+        "@formatjs/intl-segmenter installed as dependency",
+        "A hello-world page entry exists under pages/ and renders a <text> element",
+        "rspeedy dev launches without errors",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "This is the foundation. All subsequent stories depend on this. Use ReactLynx for pages, library code is plain TS under src/."
+    },
+    {
+      "id": "US-002",
+      "title": "Analysis types and whitespace normalization",
+      "description": "As the library, I need the core types (SegmentBreakKind, TextAnalysis, etc.) and whitespace normalization functions ported from Pretext's analysis.ts.",
+      "acceptanceCriteria": [
+        "src/analysis.ts exists with exported types: WhiteSpaceMode, SegmentBreakKind ('text'|'space'|'preserved-space'|'tab'|'glue'|'zero-width-break'|'soft-hyphen'|'hard-break'), MergedSegmentation, AnalysisChunk, TextAnalysis, AnalysisProfile",
+        "normalizeWhitespaceNormal() collapses runs of whitespace to single space, trims leading/trailing spaces",
+        "normalizeWhitespacePreWrap() normalizes \\r\\n to \\n and \\r/\\f to \\n, preserves spaces and tabs",
+        "classifySegmentBreakChar() correctly classifies NBSP as 'glue', ZWSP as 'zero-width-break', soft-hyphen as 'soft-hyphen', etc.",
+        "splitSegmentByBreakKind() splits a segment string into pieces by break kind",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Source: ../pretext/src/analysis.ts (lines 1-385). Port the top half: types, whitespace normalization, and segment classification. Does NOT include the merge pipeline or analyzeText() yet."
+    },
+    {
+      "id": "US-003",
+      "title": "Analysis character sets and merge helpers",
+      "description": "As the library, I need the CJK detection, kinsoku sets, punctuation sets, and merge helper functions from analysis.ts.",
+      "acceptanceCriteria": [
+        "isCJK() detects CJK unified ideographs, kana, hangul, fullwidth chars across BMP and supplementary planes",
+        "kinsokuStart set contains fullwidth comma/period/brackets/prolonged sound mark/iteration marks",
+        "kinsokuEnd set contains opening brackets and quotes",
+        "leftStickyPunctuation set contains period, comma, closing brackets, percentage, closing quotes, ellipsis, Arabic/Devanagari/Myanmar punctuation",
+        "isLeftStickyPunctuationSegment(), isForwardStickyClusterSegment(), isEscapedQuoteClusterSegment() work correctly",
+        "splitTrailingForwardStickyCluster() splits trailing opening brackets/quotes from a CJK segment",
+        "endsWithClosingQuote() detects trailing closing quotes including CJK brackets",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Source: ../pretext/src/analysis.ts (lines 97-320). Port isCJK, kinsoku sets, punctuation sets, and merge helper predicates. These are used by the merge pipeline in the next story."
+    },
+    {
+      "id": "US-004",
+      "title": "Analysis merge pipeline and analyzeText",
+      "description": "As the library, I need the full segment merge pipeline (punctuation merging, URL merging, numeric runs, glue runs, CJK kinsoku) and the top-level analyzeText() function.",
+      "acceptanceCriteria": [
+        "buildMergedSegmentation() uses Intl.Segmenter polyfill for word segmentation and applies all merge rules: left-sticky punctuation, forward-sticky clusters, escaped quote clusters, CJK kinsoku line-start prohibition, Arabic no-space punctuation, Myanmar medial glue, repeated single-char runs",
+        "mergeUrlLikeRuns() merges URL-like segments (http://... and www.) up to query boundary",
+        "mergeUrlQueryRuns() merges query string segments after the URL path",
+        "mergeNumericRuns() merges digit+joiner sequences like '7:00-9:00'",
+        "mergeGlueConnectedTextRuns() merges NBSP-connected text into single non-breakable units",
+        "compileAnalysisChunks() splits segments at hard-break boundaries for pre-wrap mode",
+        "analyzeText('hello world', profile) returns TextAnalysis with 3 segments: 'hello', ' ', 'world'",
+        "analyzeText works with pre-wrap mode preserving hard breaks",
+        "setAnalysisLocale() and clearAnalysisCaches() exported and functional",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Source: ../pretext/src/analysis.ts (lines 320-1008). Port buildMergedSegmentation, all merge* functions, compileAnalysisChunks, analyzeText. Replace native Intl.Segmenter with @formatjs/intl-segmenter polyfill."
+    },
+    {
+      "id": "US-005",
+      "title": "Text measurement via getTextInfo",
+      "description": "As the library, I need to measure segment widths using Lynx's main-thread lynx.getTextInfo() API, replacing Pretext's Canvas measureText.",
+      "acceptanceCriteria": [
+        "src/measurement.ts exists with getSegmentMetrics() that calls lynx.getTextInfo(seg, { fontSize, fontFamily }) and returns { width, containsCJK }",
+        "parseFontSize() extracts px value from font strings like '16px Inter' or '700 20px Palatino'",
+        "parseFontFamily() extracts font family name from font shorthand string",
+        "Segment metrics cache: Map<font, Map<segment, SegmentMetrics>> via getSegmentMetricCache()",
+        "getCorrectedSegmentWidth() returns metrics.width (emoji correction = 0 for MVP)",
+        "getSegmentGraphemeWidths() splits a segment into graphemes via polyfill and measures each",
+        "getSegmentGraphemePrefixWidths() measures cumulative prefix widths for Safari-style breakable runs",
+        "getFontMeasurementState(font, needsEmoji) returns { cache, fontSize, emojiCorrection }",
+        "getEngineProfile() returns a single Lynx profile (no UA sniffing): { lineFitEpsilon: 0.005, carryCJKAfterClosingQuote: false, preferPrefixWidthsForBreakableRuns: false, preferEarlySoftHyphenBreak: false }",
+        "clearMeasurementCaches() clears all caches",
+        "textMayContainEmoji() regex check exported",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Source: ../pretext/src/measurement.ts. Key adaptation: replace getMeasureContext()/OffscreenCanvas with lynx.getTextInfo(). Add parseFontFamily(). Emoji correction set to 0 for MVP. getEngineProfile() returns single Lynx profile instead of UA-sniffing."
+    },
+    {
+      "id": "US-006",
+      "title": "Line breaking engine",
+      "description": "As the library, I need the pure-arithmetic line breaking engine that walks cached segment widths to count lines and compute positions.",
+      "acceptanceCriteria": [
+        "src/line-break.ts ported 1:1 from Pretext (zero platform dependencies in this file)",
+        "countPreparedLines() returns correct line count for simple text",
+        "countPreparedLinesSimple() fast path handles text + space + zero-width-break only",
+        "walkPreparedLines() calls back with InternalLayoutLine for each line including start/end segment indices and width",
+        "layoutNextLineRange() returns one line at a time for streaming layout, or null when exhausted",
+        "normalizeLineStart() skips leading spaces/ZWSP/soft-hyphens at line starts",
+        "Full path handles soft-hyphen (discretionary hyphen width added at break), tab (tab-stop advance), hard-break, preserved-space",
+        "Trailing whitespace hangs past maxWidth without triggering line break",
+        "Words wider than maxWidth break at grapheme boundaries using breakableWidths",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Source: ../pretext/src/line-break.ts. Direct copy with only import path changes — zero platform dependencies."
+    },
+    {
+      "id": "US-007",
+      "title": "Public API — prepare and layout",
+      "description": "As the library, I need the core prepare() + layout() public API that ties analysis, measurement, and line breaking together.",
+      "acceptanceCriteria": [
+        "src/layout.ts exports prepare(text, font, options?) returning opaque PreparedText",
+        "src/layout.ts exports layout(prepared, maxWidth, lineHeight) returning { lineCount, height }",
+        "prepare() internally calls analyzeText() then measureAnalysis() which measures each segment via getTextInfo",
+        "CJK segments are split into graphemes with kinsoku merging during measurement",
+        "Soft-hyphen, hard-break, and tab segments get correct zero/special widths",
+        "Word-like segments longer than 1 char get pre-measured grapheme widths for overflow-wrap",
+        "layout() calls countPreparedLines() — zero native calls, pure arithmetic",
+        "clearCache() resets analysis + measurement + grapheme caches",
+        "setLocale(locale?) retargets the word segmenter and clears caches",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Source: ../pretext/src/layout.ts (types, measureAnalysis, prepareInternal, prepare, layout, clearCache, setLocale). Port PreparedCore type, measureAnalysis(), and the prepare/layout public API."
+    },
+    {
+      "id": "US-008",
+      "title": "Public API — rich layout functions",
+      "description": "As the library, I need prepareWithSegments, layoutWithLines, walkLineRanges, and layoutNextLine for manual line-level layout.",
+      "acceptanceCriteria": [
+        "prepareWithSegments(text, font, options?) returns PreparedTextWithSegments with .segments string array",
+        "layoutWithLines(prepared, maxWidth, lineHeight) returns { lineCount, height, lines: LayoutLine[] }",
+        "Each LayoutLine has { text, width, start: LayoutCursor, end: LayoutCursor }",
+        "walkLineRanges(prepared, maxWidth, onLine) calls back with LayoutLineRange (width + cursors, no text materialization)",
+        "layoutNextLine(prepared, start, maxWidth) returns LayoutLine or null for streaming variable-width layout",
+        "Soft-hyphen lines include visible trailing '-' in line.text",
+        "All types exported: PreparedText, PreparedTextWithSegments, LayoutCursor, LayoutResult, LayoutLine, LayoutLineRange, LayoutLinesResult, PrepareOptions",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Source: ../pretext/src/layout.ts (rich-path: buildLineTextFromRange, materializeLayoutLine, toLayoutLineRange, walkLineRanges, layoutNextLine, layoutWithLines) + ../pretext/src/bidi.ts (stub computeSegmentLevels to return null for MVP)."
+    },
+    {
+      "id": "US-009",
+      "title": "Line-by-line accuracy validation",
+      "description": "As a developer, I want to verify that lynx-pretext's line breaking matches getTextInfo's native line breaking, by comparing per-line text content.",
+      "acceptanceCriteria": [
+        "Page entry at pages/accuracy.tsx renders in Lynx",
+        "Corpus of ~20 diverse texts: English, CJK, mixed scripts, emoji, long words, short single-line text",
+        "For each text at 10 widths (50px to 500px in 50px steps): call getTextInfo(text, { fontSize, fontFamily, maxWidth }) to get native content[] and layoutWithLines(prepared, width, lineHeight) to get our lines[].text",
+        "Line-by-line comparison: native.content[i].trim() === lines[i].text.trim() for all i",
+        "Also compare line count: native.content.length === lines.length",
+        "Also compare total width: getTextInfo(text, { fontSize, fontFamily }).width vs sum-of-segment-widths (single-line case)",
+        "Display per-text pass/fail with first divergent line highlighted on mismatch",
+        "Overall pass rate displayed as percentage",
+        "Target: > 90% match rate for English text, document all mismatches",
+        "If mismatches found: log the text, width, expected line content, actual line content for debugging",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "CRITICAL: This is the verification gate. Run BEFORE building demos. The oracle is getTextInfo(fullText, { maxWidth }) which does its own native line breaking and returns content[]. Compare against layoutWithLines().lines[].text. Mismatches indicate either: (1) segment widths don't sum correctly (kerning/shaping), (2) line-break logic differs, or (3) analysis produced wrong segments. Each mismatch type has a different fix path. Start with lineFitEpsilon=0.005 and tune if needed."
+    },
+    {
+      "id": "US-010",
+      "title": "Demo — basic height measurement",
+      "description": "As a developer, I want a Lynx page that measures a paragraph's height using prepare() + layout() and compares it to native <text> height.",
+      "acceptanceCriteria": [
+        "Page entry at pages/basic-height.tsx renders in Lynx",
+        "Shows a text block rendered with native <text> element",
+        "Below it, displays pretext-computed height and lineCount",
+        "A slider or text input changes maxWidth, pretext recomputes in real time",
+        "Shows side-by-side comparison: native <text> actual height vs pretext height",
+        "Typecheck passes",
+        "Verify in Lynx DevTool that page renders correctly"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "First demo. Uses prepare() + layout() — the simplest API. Native height can be obtained from the <text> layout event."
+    },
+    {
+      "id": "US-011",
+      "title": "Demo — layoutWithLines manual rendering",
+      "description": "As a developer, I want a Lynx page that gets all lines via layoutWithLines and renders each line as an individual positioned <text> element.",
+      "acceptanceCriteria": [
+        "Page entry at pages/layout-with-lines.tsx renders in Lynx",
+        "Uses prepareWithSegments + layoutWithLines to get line array",
+        "Each line rendered as an individual <text> element positioned absolutely",
+        "Shows line index, line text, and line width for each line",
+        "Slider changes maxWidth, only layoutWithLines re-runs (not prepare), lines update in real time",
+        "Typecheck passes",
+        "Verify in Lynx DevTool that lines are correctly positioned"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Demonstrates the rich layout API. Key point: prepare() is called once, layout is re-run on width change."
+    },
+    {
+      "id": "US-012",
+      "title": "Demo — shrinkwrap width via walkLineRanges",
+      "description": "As a developer, I want a Lynx page that computes the tightest container width for multiline text using walkLineRanges.",
+      "acceptanceCriteria": [
+        "Page entry at pages/shrinkwrap.tsx renders in Lynx",
+        "Shows a text block at a given maxWidth",
+        "Uses walkLineRanges to find the widest line (shrinkwrap width)",
+        "Visual comparison: container at maxWidth vs container at shrinkwrap width side by side",
+        "Pixel difference (wasted space) shown numerically",
+        "Typecheck passes",
+        "Verify in Lynx DevTool that shrinkwrap container is visually tighter"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Demonstrates a capability missing from native Lynx layout — multiline shrinkwrap."
+    },
+    {
+      "id": "US-013",
+      "title": "Demo — variable-width flow via layoutNextLine",
+      "description": "As a developer, I want a Lynx page that flows text around a rectangular obstacle using layoutNextLine with different widths per line.",
+      "acceptanceCriteria": [
+        "Page entry at pages/variable-flow.tsx renders in Lynx",
+        "Shows text flowing around a rectangular image/view obstacle",
+        "Lines beside the obstacle are narrower, lines below it are full width",
+        "Each line rendered as an individually positioned <text> element",
+        "layoutNextLine loop uses cursor continuity: each line's end becomes the next line's start",
+        "Typecheck passes",
+        "Verify in Lynx DevTool that text correctly wraps around the obstacle"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Demonstrates the streaming variable-width API. This is the key differentiator vs native <text> layout."
+    },
+    {
+      "id": "US-014",
+      "title": "Demo — bubbles shrinkwrap shared logic",
+      "description": "As the library, I need the bubbles-shared logic (prepareBubbleTexts, collectWrapMetrics, findTightWrapMetrics, computeBubbleRender) ported for the chat bubble demo.",
+      "acceptanceCriteria": [
+        "pages/demos/bubbles-shared.ts ported from Pretext with same exports",
+        "prepareBubbleTexts(texts) calls prepareWithSegments for each text",
+        "collectWrapMetrics(prepared, maxWidth) uses walkLineRanges to find max line width and line count",
+        "findTightWrapMetrics(prepared, maxWidth) binary-searches the minimum width that preserves line count",
+        "computeBubbleRender(preparedBubbles, chatWidth) computes per-bubble CSS width, tight width, and total wasted pixels",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/bubbles-shared.ts. Pure logic port — no rendering. Import paths change from '../../src/layout.ts' to '../../src/layout'."
+    },
+    {
+      "id": "US-015",
+      "title": "Demo — bubbles shrinkwrap chat page",
+      "description": "As a developer, I want the chat bubble Lynx page showing per-bubble shrinkwrap with interactive width slider.",
+      "acceptanceCriteria": [
+        "Page entry at pages/demos/bubbles.tsx renders in Lynx",
+        "Multiple chat message bubbles displayed with sample text",
+        "Each bubble visually shrinkwrapped to its tightest width",
+        "Slider changes chat container width, all bubbles reflow live",
+        "Shows wasted pixels comparison: CSS maxWidth vs shrinkwrap width",
+        "Adapt DOM manipulation to Lynx elements (replace document.getElementById etc.)",
+        "Typecheck passes",
+        "Verify in Lynx DevTool that bubbles shrinkwrap correctly"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/bubbles.ts + ../pretext/pages/demos/bubbles.html. Replace DOM APIs (document.getElementById, HTMLDivElement, etc.) with Lynx/ReactLynx equivalents."
+    },
+    {
+      "id": "US-016",
+      "title": "Demo — dynamic layout wrap geometry",
+      "description": "As the library, I need the wrap-geometry helpers (polygon interval, hull extraction, point-in-polygon) for the editorial layout demo.",
+      "acceptanceCriteria": [
+        "pages/demos/wrap-geometry.ts ported from Pretext",
+        "getPolygonIntervalForBand() returns horizontal interval where a polygon intersects a line band",
+        "getRectIntervalsForBand() returns intervals for rect-based obstacles",
+        "carveTextLineSlots() subtracts blocked intervals from a line region",
+        "transformWrapPoints() applies rotation + translation to hull points",
+        "isPointInPolygon() tests if a point is inside a polygon (for hit testing)",
+        "getWrapHull() extracts convex hull from rasterized SVG alpha — adapt from canvas ImageData to Lynx equivalent or precompute hulls as static data",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/wrap-geometry.ts. The hull extraction (getWrapHull) uses OffscreenCanvas.getImageData() which Lynx likely lacks. Fallback: precompute hull points as static JSON from the browser version."
+    },
+    {
+      "id": "US-017",
+      "title": "Demo — dynamic editorial layout page",
+      "description": "As a developer, I want the editorial spread demo on Lynx: two-column text flow around rotatable logo obstacles with live reflow.",
+      "acceptanceCriteria": [
+        "Page entry at pages/demos/dynamic-layout.tsx renders in Lynx",
+        "Headline text with binary-search font-size fitting (no mid-word breaks)",
+        "Body text flows left column → right column via layoutNextLine cursor continuity",
+        "Columns route around logo obstacles using wrap-geometry",
+        "Tap on logo triggers rotation animation with text reflow",
+        "Viewport resize changes column layout and triggers full reflow",
+        "DOM manipulation replaced with Lynx element APIs or ReactLynx components",
+        "Typecheck passes",
+        "Verify in Lynx DevTool that editorial layout looks correct"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/."
+    }
+  ]
+}
