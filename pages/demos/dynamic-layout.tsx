@@ -471,7 +471,11 @@ export function DynamicLayoutPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
   const [showControls, setShowControls] = useState(false)
-  const [fpsDisplay, setFpsDisplay] = useState(0)
+  const [mtsFpsDisplay, setMtsFpsDisplay] = useState(0)
+  const [btsFpsDisplay, setBtsFpsDisplay] = useState(0)
+  const btsFpsFrameCountRef = useRef(0)
+  const btsFpsLastTimeRef = useRef(0)
+  const btsFpsValueRef = useRef(0)
   // Settled angles drive text reflow (expensive, only on animation end)
   const [openaiSettledAngle, setOpenaiSettledAngle] = useState(0)
   const [claudeSettledAngle, setClaudeSettledAngle] = useState(0)
@@ -520,7 +524,7 @@ export function DynamicLayoutPage() {
       fpsMT.current = Math.round((fpsFrameCountMT.current / elapsed) * 1000)
       fpsFrameCountMT.current = 0
       fpsLastTimeMT.current = now
-      runOnBackground(setFpsDisplay)(fpsMT.current)
+      runOnBackground(setMtsFpsDisplay)(fpsMT.current)
     }
 
     if (openaiSpinningMT.current) {
@@ -606,6 +610,18 @@ export function DynamicLayoutPage() {
   const preparedBody = useMemo(() => getPreparedCached(BODY_COPY, BODY_FONT), [getPreparedCached])
   const preparedCredit = useMemo(() => getPreparedCached(CREDIT_TEXT, CREDIT_FONT), [getPreparedCached])
   const creditWidth = useMemo(() => Math.ceil(getPreparedSingleLineWidth(preparedCredit)), [preparedCredit])
+
+  // BTS FPS: count how often React re-renders during animation
+  btsFpsFrameCountRef.current++
+  const btsNow = Date.now()
+  if (btsFpsLastTimeRef.current === 0) btsFpsLastTimeRef.current = btsNow
+  const btsElapsed = btsNow - btsFpsLastTimeRef.current
+  if (btsElapsed >= 500) {
+    btsFpsValueRef.current = Math.round((btsFpsFrameCountRef.current / btsElapsed) * 1000)
+    btsFpsFrameCountRef.current = 0
+    btsFpsLastTimeRef.current = btsNow
+    setBtsFpsDisplay(btsFpsValueRef.current)
+  }
 
   // Text reflow uses settled angles (recomputed only when animation finishes)
   const pageLayout = buildLayout(pageWidth, pageHeight, BODY_LINE_HEIGHT, getPreparedCached)
@@ -859,9 +875,15 @@ export function DynamicLayoutPage() {
               </text>
             </view>
             <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>FPS</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: fpsDisplay >= 50 ? '#4caf50' : fpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
-                {`${fpsDisplay}`}
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>MTS</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: mtsFpsDisplay >= 50 ? '#4caf50' : mtsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
+                {`${mtsFpsDisplay}`}
+              </text>
+            </view>
+            <view>
+              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>BTS</text>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: btsFpsDisplay >= 50 ? '#4caf50' : btsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
+                {`${btsFpsDisplay}`}
               </text>
             </view>
           </view>

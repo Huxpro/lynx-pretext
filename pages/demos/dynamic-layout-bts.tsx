@@ -1,5 +1,5 @@
 // Pure Background Thread (React) version of the dynamic editorial layout.
-// No Main Thread Script — animation loop runs via useEffect + requestAnimationFrame
+// No Main Thread Script — animation loop runs via requestAnimationFrame in BTS.
 // in BTS. Every frame triggers React re-render for both logo rotation and text reflow.
 // This tests whether Lynx's React reconciliation pipeline is fast enough for 60fps.
 
