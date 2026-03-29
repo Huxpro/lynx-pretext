@@ -215,8 +215,8 @@
         "pnpm build passes without errors (PrimJS bytecode compilation succeeds)"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "Demonstrates the rich layout API. Key point: prepare() is called once, layout is re-run on width change. [RESET: needs build + screenshot verification]"
+      "passes": true,
+      "notes": "Demonstrates the rich layout API. Key point: prepare() is called once, layout is re-run on width change."
     },
     {
       "id": "US-012",

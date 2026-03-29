@@ -108,28 +108,29 @@ export function LayoutWithLinesPage() {
         </text>
         <view style={{
           width: maxWidth,
-          height: result.height,
           marginTop: 8,
           borderWidth: 1,
           borderColor: '#1976d2',
           borderRadius: 4,
           backgroundColor: '#fafafa',
-          overflow: 'hidden',
         }}>
           {result.lines.map((line, i) => (
-            <text
+            <view
               key={`line-${i}`}
               style={{
-                position: 'absolute',
-                top: i * LINE_HEIGHT,
-                left: 0,
-                fontSize: FONT_SIZE,
-                lineHeight: LINE_HEIGHT,
-                color: '#333',
+                height: LINE_HEIGHT,
+                justifyContent: 'center',
               }}
             >
-              {line.text}
-            </text>
+              <text
+                style={{
+                  fontSize: FONT_SIZE,
+                  color: '#333',
+                }}
+              >
+                {line.text}
+              </text>
+            </view>
           ))}
         </view>
 

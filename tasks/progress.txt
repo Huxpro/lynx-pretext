@@ -17,6 +17,8 @@ Started: 2026-03-29
 - PrimJS does not have the `Intl` global — must create `globalThis.Intl = {}` before `@formatjs/intl-segmenter/polyfill-force.js`
 - Multi-entry Rspeedy config: `source.entry: { 'page-name': './pages/page-name.tsx' }` → produces `page-name.lynx.bundle`
 - Each entry page file must call `root.render(<Component />)` + `import.meta.webpackHot.accept()`
+- Lynx `<text>` does NOT support `position: 'absolute'` — wrap in `<view>` for positioning
+- For manually rendering lines: use stacked `<view>` with `height: LINE_HEIGHT` instead of absolute positioning
 
 ---
 
@@ -400,4 +402,17 @@ Started: 2026-03-29
   - Rspeedy multi-entry uses `source.entry` object syntax in lynx.config.ts — each key becomes `<key>.lynx.bundle`
   - Old dev server processes can hold port 3000; kill them with `pkill -f "rspeedy dev"` before restarting
   - DevTool screenshot only works on non-crashed sessions — check `get-console` for errors if screenshot times out
+---
+
+## 2026-03-29 - US-011 (VERIFIED)
+- Fixed manually rendered lines: replaced `position: 'absolute'` on `<text>` with stacked `<view>` wrappers with fixed height
+- Lynx `<text>` elements don't support `position: 'absolute'` — must wrap in `<view>` for positioning
+- Removed invalid `numberOfLines` prop (not in Lynx TextProps)
+- DevTool screenshot verified: page renders title, width controls, summary stats, manually rendered lines in bordered container, line details table
+- tsc --build passes, pnpm build passes
+- Files changed: pages/layout-with-lines.tsx (fixed line rendering), tasks/prd.json (mark passes: true)
+- **Learnings for future iterations:**
+  - In Lynx, `<text>` elements do not support `position: 'absolute'` — always wrap text in `<view>` for positioning
+  - Stacked `<view>` with fixed `height: LINE_HEIGHT` is a reliable alternative to absolute positioning for line rendering
+  - `numberOfLines` is not a valid prop on Lynx `<text>` — use Lynx-specific text truncation if needed
 ---
