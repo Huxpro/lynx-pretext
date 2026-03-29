@@ -221,7 +221,7 @@
         "Verify in Lynx DevTool that shrinkwrap container is visually tighter"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "Demonstrates a capability missing from native Lynx layout — multiline shrinkwrap."
     },
     {

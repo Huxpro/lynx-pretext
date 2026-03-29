@@ -177,3 +177,20 @@ Started: 2026-03-29
   - position: 'absolute' with top: i * lineHeight positions lines correctly in Lynx
   - LayoutLine.start/end LayoutCursor gives segment-level debugging info (segmentIndex, graphemeIndex)
 ---
+
+## 2026-03-29 - US-012
+- Created shrinkwrap demo page at pages/shrinkwrap.tsx
+- Uses walkLineRanges to find widest line width (CSS fit-content equivalent)
+- Binary-search finds tightest container width preserving same line count (shrinkwrap)
+- Side-by-side visual comparison: maxWidth container vs shrinkwrap container
+- Wasted pixel area shown numerically with color-coded status
+- +/− buttons change maxWidth (80–500px in 20px steps)
+- Explanatory text describes the capability gap vs native Lynx layout
+- Updated src/index.tsx to render ShrinkwrapPage
+- Files changed: pages/shrinkwrap.tsx (new), src/index.tsx (updated)
+- **Learnings for future iterations:**
+  - walkLineRanges is ideal for computing max line width without materializing line text strings
+  - Binary search for shrinkwrap: search for minimum width where lineCount stays the same as at maxWidth
+  - The bubbles-shared.ts in pretext has the same pattern (collectWrapMetrics + findTightWrapMetrics)
+  - Shrinkwrap is purely arithmetic — no native calls in the resize path
+---
