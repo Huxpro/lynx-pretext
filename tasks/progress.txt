@@ -280,3 +280,23 @@ Started: 2026-03-29
   - For complex demos with many absolutely positioned text elements, the React reconciler handles key-based updates efficiently
   - useMemo + useRef<Map> pattern works well for caching prepared texts across renders without re-measuring
 ---
+
+## 2026-03-29 - QUALITY GATE UPDATE
+- **NEW REQUIREMENT**: ALL commits must pass BOTH `tsc --build` AND `pnpm build`
+- PrimJS does not support Unicode property escapes (\p{...}) — use explicit Unicode ranges
+- DevTool verification is MANDATORY for UI stories — if build fails, the story is NOT complete
+- Added US-018 (fix regex) and US-019 (DevTool verification) to prd.json
+---
+
+## 2026-03-29 - US-018
+- Verified all Unicode property escape regexes (\p{...}) were already replaced with explicit Unicode ranges in prior stories
+- src/analysis.ts: arabicScriptRe, combiningMarkRe, decimalDigitRe all use explicit Unicode ranges (no \p{})
+- src/measurement.ts: maybeEmojiRe uses explicit emoji Unicode ranges (no \p{})
+- splitLeadingSpaceAndMarks uses per-character combiningMarkRe.test(ch) — equivalent to original /^\p{M}+$/u
+- tsc --build passes, pnpm build passes (538.4 kB bundle), no PrimJS bytecode errors
+- Files changed: tasks/prd.json (mark passes: true), tasks/progress.txt (this entry)
+- **Learnings for future iterations:**
+  - Unicode property escapes were proactively replaced during US-003 (character sets) and US-005 (measurement) — good practice to do at port time
+  - The combiningMarkRe expanded form is very long (~2KB) but compresses well in the bundle
+  - Always verify pnpm build after typecheck — PrimJS compilation catches things tsc doesn't
+---

@@ -311,6 +311,43 @@
       "priority": 17,
       "passes": true,
       "notes": "Source: ../pretext/pages/demos/dynamic-layout.ts + ../pretext/pages/demos/dynamic-layout-text.ts + ../pretext/pages/demos/dynamic-layout.html. Most complex demo. Replace DOM APIs with Lynx equivalents. Logo SVGs from ../pretext/pages/assets/."
+    },
+    {
+      "id": "US-018",
+      "title": "Fix Unicode property escapes for PrimJS compatibility",
+      "description": "As the library, I need all Unicode property escape regexes (\\p{...}) replaced with explicit Unicode ranges so the code compiles on PrimJS.",
+      "acceptanceCriteria": [
+        "No \\p{} regex patterns remain in any source file",
+        "src/analysis.ts: /\\p{Script=Arabic}/u replaced with explicit Arabic Unicode ranges",
+        "src/analysis.ts: /\\p{M}/u replaced with explicit combining mark ranges",
+        "src/analysis.ts: /\\p{Nd}/u replaced with explicit decimal digit ranges",
+        "src/analysis.ts: /^\\p{M}+$/u replaced with explicit combining mark ranges",
+        "src/measurement.ts: emoji regex replaced with explicit emoji Unicode ranges",
+        "Typecheck passes (tsc --build)",
+        "pnpm build passes with zero errors (PrimJS bytecode compilation succeeds)",
+        "rspeedy dev starts without errors"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": "PrimJS (Lynx's JS engine) does not support ES2018 Unicode property escapes. Use hardcoded Unicode ranges. Can use regenerate-unicode-properties npm package at build time to generate ranges, or hardcode the most common ranges manually."
+    },
+    {
+      "id": "US-019",
+      "title": "DevTool verification — all demo pages render correctly",
+      "description": "As a developer, I want to verify all demo pages render correctly in Lynx using DevTool screenshots.",
+      "acceptanceCriteria": [
+        "pnpm build passes",
+        "rspeedy dev starts successfully",
+        "Lynx DevTool connects to the running app",
+        "hello-world page renders text elements correctly (screenshot saved to /tmp/pretext-hello.png)",
+        "shrinkwrap demo page renders and interactive controls work (screenshot saved to /tmp/pretext-shrinkwrap.png)",
+        "variable-flow demo page renders with obstacle layout (screenshot saved to /tmp/pretext-variable-flow.png)",
+        "bubbles demo page renders chat bubbles with shrinkwrap (screenshot saved to /tmp/pretext-bubbles.png)",
+        "dynamic-layout demo page renders two-column editorial layout (screenshot saved to /tmp/pretext-dynamic-layout.png)"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Use lynx-devtool skill to connect and screenshot. Do NOT use agent-browser — this is a Lynx app. If any page has rendering issues, document them but still take the screenshot."
     }
   ]
 }
