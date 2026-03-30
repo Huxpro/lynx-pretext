@@ -56,7 +56,7 @@ function App() {
         </div>
 
         <div className="embed-section">
-          <Go key={active} example={active} defaultTab="preview" />
+          <Go key={active} example={active} mode="preview" />
         </div>
       </div>
     </GoConfigProvider>
