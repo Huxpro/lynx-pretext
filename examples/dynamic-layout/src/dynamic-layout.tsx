@@ -7,6 +7,7 @@ import {
   type LayoutCursor,
   type PreparedTextWithSegments,
 } from 'lynx-pretext'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 import { BODY_COPY } from './dynamic-layout-text'
 import {
   openaiLayout as openaiLayoutHull,
@@ -470,12 +471,10 @@ function evaluateLayout(
 export function DynamicLayoutPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
-  const [showControls, setShowControls] = useState(false)
-  const [mtsFpsDisplay, setMtsFpsDisplay] = useState(0)
-  const [btsFpsDisplay, setBtsFpsDisplay] = useState(0)
-  const btsFpsFrameCountRef = useRef(0)
-  const btsFpsLastTimeRef = useRef(0)
-  const btsFpsValueRef = useRef(0)
+
+  // DevPanel FPS hook - MTS direct update mode
+  const { mtsFpsTick, btsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
+
   // Settled angles drive text reflow (expensive, only on animation end)
   const [openaiSettledAngle, setOpenaiSettledAngle] = useState(0)
   const [claudeSettledAngle, setClaudeSettledAngle] = useState(0)
@@ -496,19 +495,11 @@ export function DynamicLayoutPage() {
   const openaiSpinningMT = useMainThreadRef(false)
   const claudeSpinningMT = useMainThreadRef(false)
   const animatingMT = useMainThreadRef(false)
-  const fpsFrameCountMT = useMainThreadRef(0)
-  const fpsLastTimeMT = useMainThreadRef(0)
-  const fpsMT = useMainThreadRef(0)
 
   const onLayout = useCallback((e: any) => {
     setPageWidth(Math.floor(e.detail.width))
     setPageHeight(Math.floor(e.detail.height))
   }, [])
-  const toggleControls = useCallback(() => setShowControls(v => !v), [])
-  const decreaseWidth = useCallback(() => setPageWidth(w => Math.max(360, w - 40)), [])
-  const increaseWidth = useCallback(() => setPageWidth(w => Math.min(1200, w + 40)), [])
-  const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(400, h - 40)), [])
-  const increaseHeight = useCallback(() => setPageHeight(h => Math.min(1200, h + 40)), [])
 
   // Main-thread animation tick — runs via requestAnimationFrame, zero React involvement
   function spinTick(_timestamp: number): void {
@@ -516,16 +507,8 @@ export function DynamicLayoutPage() {
     const now = Date.now()
     let still = false
 
-    // FPS measurement
-    fpsFrameCountMT.current++
-    if (fpsLastTimeMT.current === 0) fpsLastTimeMT.current = now
-    const elapsed = now - fpsLastTimeMT.current
-    if (elapsed >= 500) {
-      fpsMT.current = Math.round((fpsFrameCountMT.current / elapsed) * 1000)
-      fpsFrameCountMT.current = 0
-      fpsLastTimeMT.current = now
-      runOnBackground(setMtsFpsDisplay)(fpsMT.current)
-    }
+    // MTS FPS tick (from hook)
+    mtsFpsTick()
 
     if (openaiSpinningMT.current) {
       const duration = 900
@@ -611,17 +594,8 @@ export function DynamicLayoutPage() {
   const preparedCredit = useMemo(() => getPreparedCached(CREDIT_TEXT, CREDIT_FONT), [getPreparedCached])
   const creditWidth = useMemo(() => Math.ceil(getPreparedSingleLineWidth(preparedCredit)), [preparedCredit])
 
-  // BTS FPS: count how often React re-renders during animation
-  btsFpsFrameCountRef.current++
-  const btsNow = Date.now()
-  if (btsFpsLastTimeRef.current === 0) btsFpsLastTimeRef.current = btsNow
-  const btsElapsed = btsNow - btsFpsLastTimeRef.current
-  if (btsElapsed >= 500) {
-    btsFpsValueRef.current = Math.round((btsFpsFrameCountRef.current / btsElapsed) * 1000)
-    btsFpsFrameCountRef.current = 0
-    btsFpsLastTimeRef.current = btsNow
-    setBtsFpsDisplay(btsFpsValueRef.current)
-  }
+  // BTS FPS tick (from hook) - call on every render
+  btsFpsTick()
 
   // Text reflow uses settled angles (recomputed only when animation finishes)
   const pageLayout = buildLayout(pageWidth, pageHeight, BODY_LINE_HEIGHT, getPreparedCached)
@@ -742,153 +716,31 @@ export function DynamicLayoutPage() {
         </view>
       </view>
 
-      {/* Toggle button */}
-      <view
-        bindtap={toggleControls}
-        style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          width: '36px',
-          height: '36px',
-          borderRadius: '18px',
-          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.25)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <text style={{
-          fontSize: '20px',
-          color: showControls ? '#333' : '#fff',
-          fontWeight: 'bold',
-        }}>
-          {showControls ? '\u00D7' : '\u2261'}
-        </text>
-      </view>
-
-      {/* Controls overlay */}
-      {showControls && (
-        <view style={{
-          position: 'absolute',
-          top: '56px',
-          left: '12px',
-          right: '12px',
-          backgroundColor: 'rgba(0,0,0,0.88)',
-          borderRadius: '12px',
-          padding: '16px',
-        }}>
-          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
-            Dynamic Editorial Layout
-          </text>
-          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px', lineHeight: '18px' }}>
-            {'Two-column text flows around rotatable logo obstacles. ' +
-             'Tap logos to rotate. Width >760px shows two-column spread.'}
-          </text>
-
-          {/* W/H steppers */}
-          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
-            <view
-              bindtap={decreaseWidth}
-              style={{
-                width: '28px', height: '28px', borderRadius: '14px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-            </view>
-            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>
-              {`${pageWidth}px`}
-            </text>
-            <view
-              bindtap={increaseWidth}
-              style={{
-                width: '28px', height: '28px', borderRadius: '14px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
-            </view>
-
-            <view style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.2)', marginLeft: '4px', marginRight: '4px' }} />
-
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>H:</text>
-            <view
-              bindtap={decreaseHeight}
-              style={{
-                width: '28px', height: '28px', borderRadius: '14px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-            </view>
-            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>
-              {`${pageHeight}px`}
-            </text>
-            <view
-              bindtap={increaseHeight}
-              style={{
-                width: '28px', height: '28px', borderRadius: '14px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
-            </view>
-          </view>
-
-          {/* Stats */}
-          <view style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '12px' }}>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Mode</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
-                {pageLayout.isNarrow ? 'Single' : 'Two-col'}
-              </text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Headline</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
-                {`${pageLayout.headlineFontSize}px`}
-              </text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Left</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
-                {`${leftLines.length}`}
-              </text>
-            </view>
+      {/* DevPanel */}
+      <DevPanel.Root>
+        <DevPanel.Trigger />
+        <DevPanel.Content
+          title="Dynamic Editorial Layout"
+          description="Two-column text flows around rotatable logo obstacles. Tap logos to rotate. Width >760px shows two-column spread."
+        >
+          <DevPanelFPS
+            mtsFpsDisplay={mtsFpsDisplay}
+            btsFpsDisplay={btsFpsDisplay}
+            mtsFpsTextRef={mtsFpsTextRef}
+          />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="Mode" value={pageLayout.isNarrow ? 'Single' : 'Two-col'} />
+            <DevPanel.Stat label="Headline" value={`${pageLayout.headlineFontSize}px`} />
+            <DevPanel.Stat label="Left" value={`${leftLines.length}`} />
             {rightLines.length > 0 && (
-              <view>
-                <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Right</text>
-                <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
-                  {`${rightLines.length}`}
-                </text>
-              </view>
+              <DevPanel.Stat label="Right" value={`${rightLines.length}`} />
             )}
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Total</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
-                {`${headlineLines.length + totalBodyLines}`}
-              </text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>MTS</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: mtsFpsDisplay >= 50 ? '#4caf50' : mtsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
-                {`${mtsFpsDisplay}`}
-              </text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>BTS</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: btsFpsDisplay >= 50 ? '#4caf50' : btsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
-                {`${btsFpsDisplay}`}
-              </text>
-            </view>
-          </view>
-        </view>
-      )}
+            <DevPanel.Stat label="Total" value={`${headlineLines.length + totalBodyLines}`} />
+          </DevPanel.Stats>
+          <DevPanel.Stepper label="W" value={pageWidth} min={360} max={1200} step={40} onChange={setPageWidth} />
+          <DevPanel.Stepper label="H" value={pageHeight} min={400} max={1200} step={40} onChange={setPageHeight} />
+        </DevPanel.Content>
+      </DevPanel.Root>
     </view>
   )
 }

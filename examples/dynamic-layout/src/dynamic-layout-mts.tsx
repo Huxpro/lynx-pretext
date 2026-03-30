@@ -6,6 +6,7 @@
 
 import { root, useState, useCallback, useRef, useEffect, useMainThreadRef, runOnMainThread, runOnBackground } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 import { BODY_COPY } from './dynamic-layout-text'
 import {
   openaiLayout as openaiLayoutHull,
@@ -60,18 +61,14 @@ type PageLayout = {
 export function DynamicLayoutMTSPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
-  const [showControls, setShowControls] = useState(false)
-  const [mtsFpsDisplay, setMtsFpsDisplay] = useState(0)
+
+  // DevPanel FPS hook - MTS with direct update
+  const { mtsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
 
   const onLayout = useCallback((e: any) => {
     setPageWidth(Math.floor(e.detail.width))
     setPageHeight(Math.floor(e.detail.height))
   }, [])
-  const toggleControls = useCallback(() => setShowControls(v => !v), [])
-  const decreaseWidth = useCallback(() => setPageWidth(w => Math.max(360, w - 40)), [])
-  const increaseWidth = useCallback(() => setPageWidth(w => Math.min(1200, w + 40)), [])
-  const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(400, h - 40)), [])
-  const increaseHeight = useCallback(() => setPageHeight(h => Math.min(1200, h + 40)), [])
 
   // --- Element pool refs ---
   const hView0 = useMainThreadRef<MainThread.Element>(null)
@@ -116,10 +113,7 @@ export function DynamicLayoutMTSPage() {
   const pageWidthMT = useMainThreadRef(400)
   const pageHeightMT = useMainThreadRef(700)
   const creditWidthMT = useMainThreadRef(0)
-  const fpsFrameCountMT = useMainThreadRef(0)
-  const fpsLastTimeMT = useMainThreadRef(0)
   const prevBodyCountMT = useMainThreadRef(0)
-  const fpsTextRef = useMainThreadRef<MainThread.Element>(null)
 
   // MTS-side prepared text cache (state-isolated from BTS).
   // Initialized lazily on MTS — Map is not JSON-serializable so can't be passed as initial value.
@@ -336,21 +330,13 @@ export function DynamicLayoutMTSPage() {
 
   // ======= ANIMATION =======
 
-  function spinTick(_ts: number): void {
+  function spinTick(ts: number): void {
     'main thread'
     const now = Date.now()
     let still = false
 
-    fpsFrameCountMT.current++
-    if (fpsLastTimeMT.current === 0) fpsLastTimeMT.current = now
-    const fpsElapsed = now - fpsLastTimeMT.current
-    if (fpsElapsed >= 500) {
-      const fps = Math.round((fpsFrameCountMT.current / fpsElapsed) * 1000)
-      fpsFrameCountMT.current = 0; fpsLastTimeMT.current = now
-      // Update FPS display directly on MTS — no cross-thread
-      if (fpsTextRef.current) fpsTextRef.current.setAttribute('text', `${fps}`)
-      runOnBackground(setMtsFpsDisplay)(fps)
-    }
+    // MTS FPS tick (from hook)
+    mtsFpsTick()
 
     if (openaiSpinningMT.current) {
       const p = Math.min(1, (now - openaiSpinStartMT.current) / SPIN_DURATION)
@@ -428,54 +414,22 @@ export function DynamicLayoutMTSPage() {
         </view>
       </view>
 
-      <view bindtap={toggleControls} style={{
-        position: 'absolute', top: '12px', right: '12px', width: '36px', height: '36px', borderRadius: '18px',
-        backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.25)', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <text style={{ fontSize: '20px', color: showControls ? '#333' : '#fff', fontWeight: 'bold' }}>{showControls ? '\u00D7' : '\u2261'}</text>
-      </view>
-
-      {showControls && (
-        <view style={{ position: 'absolute', top: '56px', left: '12px', right: '12px', backgroundColor: 'rgba(0,0,0,0.88)', borderRadius: '12px', padding: '16px' }}>
-          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>Dynamic Layout (Pure MTS)</text>
-          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px', lineHeight: '18px' }}>
-            {'Full text reflow on main thread at 60fps via shared modules. Zero cross-thread during animation.'}
-          </text>
-          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
-            <view bindtap={decreaseWidth} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-            </view>
-            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>{`${pageWidth}px`}</text>
-            <view bindtap={increaseWidth} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
-            </view>
-            <view style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.2)', marginLeft: '4px', marginRight: '4px' }} />
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>H:</text>
-            <view bindtap={decreaseHeight} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-            </view>
-            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>{`${pageHeight}px`}</text>
-            <view bindtap={increaseHeight} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
-            </view>
-          </view>
-          <view style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '12px' }}>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Mode</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{pageWidth < 760 ? 'Single' : 'Two-col'}</text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Viewport</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{`${pageWidth}\u00D7${pageHeight}`}</text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>MTS fps</text>
-              <text main-thread:ref={fpsTextRef} style={{ fontSize: '14px', fontWeight: 'bold', color: mtsFpsDisplay >= 50 ? '#4caf50' : mtsFpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>{`${mtsFpsDisplay}`}</text>
-            </view>
-          </view>
-        </view>
-      )}
+      {/* DevPanel */}
+      <DevPanel.Root>
+        <DevPanel.Trigger />
+        <DevPanel.Content
+          title="Dynamic Layout (Pure MTS)"
+          description="Full text reflow on main thread at 60fps via shared modules. Zero cross-thread during animation."
+        >
+          <DevPanelFPS mtsFpsDisplay={mtsFpsDisplay} btsFpsDisplay={btsFpsDisplay} mtsFpsTextRef={mtsFpsTextRef} />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="Mode" value={pageWidth < 760 ? 'Single' : 'Two-col'} />
+            <DevPanel.Stat label="Viewport" value={`${pageWidth}\u00D7${pageHeight}`} />
+          </DevPanel.Stats>
+          <DevPanel.Stepper label="W" value={pageWidth} min={360} max={1200} step={40} onChange={setPageWidth} />
+          <DevPanel.Stepper label="H" value={pageHeight} min={400} max={1200} step={40} onChange={setPageHeight} />
+        </DevPanel.Content>
+      </DevPanel.Root>
     </view>
   )
 }
