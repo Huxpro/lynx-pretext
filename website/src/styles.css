@@ -1,0 +1,84 @@
+/* ── Page layout ─────────────────────────────────────── */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font: 12px/1.2 'SF Mono', ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #955f3b;
+}
+
+h1 {
+  margin: 0;
+  font: 700 34px/1.08 Georgia, 'Times New Roman', serif;
+}
+
+.intro {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  line-height: 1.5;
+  color: #6d645d;
+}
+
+.intro a {
+  color: #955f3b;
+  text-decoration: underline;
+}
+
+.intro code {
+  font-size: 0.9em;
+  padding: 1px 5px;
+  background: rgba(149, 95, 59, 0.08);
+  border-radius: 4px;
+}
+
+/* ── Tab bar ─────────────────────────────────────────── */
+
+.tab-bar {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid #d8cec3;
+}
+
+.tab {
+  appearance: none;
+  border: none;
+  background: none;
+  font: 500 13px/1.2 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 8px 14px;
+  color: #6d645d;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.tab:hover {
+  color: #201b18;
+  background: rgba(149, 95, 59, 0.06);
+}
+
+.tab.active {
+  color: #955f3b;
+  border-bottom-color: #955f3b;
+  background: rgba(149, 95, 59, 0.08);
+}
+
+/* ── Embed section ───────────────────────────────────── */
+
+.embed-section {
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .page { padding-top: 22px; }
+  .tab { font-size: 12px; padding: 6px 10px; }
+}

@@ -1,13 +1,5 @@
 {
-  "buildCommand": "pnpm build && cd website && pnpm build",
+  "buildCommand": "pnpm build && cd website && pnpm prepare-examples && pnpm build",
   "outputDirectory": "website/dist",
-  "cleanUrls": true,
-  "headers": [
-    {
-      "source": "/examples/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    }
-  ]
+  "cleanUrls": true
 }

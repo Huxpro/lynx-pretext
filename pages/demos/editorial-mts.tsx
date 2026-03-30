@@ -122,7 +122,6 @@ function circleIntervalForBand(
 function fitHeadline(
   maxWidth: number,
   maxHeight: number,
-  getPrepared: (text: string, font: string) => PreparedTextWithSegments,
 ): { fontSize: number; lineHeight: number; lines: PositionedLine[] } {
   'main thread'
   let low = 24
@@ -135,7 +134,7 @@ function fitHeadline(
     const size = Math.floor((low + high) / 2)
     const lineHeight = Math.round(size * 0.93)
     const font = `700 ${size}px ${HEADLINE_FONT_FAMILY}`
-    const prepared = getPrepared(HEADLINE_TEXT, font)
+    const prepared = prepareWithSegments(HEADLINE_TEXT, font)
     let breaksWord = false
     let lineCount = 0
 
@@ -278,7 +277,7 @@ function EditorialMTSPage() {
     orbCoreRefs.push(useMainThreadRef<MainThread.Element>(null))
   }
 
-  const preparedCacheMT = useMainThreadRef(new Map<string, PreparedTextWithSegments>())
+  const preparedCacheMT = useMainThreadRef<Map<string, PreparedTextWithSegments> | null>(null)
   const orbsMT = useMainThreadRef<OrbState[]>([])
   const bodyRectMT = useMainThreadRef<Rect>({ x: 0, y: 0, width: 0, height: 0 })
   const pageWidthMT = useMainThreadRef(390)
@@ -294,11 +293,13 @@ function EditorialMTSPage() {
 
   function getPreparedMTS(text: string, font: string): PreparedTextWithSegments {
     'main thread'
+    if (preparedCacheMT.current === null) preparedCacheMT.current = new Map()
+    const cache = preparedCacheMT.current
     const key = `${font}::${text}`
-    const cached = preparedCacheMT.current.get(key)
+    const cached = cache.get(key)
     if (cached !== undefined) return cached
     const prepared = prepareWithSegments(text, font)
-    preparedCacheMT.current.set(key, prepared)
+    cache.set(key, prepared)
     return prepared
   }
 
@@ -444,7 +445,7 @@ function EditorialMTSPage() {
   function applyEditorialLayoutMT(): void {
     'main thread'
     const layout = buildPageLayout(pageWidthMT.current, pageHeightMT.current)
-    const headlineFit = fitHeadline(layout.headlineWidth, layout.headlineMaxHeight, getPreparedMTS)
+    const headlineFit = fitHeadline(layout.headlineWidth, layout.headlineMaxHeight)
     const creditTop = layout.headlineTop + headlineFit.lines.length * headlineFit.lineHeight + 8
     const introTop = creditTop + CREDIT_LINE_HEIGHT + 10
     const introPrepared = getPreparedMTS(INTRO_TEXT, INTRO_FONT)

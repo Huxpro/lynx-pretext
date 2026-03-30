@@ -1,4 +1,5 @@
-import { root, useState, useCallback, useRef, useEffect } from '@lynx-js/react'
+import { root, useState, useCallback, useRef, useEffect, useMainThreadRef } from '@lynx-js/react'
+import type { MainThread } from '@lynx-js/types'
 import {
   layoutNextLine,
   layoutWithLines,
@@ -8,7 +9,6 @@ import {
   type PreparedTextWithSegments,
 } from '../../src/layout'
 
-console.info('[editorial-engine] module loaded, root =', typeof root)
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -16,7 +16,7 @@ const BODY_FONT_SIZE = 16
 const BODY_FONT = `${BODY_FONT_SIZE}px "Palatino Linotype", Palatino, serif`
 const BODY_LINE_HEIGHT = 26
 const HEADLINE_FONT_FAMILY = '"Palatino Linotype", Palatino, serif'
-const HEADLINE_TEXT = 'THE FUTURE OF TEXT LAYOUT IS NOT CSS'
+const HEADLINE_TEXT = 'LYNX PRETEXT'
 const PQ_FONT_SIZE = 15
 const PQ_FONT = `italic ${PQ_FONT_SIZE}px ${HEADLINE_FONT_FAMILY}`
 const PQ_LINE_HEIGHT = 22
@@ -46,12 +46,6 @@ type Orb = {
   x: number; y: number; r: number
   vx: number; vy: number
   color: OrbColor
-}
-
-type DragState = {
-  orbIndex: number
-  startX: number; startY: number
-  startOrbX: number; startOrbY: number
 }
 
 type PullquoteRect = RectObstacle & { lines: PositionedLine[]; colIdx: number }
@@ -295,17 +289,25 @@ const ORB_DEFS = [
 // ── Component ──────────────────────────────────────────────
 
 function EditorialEnginePage() {
-  console.info('[editorial-engine] render start')
+
   const [viewportW, setViewportW] = useState(0)
   const [viewportH, setViewportH] = useState(0)
   const [renderTick, setRenderTick] = useState(0)
 
   const orbsRef = useRef<Orb[]>([])
   const initRef = useRef(false)
-  const dragRef = useRef<DragState | null>(null)
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastFrameRef = useRef<number | null>(null)
   const animateFnRef = useRef<() => void>(() => {})
+
+  // Main-thread refs for drag (zero-latency touch handling)
+  const orbsMT = useMainThreadRef<Orb[]>([])
+  const dragOrbIndexMT = useMainThreadRef(-1)
+  const touchIdMT = useMainThreadRef<number | null>(null)
+  const dragStartXMT = useMainThreadRef(0)
+  const dragStartYMT = useMainThreadRef(0)
+  const dragStartOrbXMT = useMainThreadRef(0)
+  const dragStartOrbYMT = useMainThreadRef(0)
   const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
 
   // Cached text preparation
@@ -320,18 +322,20 @@ function EditorialEnginePage() {
 
   // Layout change handler — initializes orbs on first call
   const handleLayout = useCallback((e: any) => {
-    console.info('[editorial-engine] handleLayout fired', JSON.stringify(e?.detail))
+
     const { width, height } = e.detail
     if (width <= 0 || height <= 0) return
-    console.info('[editorial-engine] setting viewport', width, height)
+
     setViewportW(width)
     setViewportH(height)
     if (!initRef.current) {
       initRef.current = true
-      orbsRef.current = ORB_DEFS.map(d => ({
+      const orbs = ORB_DEFS.map(d => ({
         x: d.fx * width, y: d.fy * height,
         r: d.r, vx: d.vx, vy: d.vy, color: d.color,
       }))
+      orbsRef.current = orbs
+      orbsMT.current = orbs
       lastFrameRef.current = null
       animTimerRef.current = setTimeout(() => animateFnRef.current(), 16)
     }
@@ -344,7 +348,7 @@ function EditorialEnginePage() {
     lastFrameRef.current = now
 
     const orbs = orbsRef.current
-    const draggedIdx = dragRef.current?.orbIndex ?? -1
+    const draggedIdx = dragOrbIndexMT.current
     const w = viewportW
     const h = viewportH
 
@@ -390,49 +394,63 @@ function EditorialEnginePage() {
     }
   }, [])
 
-  // Touch handlers for orb dragging
-  const handleTouchStart = useCallback((e: { touches: Array<{ clientX: number; clientY: number }> }) => {
-    const touch = e.touches[0]
-    if (!touch) return
-    const px = touch.clientX
-    const py = touch.clientY
-    const orbs = orbsRef.current
+  // Main-thread touch handlers for zero-latency orb dragging
+  function handleTouchStartMT(event: MainThread.TouchEvent): void {
+    'main thread'
+    const touch = event.touches.length > 0 ? event.touches[0]! : null
+    if (touch === null) return
+
+    const orbs = orbsMT.current
     for (let i = orbs.length - 1; i >= 0; i--) {
       const orb = orbs[i]!
-      const dx = px - orb.x
-      const dy = py - orb.y
-      if (dx * dx + dy * dy <= orb.r * orb.r) {
-        dragRef.current = {
-          orbIndex: i,
-          startX: px, startY: py,
-          startOrbX: orb.x, startOrbY: orb.y,
-        }
+      const dx = touch.clientX - orb.x
+      const dy = touch.clientY - orb.y
+      const grabR = orb.r + 20
+      if (dx * dx + dy * dy <= grabR * grabR) {
+        touchIdMT.current = touch.identifier
+        dragOrbIndexMT.current = i
+        dragStartXMT.current = touch.clientX
+        dragStartYMT.current = touch.clientY
+        dragStartOrbXMT.current = orb.x
+        dragStartOrbYMT.current = orb.y
         return
       }
     }
-  }, [])
+  }
 
-  const handleTouchMove = useCallback((e: { touches: Array<{ clientX: number; clientY: number }> }) => {
-    const drag = dragRef.current
-    if (!drag) return
-    const touch = e.touches[0]
-    if (!touch) return
-    const orb = orbsRef.current[drag.orbIndex]
+  function handleTouchMoveMT(event: MainThread.TouchEvent): void {
+    'main thread'
+    const dragIndex = dragOrbIndexMT.current
+    if (dragIndex === -1) return
+
+    let touch: { identifier: number; clientX: number; clientY: number } | null = null
+    for (let i = 0; i < event.touches.length; i++) {
+      const candidate = event.touches[i]!
+      if (candidate.identifier === touchIdMT.current) {
+        touch = candidate
+        break
+      }
+    }
+    if (touch === null) return
+
+    const orb = orbsMT.current[dragIndex]
     if (!orb) return
-    orb.x = drag.startOrbX + (touch.clientX - drag.startX)
-    orb.y = drag.startOrbY + (touch.clientY - drag.startY)
-  }, [])
+    orb.x = dragStartOrbXMT.current + (touch.clientX - dragStartXMT.current)
+    orb.y = dragStartOrbYMT.current + (touch.clientY - dragStartYMT.current)
+  }
 
-  const handleTouchEnd = useCallback(() => {
-    dragRef.current = null
-  }, [])
+  function handleTouchEndMT(_event: MainThread.TouchEvent): void {
+    'main thread'
+    dragOrbIndexMT.current = -1
+    touchIdMT.current = null
+  }
 
   // ── Render ──
 
   void renderTick
 
   if (viewportW <= 0 || viewportH <= 0) {
-    console.info('[editorial-engine] early return (no viewport)')
+
     return (
       <view
         style={{ flex: 1, height: '100%', backgroundColor: BG_COLOR }}
@@ -442,7 +460,6 @@ function EditorialEnginePage() {
   }
 
   // ── Layout computation ──
-  console.info('[editorial-engine] full render', viewportW, viewportH)
 
   const isNarrow = viewportW < NARROW_BREAKPOINT
   const gutter = isNarrow ? 20 : GUTTER
@@ -543,11 +560,11 @@ function EditorialEnginePage() {
 
   return (
     <view
-      style={{ flex: 1, backgroundColor: BG_COLOR, overflow: 'hidden' }}
+      style={{ flex: 1, height: '100%', backgroundColor: BG_COLOR, overflow: 'hidden' }}
       bindlayoutchange={handleLayout}
-      bindtouchstart={handleTouchStart}
-      bindtouchmove={handleTouchMove}
-      bindtouchend={handleTouchEnd}
+      main-thread:bindtouchstart={handleTouchStartMT}
+      main-thread:bindtouchmove={handleTouchMoveMT}
+      main-thread:bindtouchend={handleTouchEndMT}
     >
       {/* Orb glow layers (behind text) */}
       {orbs.map((orb, i) => {
@@ -671,9 +688,7 @@ function EditorialEnginePage() {
   )
 }
 
-console.info('[editorial-engine] calling root.render')
 root.render(<EditorialEnginePage />)
-console.info('[editorial-engine] root.render called')
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()

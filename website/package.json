@@ -1,11 +1,35 @@
 {
   "name": "lynx-pretext-website",
-  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "prepare-examples": "node scripts/prepare-examples.mjs",
-    "dev": "pnpm prepare-examples && npx serve dist",
-    "build": "pnpm prepare-examples && node scripts/build.mjs"
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@douyinfe/semi-icons": "^2.74.0",
+    "@douyinfe/semi-ui": "^2.75.0",
+    "@lynx-js/go-web": "github:lynx-community/go-web",
+    "@lynx-js/web-core": "^0.19.8",
+    "@lynx-js/web-elements": "^0.12.0",
+    "@shikijs/transformers": "^3.4.2",
+    "qrcode.react": "^4.2.0",
+    "react": "^18.2.0",
+    "react-copy-to-clipboard": "^5.1.0",
+    "react-dom": "^18.2.0",
+    "shiki": "^3.4.2",
+    "swr": "^2.2.5",
+    "vscode-icons-js": "^11.6.1"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^1.3.0",
+    "@rsbuild/plugin-react": "^1.3.0",
+    "@rsbuild/plugin-sass": "^1.3.0",
+    "@types/react": "^18.2.0",
+    "@types/react-copy-to-clipboard": "^5.0.7",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.4.0"
   }
 }

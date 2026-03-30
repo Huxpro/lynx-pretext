@@ -129,8 +129,8 @@ for (const demo of demos) {
   const destDist = path.join(destDir, 'dist');
   fs.mkdirSync(destDist, { recursive: true });
 
-  // Copy the .lynx.bundle, renamed to main.lynx.bundle (Go web convention)
-  fs.copyFileSync(bundlePath, path.join(destDist, 'main.lynx.bundle'));
+  // Copy the .lynx.bundle with its original name
+  fs.copyFileSync(bundlePath, path.join(destDist, bundleFile));
 
   // Copy static assets from dist/static/ (images referenced by bundles)
   const staticDir = path.join(DIST_DIR, 'static');
@@ -160,7 +160,7 @@ for (const demo of demos) {
   const metadata = {
     name: demo.name,
     files: sourceFiles,
-    templateFiles: [{ name: 'main', file: 'dist/main.lynx.bundle' }],
+    templateFiles: [{ name: demo.name, file: `dist/${bundleFile}` }],
     exampleGitBaseUrl: EXAMPLE_GIT_BASE_URL,
   };
 

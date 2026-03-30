@@ -15,7 +15,7 @@ import { prepareWithSegments } from '../../src/layout' with { runtime: 'shared' 
 const FONT_SIZE = 14
 const LINE_HEIGHT = 17
 const MAX_COLS = 80
-const MAX_ROWS = 50
+const MAX_ROWS = 60
 const U_STEPS = 36
 const V_STEPS = 18
 const MAJOR_R = 0.42
@@ -72,6 +72,7 @@ export function WireframeTorusPage() {
   const colsMT = useMainThreadRef(0)
   const rowsMT = useMainThreadRef(0)
   const avgCharWidthMT = useMainThreadRef(8)
+  const maxCharWidthMT = useMainThreadRef(12)
 
   // ======= MTS FUNCTIONS =======
 
@@ -91,27 +92,20 @@ export function WireframeTorusPage() {
       widths.push(w > 0 ? w : FONT_SIZE * 0.5)
     }
     charWidthsMT.current = widths
-    // Compute average char width (excluding space)
-    let sum = 0, cnt = 0
-    for (let i = 1; i < widths.length; i++) { sum += widths[i]!; cnt++ }
+    let sum = 0, cnt = 0, maxW = 0
+    for (let i = 1; i < widths.length; i++) {
+      sum += widths[i]!; cnt++
+      if (widths[i]! > maxW) maxW = widths[i]!
+    }
     avgCharWidthMT.current = cnt > 0 ? sum / cnt : FONT_SIZE * 0.5
+    maxCharWidthMT.current = maxW > 0 ? maxW : FONT_SIZE * 0.8
   }
 
   function updateGrid(): void {
     'main thread'
-    const acw = avgCharWidthMT.current
-    colsMT.current = Math.min(MAX_COLS, Math.floor(pageWidthMT.current / acw))
+    // avg width + 10% margin — occasional minor overflow is acceptable
+    colsMT.current = Math.min(MAX_COLS, Math.floor(pageWidthMT.current / (avgCharWidthMT.current * 1.1)))
     rowsMT.current = Math.min(MAX_ROWS, Math.floor(pageHeightMT.current / LINE_HEIGHT))
-    // Hide unused rows
-    for (let r = rowsMT.current; r < MAX_ROWS; r++) {
-      const el = rowRefs[r]!.current
-      if (el) el.setStyleProperty('display', 'none')
-    }
-    // Show used rows
-    for (let r = 0; r < rowsMT.current; r++) {
-      const el = rowRefs[r]!.current
-      if (el) el.setStyleProperty('display', 'flex')
-    }
   }
 
   function renderFrame(now: number): void {
@@ -127,8 +121,8 @@ export function WireframeTorusPage() {
     // --- Torus projection ---
     const ay = t * 0.5, ax = t * 0.3 + Math.sin(t * 0.1) * 0.4
     const cw = COLS, ch = ROWS
-    const fov = Math.min(cw, ch / aspect) * 0.9
-    const camDist = 1.2
+    const fov = Math.min(cw, ch / aspect) * 0.82
+    const camDist = 1.25
 
     // Project vertices to grid coordinates
     const proj: { x: number; y: number; z: number }[][] = []
@@ -151,28 +145,31 @@ export function WireframeTorusPage() {
     // --- Rasterize torus into brightness buffer ---
     const buf = new Float32Array(COLS * ROWS) // brightness per cell
 
-    // Light direction
+    // Light direction (slightly from top-left-front)
     const lx = 0.3, ly = -0.5, lz = 0.8
     const ll = Math.sqrt(lx * lx + ly * ly + lz * lz)
     const ldx = lx / ll, ldy = ly / ll, ldz = lz / ll
 
+    // Precompute rotated normals for each vertex (reuse in both fill and wireframe)
+    const cosAy = Math.cos(ay), sinAy = Math.sin(ay)
+    const cosAx = Math.cos(ax), sinAx = Math.sin(ax)
+
+    // Pass 1: Filled quads with Lambertian shading
     for (let i = 0; i < U_STEPS; i++) {
       const ni = (i + 1) % U_STEPS
       for (let j = 0; j < V_STEPS; j++) {
         const nj = (j + 1) % V_STEPS
         const p00 = proj[i]![j]!, p10 = proj[ni]![j]!, p01 = proj[i]![nj]!, p11 = proj[ni]![nj]!
 
-        // Face normal (rotated space)
+        // Face normal from cross product (in rotated 3D space)
         const a = baseVerts[i]![j]!, b = baseVerts[ni]![j]!, c = baseVerts[i]![nj]!
-        // rotY then rotX for each
-        let ca = Math.cos(ay), sa = Math.sin(ay)
-        let ax1 = a.x * ca + a.z * sa, ay1 = a.y, az1 = -a.x * sa + a.z * ca
-        let bx1 = b.x * ca + b.z * sa, by1 = b.y, bz1 = -b.x * sa + b.z * ca
-        let cx1 = c.x * ca + c.z * sa, cy1 = c.y, cz1 = -c.x * sa + c.z * ca
-        ca = Math.cos(ax); sa = Math.sin(ax)
-        const rax = ax1, ray = ay1 * ca - az1 * sa, raz = ay1 * sa + az1 * ca
-        const rbx = bx1, rby = by1 * ca - bz1 * sa, rbz = by1 * sa + bz1 * ca
-        const rcx = cx1, rcy = cy1 * ca - cz1 * sa, rcz = cy1 * sa + cz1 * ca
+        // rotY then rotX
+        let ax1 = a.x * cosAy + a.z * sinAy, ay1 = a.y, az1 = -a.x * sinAy + a.z * cosAy
+        let bx1 = b.x * cosAy + b.z * sinAy, by1 = b.y, bz1 = -b.x * sinAy + b.z * cosAy
+        let cx1 = c.x * cosAy + c.z * sinAy, cy1 = c.y, cz1 = -c.x * sinAy + c.z * cosAy
+        const rax = ax1, ray = ay1 * cosAx - az1 * sinAx, raz = ay1 * sinAx + az1 * cosAx
+        const rbx = bx1, rby = by1 * cosAx - bz1 * sinAx, rbz = by1 * sinAx + bz1 * cosAx
+        const rcx = cx1, rcy = cy1 * cosAx - cz1 * sinAx, rcz = cy1 * sinAx + cz1 * cosAx
 
         const e1x = rbx - rax, e1y = rby - ray, e1z = rbz - raz
         const e2x = rcx - rax, e2y = rcy - ray, e2z = rcz - raz
@@ -183,12 +180,12 @@ export function WireframeTorusPage() {
         if (nl < 0.0001) continue
 
         const dot = (nx * ldx + ny * ldy + nz * ldz) / nl
-        const brightness = Math.max(0, dot) * 0.7 + 0.15
+        const brightness = Math.max(0, dot) * 0.75 + 0.1
         const avgZ = (raz + rbz + rcz) / 3
-        const depthFade = Math.max(0.15, Math.min(1, 1 - avgZ * 0.8))
+        const depthFade = Math.max(0.1, Math.min(1, 1 - avgZ * 0.9))
         const alpha = brightness * depthFade
 
-        // Fill quad in buffer (simple bounding-box rasterization)
+        // Fill quad bounding box
         const minX = Math.max(0, Math.floor(Math.min(p00.x, p10.x, p01.x, p11.x)))
         const maxX = Math.min(COLS - 1, Math.ceil(Math.max(p00.x, p10.x, p01.x, p11.x)))
         const minY = Math.max(0, Math.floor(Math.min(p00.y, p10.y, p01.y, p11.y)))
@@ -196,7 +193,6 @@ export function WireframeTorusPage() {
 
         for (let ry = minY; ry <= maxY; ry++) {
           for (let rx = minX; rx <= maxX; rx++) {
-            // Point-in-quad test (simplified: check if point is inside the convex hull)
             const idx = ry * COLS + rx
             if (alpha > buf[idx]!) buf[idx] = alpha
           }
@@ -204,11 +200,58 @@ export function WireframeTorusPage() {
       }
     }
 
-    // --- Map brightness to characters ---
+    // Pass 2: Wireframe edges on top — draws lines into the buffer for definition
+    for (let i = 0; i < U_STEPS; i++) {
+      const ni = (i + 1) % U_STEPS
+      for (let j = 0; j < V_STEPS; j++) {
+        const nj = (j + 1) % V_STEPS
+        const p = proj[i]![j]!
+        const depthP = 1 - p.z * 1.2
+        const lineAlpha = Math.max(0.03, Math.min(0.35, depthP * 0.25 + 0.08))
+
+        // Horizontal edge i→ni
+        const ph = proj[ni]![j]!
+        const steps1 = Math.max(Math.abs(ph.x - p.x), Math.abs(ph.y - p.y))
+        if (steps1 > 0.5) {
+          const n = Math.ceil(steps1)
+          for (let s = 0; s <= n; s++) {
+            const t2 = s / n
+            const lx2 = Math.round(p.x + (ph.x - p.x) * t2)
+            const ly2 = Math.round(p.y + (ph.y - p.y) * t2)
+            if (lx2 >= 0 && lx2 < COLS && ly2 >= 0 && ly2 < ROWS) {
+              const idx = ly2 * COLS + lx2
+              const v = buf[idx]! + lineAlpha
+              if (v > buf[idx]!) buf[idx] = Math.min(1, v)
+            }
+          }
+        }
+
+        // Vertical edge j→nj
+        const pv = proj[i]![nj]!
+        const steps2 = Math.max(Math.abs(pv.x - p.x), Math.abs(pv.y - p.y))
+        if (steps2 > 0.5) {
+          const n = Math.ceil(steps2)
+          for (let s = 0; s <= n; s++) {
+            const t2 = s / n
+            const lx2 = Math.round(p.x + (pv.x - p.x) * t2)
+            const ly2 = Math.round(p.y + (pv.y - p.y) * t2)
+            if (lx2 >= 0 && lx2 < COLS && ly2 >= 0 && ly2 < ROWS) {
+              const idx = ly2 * COLS + lx2
+              const v = buf[idx]! + lineAlpha
+              if (v > buf[idx]!) buf[idx] = Math.min(1, v)
+            }
+          }
+        }
+      }
+    }
+
+    // --- Map brightness to characters + per-row glow color ---
     for (let r = 0; r < ROWS; r++) {
       let rowText = ''
+      let maxB = 0
       for (let c = 0; c < COLS; c++) {
         const b = buf[r * COLS + c]!
+        if (b > maxB) maxB = b
         if (b < 0.02) {
           rowText += ' '
         } else {
@@ -217,7 +260,15 @@ export function WireframeTorusPage() {
         }
       }
       const el = rowRefs[r]!.current
-      if (el) el.setAttribute('text', rowText)
+      if (el) {
+        el.setAttribute('text', rowText)
+        // Glow: bright rows get vivid cyan, dim rows get muted blue-grey
+        const glow = Math.max(0.15, Math.min(1, maxB * 1.5))
+        const rr = Math.round(20 + glow * 60)
+        const gg = Math.round(60 + glow * 195)
+        const bb = Math.round(80 + glow * 140)
+        el.setStyleProperty('color', `rgb(${rr},${gg},${bb})`)
+      }
     }
   }
 
@@ -257,33 +308,25 @@ export function WireframeTorusPage() {
   useEffect(() => { void runOnMainThread(syncDims)(pageWidth, pageHeight) }, [pageWidth, pageHeight])
 
   return (
-    <view style={{ flex: 1, backgroundColor: '#0a0a0f' }} bindlayoutchange={onLayout}>
-      {/* Row pool */}
-      {Array.from({ length: MAX_ROWS }, (_, i) => (
-        <view key={`r-${i}`} style={{ height: `${LINE_HEIGHT}px`, display: 'none' }}>
-          <text
-            main-thread:ref={rowRefs[i]}
-            style={{
-              fontSize: `${FONT_SIZE}px`,
-              lineHeight: `${LINE_HEIGHT}px`,
-              color: '#c8c0b0',
-              fontFamily: 'Menlo, Courier, monospace',
-              letterSpacing: '0px',
-            }}
-          > </text>
-        </view>
-      ))}
-
-      {/* Stats overlay */}
-      <view style={{
-        position: 'absolute', bottom: '12px', left: '12px', right: '12px',
-        backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '8px', padding: '8px 12px',
-      }}>
-        <text
-          main-thread:ref={statsRef}
-          style={{ fontSize: '11px', color: 'rgba(200,192,176,0.7)', fontFamily: 'Menlo, Courier, monospace' }}
-        >loading...</text>
+    <view style={{ flex: 1, backgroundColor: '#000000' }} bindlayoutchange={onLayout}>
+      {/* Row pool — overflow hidden so extra rows beyond screen don't add height */}
+      <view style={{ width: '100%', height: `${pageHeight}px`, overflow: 'hidden' }}>
+        {Array.from({ length: MAX_ROWS }, (_, i) => (
+          <view key={`r-${i}`} style={{ height: `${LINE_HEIGHT}px` }}>
+            <text
+              main-thread:ref={rowRefs[i]}
+              style={{
+                fontSize: `${FONT_SIZE}px`,
+                lineHeight: `${LINE_HEIGHT}px`,
+                color: '#3c9c78',
+                fontFamily: 'Menlo, Courier, monospace',
+                letterSpacing: '0px',
+              }}
+            > </text>
+          </view>
+        ))}
       </view>
+
     </view>
   )
 }
