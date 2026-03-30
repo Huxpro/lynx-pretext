@@ -681,6 +681,7 @@ function EditorialMTSPage() {
     dragStartOrbXMT.current = orb.x
     dragStartOrbYMT.current = orb.y
     dragMoveCountMT.current = 0
+    orb.paused = true // 暂停物理模拟，确保拖拽过程中不受干扰
     logTouchMT(
       `start hit orb=${hitIndex} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) r=${orb.r} paused=${orb.paused ? '1' : '0'}`,
     )
@@ -691,16 +692,10 @@ function EditorialMTSPage() {
     const dragIndex = dragOrbIndexMT.current
     if (dragIndex === -1) return
 
-    let touch = null as null | { identifier: number; clientX: number; clientY: number }
-    for (let index = 0; index < event.touches.length; index++) {
-      const candidate = event.touches[index]!
-      if (candidate.identifier === touchIdMT.current) {
-        touch = candidate
-        break
-      }
-    }
+    // 直接用第一个 touch，单指拖拽足够
+    const touch = event.touches.length > 0 ? event.touches[0]! : null
     if (touch === null) {
-      logTouchMT(`move missing tracked touch activeOrb=${dragIndex} trackedTouch=${touchIdMT.current}`)
+      logTouchMT(`move no touch in event`)
       return
     }
 
@@ -712,9 +707,28 @@ function EditorialMTSPage() {
     dragMoveCountMT.current += 1
     if (dragMoveCountMT.current === 1 || dragMoveCountMT.current % 4 === 0) {
       logTouchMT(
-        `move orb=${dragIndex} step=${dragMoveCountMT.current} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)})`,
+        `move orb=${dragIndex} step=${dragMoveCountMT.current} touch@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)})`,
       )
     }
+    // 实时更新 orb 元素位置，确保拖拽过程可见
+    positionOrb(
+      orbGlowRefs[dragIndex],
+      orb.x - orb.r * 1.55,
+      orb.y - orb.r * 1.55,
+      orb.r * 3.1,
+      orb.r * 1.55,
+      orb.glowColor,
+      orb.paused ? '0.12' : '0.3',
+    )
+    positionOrb(
+      orbCoreRefs[dragIndex],
+      orb.x - orb.r,
+      orb.y - orb.r,
+      orb.r * 2,
+      orb.r,
+      orb.coreColor,
+      orb.paused ? '0.34' : '0.92',
+    )
     applyEditorialLayoutMT()
   }
 

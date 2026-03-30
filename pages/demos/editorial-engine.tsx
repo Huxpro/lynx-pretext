@@ -1,4 +1,4 @@
-import { root, useState, useCallback, useRef, useEffect, useMainThreadRef } from '@lynx-js/react'
+import { root, useState, useCallback, useRef, useMainThreadRef, runOnMainThread, runOnBackground } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
 import {
   layoutNextLine,
@@ -292,23 +292,23 @@ function EditorialEnginePage() {
 
   const [viewportW, setViewportW] = useState(0)
   const [viewportH, setViewportH] = useState(0)
-  const [renderTick, setRenderTick] = useState(0)
+  const [orbs, setOrbs] = useState<Orb[]>([]) // BTS render copy
 
-  const orbsRef = useRef<Orb[]>([])
   const initRef = useRef(false)
-  const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastFrameRef = useRef<number | null>(null)
-  const animateFnRef = useRef<() => void>(() => {})
+  const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
 
-  // Main-thread refs for drag (zero-latency touch handling)
+  // ── Main Thread State (single source of truth for animation/physics) ──
   const orbsMT = useMainThreadRef<Orb[]>([])
+  const viewportWMT = useMainThreadRef(0)
+  const viewportHMT = useMainThreadRef(0)
+  const lastFrameTimeMT = useMainThreadRef(0)
+  const animatingMT = useMainThreadRef(false)
+  // Drag state
   const dragOrbIndexMT = useMainThreadRef(-1)
-  const touchIdMT = useMainThreadRef<number | null>(null)
   const dragStartXMT = useMainThreadRef(0)
   const dragStartYMT = useMainThreadRef(0)
   const dragStartOrbXMT = useMainThreadRef(0)
   const dragStartOrbYMT = useMainThreadRef(0)
-  const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
 
   // Cached text preparation
   const getPrepared = useCallback((text: string, font: string): PreparedTextWithSegments => {
@@ -320,38 +320,43 @@ function EditorialEnginePage() {
     return cached
   }, [])
 
-  // Layout change handler — initializes orbs on first call
+  // Layout change handler — initializes viewport and orbs
   const handleLayout = useCallback((e: any) => {
-
     const { width, height } = e.detail
     if (width <= 0 || height <= 0) return
 
     setViewportW(width)
     setViewportH(height)
+
     if (!initRef.current) {
       initRef.current = true
-      const orbs = ORB_DEFS.map(d => ({
+      const initialOrbs = ORB_DEFS.map(d => ({
         x: d.fx * width, y: d.fy * height,
         r: d.r, vx: d.vx, vy: d.vy, color: d.color,
       }))
-      orbsRef.current = orbs
-      orbsMT.current = orbs
-      lastFrameRef.current = null
-      animTimerRef.current = setTimeout(() => animateFnRef.current(), 16)
+      setOrbs(initialOrbs)
+      // Initialize MTS state and start animation
+      void runOnMainThread(initAndStartMT)(width, height, initialOrbs)
     }
   }, [])
 
-  // Animation tick — updates orb positions and triggers re-render
-  animateFnRef.current = () => {
+  // ── Main Thread Animation Loop ──
+  // NOTE: MTS functions must be declared in callee-before-caller order (TDZ)
+
+  function gameTickMT(): void {
+    'main thread'
+    if (!animatingMT.current) return
+
     const now = Date.now()
-    const dt = Math.min((now - (lastFrameRef.current ?? now)) / 1000, 0.05)
-    lastFrameRef.current = now
+    const dt = Math.min((now - lastFrameTimeMT.current) / 1000, 0.05)
+    lastFrameTimeMT.current = now
 
-    const orbs = orbsRef.current
+    const orbs = orbsMT.current
     const draggedIdx = dragOrbIndexMT.current
-    const w = viewportW
-    const h = viewportH
+    const w = viewportWMT.current
+    const h = viewportHMT.current
 
+    // Physics update
     for (let i = 0; i < orbs.length; i++) {
       const orb = orbs[i]!
       if (i === draggedIdx) continue
@@ -381,33 +386,45 @@ function EditorialEnginePage() {
       }
     }
 
-    setRenderTick(n => n + 1)
-    animTimerRef.current = setTimeout(() => animateFnRef.current(), 16)
+    // Sync to BTS for rendering (once per frame)
+    runOnBackground(setOrbs)(orbs.map(o => ({ ...o })))
+
+    requestAnimationFrame(gameTickMT)
   }
 
-  // Cleanup animation on unmount
-  useEffect(() => {
-    return () => {
-      if (animTimerRef.current !== null) {
-        clearTimeout(animTimerRef.current)
-      }
-    }
-  }, [])
+  function initAndStartMT(w: number, h: number, initialOrbs: Orb[]): void {
+    'main thread'
+    console.log('[MTS] initAndStartMT', w, h, 'orbs:', initialOrbs.length)
+    viewportWMT.current = w
+    viewportHMT.current = h
+    orbsMT.current = initialOrbs.map(o => ({ ...o }))
+    console.log('[MTS] orbsMT.current set, first orb:', orbsMT.current[0])
+    lastFrameTimeMT.current = Date.now()
+    animatingMT.current = true
+    requestAnimationFrame(gameTickMT)
+  }
 
-  // Main-thread touch handlers for zero-latency orb dragging
+  // ── Main Thread Touch Handlers (zero-latency drag) ──
+
   function handleTouchStartMT(event: MainThread.TouchEvent): void {
     'main thread'
     const touch = event.touches.length > 0 ? event.touches[0]! : null
     if (touch === null) return
 
     const orbs = orbsMT.current
+    console.log('[MTS] touchstart at', touch.clientX.toFixed(0), touch.clientY.toFixed(0))
+    for (let i = 0; i < orbs.length; i++) {
+      const orb = orbs[i]!
+      console.log(`  orb ${i}: pos=(${orb.x.toFixed(0)}, ${orb.y.toFixed(0)}) r=${orb.r}`)
+    }
+
     for (let i = orbs.length - 1; i >= 0; i--) {
       const orb = orbs[i]!
       const dx = touch.clientX - orb.x
       const dy = touch.clientY - orb.y
       const grabR = orb.r + 20
       if (dx * dx + dy * dy <= grabR * grabR) {
-        touchIdMT.current = touch.identifier
+        console.log('[MTS] DRAG START on orb', i)
         dragOrbIndexMT.current = i
         dragStartXMT.current = touch.clientX
         dragStartYMT.current = touch.clientY
@@ -416,41 +433,38 @@ function EditorialEnginePage() {
         return
       }
     }
+    console.log('[MTS] no orb hit')
   }
 
   function handleTouchMoveMT(event: MainThread.TouchEvent): void {
     'main thread'
     const dragIndex = dragOrbIndexMT.current
+    console.log('[MTS] touchmove, dragIndex:', dragIndex, 'touches:', event.touches.length)
     if (dragIndex === -1) return
 
-    let touch: { identifier: number; clientX: number; clientY: number } | null = null
-    for (let i = 0; i < event.touches.length; i++) {
-      const candidate = event.touches[i]!
-      if (candidate.identifier === touchIdMT.current) {
-        touch = candidate
-        break
-      }
+    // Just use first touch for single-finger drag
+    const touch = event.touches.length > 0 ? event.touches[0]! : null
+    if (touch === null) {
+      console.log('[MTS] no touch in event')
+      return
     }
-    if (touch === null) return
 
     const orb = orbsMT.current[dragIndex]
     if (!orb) return
     orb.x = dragStartOrbXMT.current + (touch.clientX - dragStartXMT.current)
     orb.y = dragStartOrbYMT.current + (touch.clientY - dragStartYMT.current)
+    console.log('[MTS] DRAG MOVE orb', dragIndex, '->', orb.x, orb.y)
   }
 
   function handleTouchEndMT(_event: MainThread.TouchEvent): void {
     'main thread'
+    console.log('[MTS] touchend, was dragging:', dragOrbIndexMT.current)
     dragOrbIndexMT.current = -1
-    touchIdMT.current = null
   }
 
   // ── Render ──
 
-  void renderTick
-
   if (viewportW <= 0 || viewportH <= 0) {
-
     return (
       <view
         style={{ flex: 1, height: '100%', backgroundColor: BG_COLOR }}
@@ -466,7 +480,6 @@ function EditorialEnginePage() {
   const colGap = isNarrow ? 16 : COL_GAP
   const bottomGap = isNarrow ? 12 : BOTTOM_GAP
 
-  const orbs = orbsRef.current
   const circleObstacles: CircleObstacle[] = orbs.map(orb => ({
     cx: orb.x, cy: orb.y, r: orb.r,
     hPad: isNarrow ? 8 : 12,

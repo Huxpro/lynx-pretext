@@ -20,6 +20,8 @@ export default defineConfig({
       'dynamic-layout-bts': './pages/demos/dynamic-layout-bts.tsx',
       'editorial-mts': './pages/demos/editorial-mts.tsx',
       'wireframe-torus': './pages/demos/wireframe-torus.tsx',
+      'field-mono': './pages/demos/field-mono.tsx',
+      'field-prop': './pages/demos/field-prop.tsx',
     },
   },
   plugins: [
