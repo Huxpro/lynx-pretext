@@ -36,6 +36,8 @@ const BODY_POOL = 84
 const HEADLINE_POOL = 4
 const INTRO_POOL = 8
 const DRAG_TAP_THRESHOLD = 12
+const ORB_GRAB_PADDING = 20
+const DEBUG_TOUCH_LOGS = true
 
 const BODY_TEXT = `The web renders text through a pipeline that was designed thirty years ago for static documents. A browser loads a font, shapes the text into glyphs, measures their combined width, determines where lines break, and positions each line vertically. Every step depends on the previous one. Every step requires the rendering engine to consult its internal layout tree — a structure so expensive to maintain that browsers guard access to it behind synchronous reflow barriers that can freeze the main thread for tens of milliseconds at a time.
 
@@ -234,6 +236,7 @@ function EditorialMTSPage() {
   const onLayout = useCallback((e: any) => {
     const width = Math.floor(e.detail.width)
     const height = Math.floor(e.detail.height)
+    if (width <= 0 || height <= 0) return
     void runOnMainThread(syncViewportMT)(width, height)
   }, [])
 
@@ -290,6 +293,7 @@ function EditorialMTSPage() {
   const dragStartYMT = useMainThreadRef(0)
   const dragStartOrbXMT = useMainThreadRef(0)
   const dragStartOrbYMT = useMainThreadRef(0)
+  const dragMoveCountMT = useMainThreadRef(0)
 
   function getPreparedMTS(text: string, font: string): PreparedTextWithSegments {
     'main thread'
@@ -330,7 +334,7 @@ function EditorialMTSPage() {
     if (fontSize !== undefined) {
       text.setStyleProperty('font-size', `${fontSize}px`)
     }
-    text.setAttribute('textContent', line.text)
+    text.setAttribute('text', line.text)
   }
 
   function positionOrb(ref: any, left: number, top: number, size: number, radius: number, color: string, opacity: string): void {
@@ -347,6 +351,25 @@ function EditorialMTSPage() {
     })
   }
 
+  function logTouchMT(message: string): void {
+    'main thread'
+    if (!DEBUG_TOUCH_LOGS) return
+    console.info(`[editorial-mts touch] ${message}`)
+  }
+
+  function summarizeOrbsMT(): string {
+    'main thread'
+    const parts: string[] = []
+    for (let index = 0; index < orbsMT.current.length; index++) {
+      const orb = orbsMT.current[index]
+      if (!orb) continue
+      parts.push(
+        `#${index}@(${Math.round(orb.x)},${Math.round(orb.y)}) r=${orb.r} paused=${orb.paused ? '1' : '0'}`,
+      )
+    }
+    return parts.join(' | ')
+  }
+
   function hitTestOrbIndex(x: number, y: number): number {
     'main thread'
     const orbs = orbsMT.current
@@ -354,7 +377,8 @@ function EditorialMTSPage() {
       const orb = orbs[index]!
       const dx = x - orb.x
       const dy = y - orb.y
-      if (dx * dx + dy * dy <= orb.r * orb.r) return index
+      const grabRadius = orb.r + ORB_GRAB_PADDING
+      if (dx * dx + dy * dy <= grabRadius * grabRadius) return index
     }
     return -1
   }
@@ -623,6 +647,9 @@ function EditorialMTSPage() {
     pageWidthMT.current = width
     pageHeightMT.current = height
     applyEditorialLayoutMT()
+    logTouchMT(
+      `viewport=${width}x${height} body=(${Math.round(bodyRectMT.current.x)},${Math.round(bodyRectMT.current.y)},${Math.round(bodyRectMT.current.width)},${Math.round(bodyRectMT.current.height)}) orbs=${summarizeOrbsMT()}`,
+    )
     ensureAnimationMT()
   }
 
@@ -639,7 +666,12 @@ function EditorialMTSPage() {
     if (touch === null) return
 
     const hitIndex = hitTestOrbIndex(touch.clientX, touch.clientY)
-    if (hitIndex === -1) return
+    if (hitIndex === -1) {
+      logTouchMT(
+        `start miss touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) body=(${Math.round(bodyRectMT.current.x)},${Math.round(bodyRectMT.current.y)},${Math.round(bodyRectMT.current.width)},${Math.round(bodyRectMT.current.height)}) orbs=${summarizeOrbsMT()}`,
+      )
+      return
+    }
 
     const orb = orbsMT.current[hitIndex]!
     touchIdMT.current = touch.identifier
@@ -648,6 +680,10 @@ function EditorialMTSPage() {
     dragStartYMT.current = touch.clientY
     dragStartOrbXMT.current = orb.x
     dragStartOrbYMT.current = orb.y
+    dragMoveCountMT.current = 0
+    logTouchMT(
+      `start hit orb=${hitIndex} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) r=${orb.r} paused=${orb.paused ? '1' : '0'}`,
+    )
   }
 
   function handleTouchMoveMT(event: MainThread.TouchEvent): void {
@@ -663,13 +699,22 @@ function EditorialMTSPage() {
         break
       }
     }
-    if (touch === null) return
+    if (touch === null) {
+      logTouchMT(`move missing tracked touch activeOrb=${dragIndex} trackedTouch=${touchIdMT.current}`)
+      return
+    }
 
     const orb = orbsMT.current[dragIndex]
     if (!orb) return
     orb.x = dragStartOrbXMT.current + (touch.clientX - dragStartXMT.current)
     orb.y = dragStartOrbYMT.current + (touch.clientY - dragStartYMT.current)
     clampOrbToBody(orb, bodyRectMT.current)
+    dragMoveCountMT.current += 1
+    if (dragMoveCountMT.current === 1 || dragMoveCountMT.current % 4 === 0) {
+      logTouchMT(
+        `move orb=${dragIndex} step=${dragMoveCountMT.current} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)})`,
+      )
+    }
     applyEditorialLayoutMT()
   }
 
@@ -690,8 +735,10 @@ function EditorialMTSPage() {
 
     const orb = orbsMT.current[dragIndex]
     if (!orb || touch === null) {
+      logTouchMT(`end missing orbOrTouch activeOrb=${dragIndex} trackedTouch=${touchIdMT.current}`)
       dragOrbIndexMT.current = -1
       touchIdMT.current = null
+      dragMoveCountMT.current = 0
       return
     }
 
@@ -707,19 +754,20 @@ function EditorialMTSPage() {
       orb.paused = false
     }
 
+    logTouchMT(
+      `end orb=${dragIndex} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) delta=(${Math.round(dx)},${Math.round(dy)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) mode=${dx * dx + dy * dy <= DRAG_TAP_THRESHOLD * DRAG_TAP_THRESHOLD ? 'tap' : 'drag'} paused=${orb.paused ? '1' : '0'}`,
+    )
+
     dragOrbIndexMT.current = -1
     touchIdMT.current = null
+    dragMoveCountMT.current = 0
     applyEditorialLayoutMT()
   }
 
   return (
     <view
-      style={{ flex: 1, backgroundColor: BG_COLOR, overflow: 'hidden' }}
+      style={{ flex: 1, height: '100%', backgroundColor: BG_COLOR, overflow: 'hidden' }}
       bindlayoutchange={onLayout}
-      main-thread:bindtouchstart={handleTouchStartMT}
-      main-thread:bindtouchmove={handleTouchMoveMT}
-      main-thread:bindtouchend={handleTouchEndMT}
-      main-thread:bindtouchcancel={handleTouchEndMT}
     >
       {Array.from({ length: HEADLINE_POOL }, (_, index) => (
         <view
@@ -779,6 +827,22 @@ function EditorialMTSPage() {
           <view main-thread:ref={orbCoreRefs[index]} style={{ position: 'absolute', display: 'none' }} />
         </view>
       ))}
+
+      <view
+        key="touch-surface"
+        style={{
+          position: 'absolute',
+          left: '0px',
+          top: '0px',
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0)',
+        }}
+        main-thread:bindtouchstart={handleTouchStartMT}
+        main-thread:bindtouchmove={handleTouchMoveMT}
+        main-thread:bindtouchend={handleTouchEndMT}
+        main-thread:bindtouchcancel={handleTouchEndMT}
+      />
     </view>
   )
 }
