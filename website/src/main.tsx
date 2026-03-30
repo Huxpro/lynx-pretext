@@ -6,7 +6,7 @@ import type { GoConfig } from '@lynx-js/go-web';
 import './styles.css';
 
 // Injected at build time by rsbuild.config.ts
-const examples: string[] = import.meta.env.EXAMPLES;
+const entryNames: string[] = import.meta.env.ENTRY_NAMES;
 
 const goConfig: GoConfig = {
   exampleBasePath: '/examples',
@@ -16,7 +16,7 @@ const goConfig: GoConfig = {
 function App() {
   const hashName = location.hash.slice(1);
   const [active, setActive] = useState(
-    examples.includes(hashName) ? hashName : examples[0] || '',
+    entryNames.includes(hashName) ? hashName : entryNames[0] || '',
   );
 
   function switchTo(name: string) {
@@ -44,7 +44,7 @@ function App() {
         </p>
 
         <div className="tab-bar">
-          {examples.map((name) => (
+          {entryNames.map((name) => (
             <button
               key={name}
               className={`tab ${name === active ? 'active' : ''}`}
@@ -56,7 +56,12 @@ function App() {
         </div>
 
         <div className="embed-section">
-          <Go key={active} example={active} mode="preview" />
+          <Go
+            key={active}
+            example="lynx-pretext"
+            defaultEntryName={active}
+            mode="preview"
+          />
         </div>
       </div>
     </GoConfigProvider>

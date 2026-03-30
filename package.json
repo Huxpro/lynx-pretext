@@ -1,28 +1,13 @@
 {
-  "name": "lynx-pretext",
-  "version": "0.0.1",
-  "type": "module",
-  "description": "Pure JS text measurement & layout library for Lynx using getTextInfo()",
+  "name": "lynx-pretext-monorepo",
+  "private": true,
   "scripts": {
-    "build": "rspeedy build",
-    "dev": "rspeedy dev",
-    "preview": "rspeedy preview",
-    "typecheck": "tsc --build"
-  },
-  "dependencies": {
-    "@formatjs/intl-segmenter": "^12.2.1",
-    "@lynx-js/react": "0.116.4"
-  },
-  "devDependencies": {
-    "@lynx-js/qrcode-rsbuild-plugin": "^0.4.6",
-    "@lynx-js/react-rsbuild-plugin": "0.12.9",
-    "@lynx-js/rspeedy": "0.13.4",
-    "@lynx-js/types": "3.7.0",
-    "@rsbuild/plugin-type-check": "1.3.4",
-    "@types/react": "^18.3.28",
-    "typescript": "~5.9.3"
-  },
-  "engines": {
-    "node": ">=18"
+    "build": "pnpm --filter lynx-pretext run build",
+    "build:examples": "pnpm --filter './examples/*' --parallel run build",
+    "dev:basic": "pnpm --filter @lynx-pretext-example/basic run dev",
+    "dev:bubble": "pnpm --filter @lynx-pretext-example/bubble run dev",
+    "dev:dynamic-layout": "pnpm --filter @lynx-pretext-example/dynamic-layout run dev",
+    "dev:editorial": "pnpm --filter @lynx-pretext-example/editorial run dev",
+    "dev:ascii-arts": "pnpm --filter @lynx-pretext-example/ascii-arts run dev"
   }
 }

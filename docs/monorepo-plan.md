@@ -27,6 +27,8 @@ lynx-pretext/
 │       ├── dynamic-layout*.tsx
 │       ├── editorial-*.tsx
 │       ├── wireframe-torus.tsx
+│       ├── field-mono.tsx
+│       ├── field-prop.tsx
 │       └── (shared: hull-data, wrap-geometry, etc.)
 ├── website/
 ├── lynx.config.ts        ← single config for everything
@@ -100,7 +102,9 @@ lynx-pretext/
 │   └── ascii-arts/                ← ASCII art demos
 │       ├── src/
 │       │   ├── index.tsx
-│       │   └── wireframe-torus.tsx
+│       │   ├── wireframe-torus.tsx
+│       │   ├── field-mono.tsx
+│       │   └── field-prop.tsx
 │       ├── lynx.config.ts
 │       ├── package.json
 │       └── tsconfig.json
@@ -276,6 +280,8 @@ export default defineConfig({
   source: {
     entry: {
       main: './src/wireframe-torus.tsx',
+      'field-mono': './src/field-mono.tsx',
+      'field-prop': './src/field-prop.tsx',
     },
   },
   // ...same plugins
@@ -405,6 +411,8 @@ This matches the original pretext `editorial-engine.ts` which also inlines `carv
 | `pages/demos/editorial-engine.tsx` | `examples/editorial/src/editorial-engine.tsx` | Editorial demo |
 | `pages/demos/editorial-mts.tsx` | `examples/editorial/src/editorial-mts.tsx` | Editorial demo (inline carveTextLineSlots) |
 | `pages/demos/wireframe-torus.tsx` | `examples/ascii-arts/src/wireframe-torus.tsx` | ASCII art demo |
+| `pages/demos/field-mono.tsx` | `examples/ascii-arts/src/field-mono.tsx` | ASCII art demo (mono) |
+| `pages/demos/field-prop.tsx` | `examples/ascii-arts/src/field-prop.tsx` | ASCII art demo (proportional) |
 | `website/` | `website/` | Unchanged |
 | `docs/` | `docs/` | Unchanged |
 | `tasks/` | `tasks/` | Unchanged |

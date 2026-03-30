@@ -1,9 +1,9 @@
 /**
- * Pre-build script that copies built demo bundles and source files
- * to public/examples/ for the <Go> component to consume.
+ * Pre-build script that copies the built dist/ and source files into a single
+ * "lynx-pretext" example at public/examples/lynx-pretext/ for Go web to consume.
  *
- * Mirrors the vue-lynx website pattern: builds locally, no npm round-trip.
- * Each demo gets its bundle renamed to main.lynx.bundle (Go web convention).
+ * Unlike vue-lynx (many separate example packages), lynx-pretext is one project
+ * with multiple entries — so it becomes one Go web example with many templateFiles.
  *
  * Usage:
  *   node scripts/prepare-examples.mjs
@@ -18,74 +18,29 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../..');
 const DIST_DIR = path.join(REPO_ROOT, 'dist');
 const EXAMPLES_DEST = path.resolve(__dirname, '../public/examples');
+const EXAMPLE_DIR = path.join(EXAMPLES_DEST, 'lynx-pretext');
 const EXAMPLE_GIT_BASE_URL =
   'https://github.com/Huxpro/lynx-pretext/tree/main';
 
-/** All demo entries to expose on the website (matches lynx.config.ts). */
-const demos = [
-  {
-    name: 'basic-height',
-    sources: ['pages/basic-height.tsx'],
-  },
-  {
-    name: 'layout-with-lines',
-    sources: ['pages/layout-with-lines.tsx'],
-  },
-  {
-    name: 'shrinkwrap',
-    sources: ['pages/shrinkwrap.tsx'],
-  },
-  {
-    name: 'variable-flow',
-    sources: ['pages/variable-flow.tsx'],
-  },
-  {
-    name: 'accuracy',
-    sources: ['pages/accuracy.tsx'],
-  },
-  {
-    name: 'bubbles',
-    sources: ['pages/demos/bubbles.tsx', 'pages/demos/bubbles-shared.ts'],
-  },
-  {
-    name: 'dynamic-layout',
-    sources: [
-      'pages/demos/dynamic-layout.tsx',
-      'pages/demos/dynamic-layout-text.ts',
-      'pages/demos/wrap-geometry.ts',
-      'pages/demos/hull-data.ts',
-    ],
-  },
-  {
-    name: 'editorial-engine',
-    sources: ['pages/demos/editorial-engine.tsx'],
-  },
-  {
-    name: 'dynamic-layout-mts',
-    sources: [
-      'pages/demos/dynamic-layout-mts.tsx',
-      'pages/demos/dynamic-layout-text.ts',
-      'pages/demos/hull-data.ts',
-      'pages/demos/wrap-geometry.ts',
-    ],
-  },
-  {
-    name: 'dynamic-layout-bts',
-    sources: [
-      'pages/demos/dynamic-layout-bts.tsx',
-      'pages/demos/dynamic-layout-text.ts',
-      'pages/demos/hull-data.ts',
-      'pages/demos/wrap-geometry.ts',
-    ],
-  },
-  {
-    name: 'editorial-mts',
-    sources: ['pages/demos/editorial-mts.tsx', 'pages/demos/wrap-geometry.ts'],
-  },
-  {
-    name: 'wireframe-torus',
-    sources: ['pages/demos/wireframe-torus.tsx'],
-  },
+/** Source files to include for code viewing. */
+const sourceFiles = [
+  'lynx.config.ts',
+  'pages/basic-height.tsx',
+  'pages/layout-with-lines.tsx',
+  'pages/shrinkwrap.tsx',
+  'pages/variable-flow.tsx',
+  'pages/accuracy.tsx',
+  'pages/demos/bubbles.tsx',
+  'pages/demos/bubbles-shared.ts',
+  'pages/demos/dynamic-layout.tsx',
+  'pages/demos/dynamic-layout-text.ts',
+  'pages/demos/dynamic-layout-mts.tsx',
+  'pages/demos/dynamic-layout-bts.tsx',
+  'pages/demos/editorial-engine.tsx',
+  'pages/demos/editorial-mts.tsx',
+  'pages/demos/wireframe-torus.tsx',
+  'pages/demos/wrap-geometry.ts',
+  'pages/demos/hull-data.ts',
 ];
 
 function copyDir(src, dest) {
@@ -110,67 +65,53 @@ if (!fs.existsSync(DIST_DIR)) {
 if (fs.existsSync(EXAMPLES_DEST)) {
   fs.rmSync(EXAMPLES_DEST, { recursive: true });
 }
-fs.mkdirSync(EXAMPLES_DEST, { recursive: true });
 
-// --- Process each demo ---
+// --- Copy entire dist/ ---
 
-let processed = 0;
+const destDist = path.join(EXAMPLE_DIR, 'dist');
+copyDir(DIST_DIR, destDist);
+console.info('  ✓ dist/ copied');
 
-for (const demo of demos) {
-  const bundleFile = `${demo.name}.lynx.bundle`;
-  const bundlePath = path.join(DIST_DIR, bundleFile);
+// --- Copy source files ---
 
-  if (!fs.existsSync(bundlePath)) {
-    console.warn(`  ⚠ skipping ${demo.name}: ${bundleFile} not found in dist/`);
+const copiedFiles = [];
+for (const srcFile of sourceFiles) {
+  const srcPath = path.join(REPO_ROOT, srcFile);
+  if (!fs.existsSync(srcPath)) {
+    console.warn(`  ⚠ ${srcFile} not found, skipping`);
     continue;
   }
-
-  const destDir = path.join(EXAMPLES_DEST, demo.name);
-  const destDist = path.join(destDir, 'dist');
-  fs.mkdirSync(destDist, { recursive: true });
-
-  // Copy the .lynx.bundle with its original name
-  fs.copyFileSync(bundlePath, path.join(destDist, bundleFile));
-
-  // Copy static assets from dist/static/ (images referenced by bundles)
-  const staticDir = path.join(DIST_DIR, 'static');
-  if (fs.existsSync(staticDir)) {
-    copyDir(staticDir, path.join(destDist, 'static'));
-  }
-
-  // Copy source files
-  const sourceFiles = [];
-  for (const srcFile of demo.sources) {
-    const srcPath = path.join(REPO_ROOT, srcFile);
-    if (!fs.existsSync(srcPath)) continue;
-    const destPath = path.join(destDir, srcFile);
-    fs.mkdirSync(path.dirname(destPath), { recursive: true });
-    fs.copyFileSync(srcPath, destPath);
-    sourceFiles.push(srcFile);
-  }
-
-  // Copy lynx.config.ts for reference
-  const configSrc = path.join(REPO_ROOT, 'lynx.config.ts');
-  if (fs.existsSync(configSrc)) {
-    fs.copyFileSync(configSrc, path.join(destDir, 'lynx.config.ts'));
-    sourceFiles.push('lynx.config.ts');
-  }
-
-  // Generate example-metadata.json
-  const metadata = {
-    name: demo.name,
-    files: sourceFiles,
-    templateFiles: [{ name: demo.name, file: `dist/${bundleFile}` }],
-    exampleGitBaseUrl: EXAMPLE_GIT_BASE_URL,
-  };
-
-  fs.writeFileSync(
-    path.join(destDir, 'example-metadata.json'),
-    JSON.stringify(metadata, null, 2),
-  );
-
-  processed++;
-  console.info(`  ✓ ${demo.name} (${sourceFiles.length} files)`);
+  const destPath = path.join(EXAMPLE_DIR, srcFile);
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  fs.copyFileSync(srcPath, destPath);
+  copiedFiles.push(srcFile);
 }
+console.info(`  ✓ ${copiedFiles.length} source files copied`);
 
-console.info(`\nPrepared ${processed}/${demos.length} examples in public/examples/`);
+// --- Discover templateFiles from dist/ ---
+
+const templateFiles = fs
+  .readdirSync(destDist)
+  .filter((f) => f.endsWith('.lynx.bundle'))
+  .sort()
+  .map((f) => ({ name: f.replace('.lynx.bundle', ''), file: `dist/${f}` }));
+
+console.info(`  ✓ ${templateFiles.length} template entries`);
+
+// --- Generate example-metadata.json ---
+
+fs.writeFileSync(
+  path.join(EXAMPLE_DIR, 'example-metadata.json'),
+  JSON.stringify(
+    {
+      name: 'lynx-pretext',
+      files: copiedFiles,
+      templateFiles,
+      exampleGitBaseUrl: EXAMPLE_GIT_BASE_URL,
+    },
+    null,
+    2,
+  ),
+);
+
+console.info('\nPrepared example at public/examples/lynx-pretext/');

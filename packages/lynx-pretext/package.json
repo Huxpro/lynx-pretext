@@ -1,0 +1,13 @@
+{
+  "name": "lynx-pretext",
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/layout.ts"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@formatjs/intl-segmenter": "^12.2.1"
+  }
+}

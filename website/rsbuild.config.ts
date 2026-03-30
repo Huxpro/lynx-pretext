@@ -4,16 +4,18 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import path from 'node:path';
 import fs from 'node:fs';
 
-// Discover examples from public/examples/ (populated by prepare-examples.mjs)
-const examplesDir = path.resolve(__dirname, 'public/examples');
-const exampleNames = fs.existsSync(examplesDir)
-  ? fs
-      .readdirSync(examplesDir)
-      .filter((name) =>
-        fs.statSync(path.join(examplesDir, name)).isDirectory(),
-      )
-      .sort()
-  : [];
+// Read template entries from the prepared example metadata
+const metadataPath = path.resolve(
+  __dirname,
+  'public/examples/lynx-pretext/example-metadata.json',
+);
+let entryNames: string[] = [];
+if (fs.existsSync(metadataPath)) {
+  const meta = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
+  entryNames = meta.templateFiles.map(
+    (t: { name: string }) => t.name,
+  );
+}
 
 export default defineConfig({
   plugins: [pluginReact(), pluginSass()],
@@ -31,7 +33,7 @@ export default defineConfig({
       embed: './src/embed-entry.tsx',
     },
     define: {
-      'import.meta.env.EXAMPLES': JSON.stringify(exampleNames),
+      'import.meta.env.ENTRY_NAMES': JSON.stringify(entryNames),
     },
   },
 
