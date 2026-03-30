@@ -1,4 +1,4 @@
-import { root, runOnMainThread, useCallback, useMainThreadRef } from '@lynx-js/react'
+import { root, runOnMainThread, runOnBackground, useCallback, useMainThreadRef, useState } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
 import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 import {
@@ -256,6 +256,9 @@ function EditorialMTSPage() {
   // DevPanel FPS hook - MTS direct update mode
   const { mtsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
 
+  // State for DevPanel stats (cannot read MainThreadRef.current in BTS render)
+  const [orbsCount, setOrbsCount] = useState(0)
+
   const onLayout = useCallback((e: any) => {
     const width = Math.floor(e.detail.width)
     const height = Math.floor(e.detail.height)
@@ -487,6 +490,8 @@ function EditorialMTSPage() {
     for (let index = 0; index < orbsMT.current.length; index++) {
       clampOrbToBody(orbsMT.current[index]!, bodyRect)
     }
+    // Notify BTS of orbs count
+    runOnBackground(setOrbsCount)(orbsMT.current.length)
   }
 
   function applyEditorialLayoutMT(): void {
@@ -897,7 +902,7 @@ function EditorialMTSPage() {
             mtsFpsTextRef={mtsFpsTextRef}
           />
           <DevPanel.Stats>
-            <DevPanel.Stat label="Orbs" value={`${orbsMT.current.length}`} />
+            <DevPanel.Stat label="Orbs" value={`${orbsCount}`} />
             <DevPanel.Stat label="Lines" value={`${BODY_POOL}`} />
           </DevPanel.Stats>
         </DevPanel.Content>
