@@ -1,0 +1,12 @@
+{
+  "frameWidth": 480,
+  "frameHeight": 270,
+  "cols": 10,
+  "rows": 84,
+  "totalFrames": 840,
+  "fps": 12,
+  "sourceFps": 12,
+  "sampleRate": 1,
+  "generatedAt": "2026-03-30T12:47:09.712Z",
+  "source": "chika-source.mp4"
+}

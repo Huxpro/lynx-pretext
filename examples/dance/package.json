@@ -1,0 +1,24 @@
+{
+  "name": "@lynx-pretext/example-dance",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "rspeedy dev",
+    "build": "rspeedy build",
+    "preview": "rspeedy preview",
+    "generate": "node scripts/generate-sprite-exclusion.mjs"
+  },
+  "dependencies": {
+    "@lynx-js/react": "0.116.4",
+    "@lynx-pretext/devtools": "workspace:*",
+    "lynx-pretext": "workspace:*"
+  },
+  "devDependencies": {
+    "@lynx-js/rspeedy": "0.13.4",
+    "@lynx-js/react-rsbuild-plugin": "0.12.9",
+    "@lynx-js/types": "3.7.0",
+    "@types/react": "^18.3.28",
+    "typescript": "~5.9.3",
+    "canvas": "^3.1.0"
+  }
+}

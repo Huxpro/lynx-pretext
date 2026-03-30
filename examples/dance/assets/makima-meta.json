@@ -1,0 +1,12 @@
+{
+  "frameWidth": 480,
+  "frameHeight": 853,
+  "cols": 10,
+  "rows": 20,
+  "totalFrames": 192,
+  "fps": 12,
+  "sourceFps": 12,
+  "sampleRate": 1,
+  "generatedAt": "2026-03-30T12:45:19.271Z",
+  "source": "makima-source.mp4"
+}

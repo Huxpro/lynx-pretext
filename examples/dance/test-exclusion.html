@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .frame { margin: 20px; }
+    .band { height: 27px; position: relative; background: #f0f0f0; margin: 2px 0; }
+    .exclusion { position: absolute; background: rgba(255,0,0,0.3); height: 100%; }
+  </style>
+</head>
+<body>
+  <h2>Frame 0 Exclusion Visualization</h2>
+  <div class="frame" style="width: 480px; height: 270px; position: relative; border: 1px solid #ccc;">
+    <div id="bands"></div>
+  </div>
+  
+  <script>
+    const profile = [{"width":0.1,"offset":-0.11944444444444445},{"width":0.13194444444444445,"offset":-0.22152777777777777},{"width":0.1625,"offset":-0.32430555555555557},{"width":0.17500000000000002,"offset":-0.3055555555555556},{"width":0.14583333333333334,"offset":-0.30625},{"width":0.13194444444444445,"offset":-0.3076388888888889},{"width":0.14305555555555555,"offset":-0.31180555555555556},{"width":0.16666666666666666,"offset":-0.31527777777777777},{"width":0.15,"offset":-0.31805555555555554},{"width":0.12638888888888888,"offset":-0.32013888888888886}];
+    
+    const frameWidth = 480;
+    const frameHeight = 270;
+    const padding = 16;
+    
+    const bandsDiv = document.getElementById('bands');
+    
+    profile.forEach((band, i) => {
+      const bandDiv = document.createElement('div');
+      bandDiv.className = 'band';
+      bandDiv.style.width = frameWidth + 'px';
+      
+      // Calculate exclusion
+      const exclusionWidth = band.width * frameWidth;
+      const exclusionCenterX = frameWidth / 2 + band.offset * frameWidth;
+      const exclusionLeft = Math.max(0, exclusionCenterX - exclusionWidth / 2 - padding);
+      const exclusionRight = Math.min(frameWidth, exclusionCenterX + exclusionWidth / 2 + padding);
+      
+      // Show exclusion zone
+      const exclDiv = document.createElement('div');
+      exclDiv.className = 'exclusion';
+      exclDiv.style.left = exclusionLeft + 'px';
+      exclDiv.style.width = (exclusionRight - exclusionLeft) + 'px';
+      exclDiv.title = `Band ${i}: width=${(band.width*100).toFixed(1)}%, offset=${(band.offset*100).toFixed(1)}%, left=${(exclusionLeft/frameWidth*100).toFixed(1)}%, right=${(exclusionRight/frameWidth*100).toFixed(1)}%`;
+      
+      bandDiv.appendChild(exclDiv);
+      bandsDiv.appendChild(bandDiv);
+    });
+  </script>
+</body>
+</html>

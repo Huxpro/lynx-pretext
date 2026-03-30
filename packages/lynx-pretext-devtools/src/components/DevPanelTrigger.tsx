@@ -20,8 +20,8 @@ export function DevPanelTrigger(): React.ReactElement {
       bindtap={toggle}
       style={{
         position: 'absolute',
-        top: '12px',
-        right: '12px',
+        top: '67%',
+        right: '8px',
         width: TRIGGER_SIZE,
         height: TRIGGER_SIZE,
         borderRadius: TRIGGER_RADIUS,
@@ -32,12 +32,13 @@ export function DevPanelTrigger(): React.ReactElement {
     >
       <text
         style={{
-          fontSize: '20px',
-          color: open ? '#333' : TEXT_PRIMARY,
-          fontWeight: 'bold',
+          fontSize: '12px',
+          color: TEXT_PRIMARY,
+          fontFamily: 'monospace',
+          lineHeight: '14px',
         }}
       >
-        {open ? '\u00D7' : '\u2261'}
+        {open ? '\u00D7' : '\u2630'}
       </text>
     </view>
   )
