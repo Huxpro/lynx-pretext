@@ -103,12 +103,11 @@ export function FieldPropPage() {
     if (maxB > 0) for (let i = 0; i < palette.length; i++) palette[i]!.brightness /= maxB
     palette.sort((a, b) => a.brightness - b.brightness)
     paletteMT.current = palette
-    buildBrightnessLookup()
+    buildBrightnessLookup(palette)
   }
 
-  function buildBrightnessLookup(): void {
+  function buildBrightnessLookup(palette: PaletteEntry[]): void {
     'main thread'
-    const palette = paletteMT.current
     const lookup: string[] = []
     for (let b = 0; b < 256; b++) {
       const brightness = b / 255

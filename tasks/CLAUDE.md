@@ -2,6 +2,8 @@
 
 You are an autonomous coding agent porting chenglou/pretext to Lynx.
 
+> **📚 Learning Materials:** See [AGENT.md](AGENT.md) for a catalog of technical documentation including MTS/BTS architecture patterns, shared module pitfalls, and more.
+
 ## Project Context
 
 - **Working directory:** ~/github/lynx-pretext (this project)
