@@ -106,6 +106,9 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
+      '@lynx-pretext/devtools':
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
@@ -168,6 +171,21 @@ importers:
       '@formatjs/intl-segmenter':
         specifier: ^12.2.1
         version: 12.2.1
+
+  packages/lynx-pretext-devtools:
+    devDependencies:
+      '@lynx-js/react':
+        specifier: 0.116.4
+        version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
+      '@lynx-js/types':
+        specifier: 3.7.0
+        version: 3.7.0
+      '@types/react':
+        specifier: ^18.3.28
+        version: 18.3.28
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
 
   website:
     dependencies:

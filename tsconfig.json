@@ -12,7 +12,8 @@
   },
   "references": [
     { "path": "./tsconfig.node.json" },
-    { "path": "./packages/lynx-pretext" }
+    { "path": "./packages/lynx-pretext" },
+    { "path": "./packages/lynx-pretext-devtools" }
   ],
   "files": []
 }

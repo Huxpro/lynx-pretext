@@ -11,6 +11,8 @@ import {
   type LayoutCursor,
   type PreparedTextWithSegments,
 } from 'lynx-pretext'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import type { UseDevPanelFPSReturn } from '@lynx-pretext/devtools'
 import { BODY_COPY } from './dynamic-layout-text'
 import {
   openaiLayout as openaiLayoutHull,
@@ -257,15 +259,13 @@ function evaluateLayout(
 export function DynamicLayoutBTSPage() {
   const [pageWidth, setPageWidth] = useState(400)
   const [pageHeight, setPageHeight] = useState(700)
-  const [showControls, setShowControls] = useState(false)
   const [openaiAngle, setOpenaiAngle] = useState(0)
   const [claudeAngle, setClaudeAngle] = useState(0)
-  const [fpsDisplay, setFpsDisplay] = useState(0)
+
+  // DevPanel FPS hook - BTS only
+  const { btsFpsTick, mtsFpsDisplay, btsFpsDisplay } = useDevPanelFPS()
 
   const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
-  const fpsFrameCountRef = useRef(0)
-  const fpsLastTimeRef = useRef(0)
-  const fpsValueRef = useRef(0)
   const openaiSpinRef = useRef<SpinState | null>(null)
   const claudeSpinRef = useRef<SpinState | null>(null)
   const rafRef = useRef<number | null>(null)
@@ -274,26 +274,13 @@ export function DynamicLayoutBTSPage() {
     setPageWidth(Math.floor(e.detail.width))
     setPageHeight(Math.floor(e.detail.height))
   }, [])
-  const toggleControls = useCallback(() => setShowControls(v => !v), [])
-  const decreaseWidth = useCallback(() => setPageWidth(w => Math.max(360, w - 40)), [])
-  const increaseWidth = useCallback(() => setPageWidth(w => Math.min(1200, w + 40)), [])
-  const decreaseHeight = useCallback(() => setPageHeight(h => Math.max(400, h - 40)), [])
-  const increaseHeight = useCallback(() => setPageHeight(h => Math.min(1200, h + 40)), [])
 
   // Pure BTS animation loop — requestAnimationFrame + setState every frame
   const tick = useCallback(() => {
-    const now = Date.now()
+    // BTS FPS tick
+    btsFpsTick()
 
-    // FPS measurement
-    fpsFrameCountRef.current++
-    if (fpsLastTimeRef.current === 0) fpsLastTimeRef.current = now
-    const fpsElapsed = now - fpsLastTimeRef.current
-    if (fpsElapsed >= 500) {
-      fpsValueRef.current = Math.round((fpsFrameCountRef.current / fpsElapsed) * 1000)
-      fpsFrameCountRef.current = 0
-      fpsLastTimeRef.current = now
-      setFpsDisplay(fpsValueRef.current)
-    }
+    const now = Date.now()
 
     let still = false
     let nextOpenai = openaiAngle
@@ -323,7 +310,7 @@ export function DynamicLayoutBTSPage() {
     } else {
       rafRef.current = null
     }
-  }, [openaiAngle, claudeAngle])
+  }, [openaiAngle, claudeAngle, btsFpsTick])
 
   // Cleanup
   useEffect(() => {
@@ -422,65 +409,22 @@ export function DynamicLayoutBTSPage() {
         </view>
       </view>
 
-      {/* Toggle */}
-      <view bindtap={toggleControls} style={{
-        position: 'absolute', top: '12px', right: '12px', width: '36px', height: '36px',
-        borderRadius: '18px', backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.25)',
-        alignItems: 'center', justifyContent: 'center',
-      }}>
-        <text style={{ fontSize: '20px', color: showControls ? '#333' : '#fff', fontWeight: 'bold' }}>
-          {showControls ? '\u00D7' : '\u2261'}
-        </text>
-      </view>
-
-      {/* Controls */}
-      {showControls && (
-        <view style={{ position: 'absolute', top: '56px', left: '12px', right: '12px', backgroundColor: 'rgba(0,0,0,0.88)', borderRadius: '12px', padding: '16px' }}>
-          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>Dynamic Layout (BTS)</text>
-          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px', lineHeight: '18px' }}>
-            {'Pure React animation — no Main Thread Script. ' +
-             'Every frame: rAF → setState → React render → reconcile → commit. ' +
-             'Compare with MTS version for performance difference.'}
-          </text>
-
-          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
-            <view bindtap={decreaseWidth} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-            </view>
-            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>{`${pageWidth}px`}</text>
-            <view bindtap={increaseWidth} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
-            </view>
-            <view style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.2)', marginLeft: '4px', marginRight: '4px' }} />
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>H:</text>
-            <view bindtap={decreaseHeight} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
-            </view>
-            <text style={{ fontSize: '13px', color: '#fff', minWidth: '55px', textAlign: 'center' }}>{`${pageHeight}px`}</text>
-            <view bindtap={increaseHeight} style={{ width: '28px', height: '28px', borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <text style={{ fontSize: '16px', color: '#fff', fontWeight: 'bold' }}>+</text>
-            </view>
-          </view>
-
-          <view style={{ display: 'flex', flexDirection: 'row', gap: '16px', marginTop: '12px' }}>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Mode</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{pageLayout.isNarrow ? 'Single' : 'Two-col'}</text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Lines</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{`${headlineLines.length + totalBodyLines}`}</text>
-            </view>
-            <view>
-              <text style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>FPS</text>
-              <text style={{ fontSize: '14px', fontWeight: 'bold', color: fpsDisplay >= 50 ? '#4caf50' : fpsDisplay >= 30 ? '#ff9800' : '#f44336' }}>
-                {`${fpsDisplay}`}
-              </text>
-            </view>
-          </view>
-        </view>
-      )}
+      {/* DevPanel */}
+      <DevPanel.Root>
+        <DevPanel.Trigger />
+        <DevPanel.Content
+          title="Dynamic Layout (BTS)"
+          description="Pure React animation — no Main Thread Script. Every frame: rAF → setState → React render → reconcile → commit."
+        >
+          <DevPanelFPS mtsFpsDisplay={mtsFpsDisplay} btsFpsDisplay={btsFpsDisplay} />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="Mode" value={pageLayout.isNarrow ? 'Single' : 'Two-col'} />
+            <DevPanel.Stat label="Lines" value={`${headlineLines.length + totalBodyLines}`} />
+          </DevPanel.Stats>
+          <DevPanel.Stepper label="W" value={pageWidth} min={360} max={1200} step={40} onChange={setPageWidth} />
+          <DevPanel.Stepper label="H" value={pageHeight} min={400} max={1200} step={40} onChange={setPageHeight} />
+        </DevPanel.Content>
+      </DevPanel.Root>
     </view>
   )
 }
