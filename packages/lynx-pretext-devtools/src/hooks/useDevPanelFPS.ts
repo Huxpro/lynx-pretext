@@ -1,4 +1,5 @@
 import { useRef, useMainThreadRef, runOnBackground, useState } from '@lynx-js/react'
+import type { MainThreadRef } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
 
 export interface UseDevPanelFPSReturn {
@@ -6,7 +7,7 @@ export interface UseDevPanelFPSReturn {
   btsFpsTick: () => void
   mtsFpsDisplay: number
   btsFpsDisplay: number
-  mtsFpsTextRef: React.MutableRefObject<MainThread.Element | null>
+  mtsFpsTextRef: MainThreadRef<MainThread.Element | null>
 }
 
 export function useDevPanelFPS(mtsDirectUpdate = false): UseDevPanelFPSReturn {
@@ -23,7 +24,8 @@ export function useDevPanelFPS(mtsDirectUpdate = false): UseDevPanelFPSReturn {
   const btsLastTimeRef = useRef(0)
 
   // MTS direct update ref (for mtsDirectUpdate mode)
-  const mtsFpsTextRef = useRef<MainThread.Element | null>(null)
+  // Must use useMainThreadRef since it's passed to main-thread:ref
+  const mtsFpsTextRef = useMainThreadRef<MainThread.Element | null>(null)
 
   // MTS tick function - must have 'main thread' directive first
   function mtsFpsTick(): void {

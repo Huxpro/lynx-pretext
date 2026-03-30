@@ -1,9 +1,11 @@
+import type { MainThreadRef } from '@lynx-js/react'
+import type { MainThread } from '@lynx-js/types'
 import { getFpsColor, TEXT_TERTIARY } from '../constants'
 
 export interface DevPanelFPSProps {
   mtsFpsDisplay: number
   btsFpsDisplay: number
-  mtsFpsTextRef?: React.MutableRefObject<any>
+  mtsFpsTextRef?: MainThreadRef<MainThread.Element | null>
 }
 
 export function DevPanelFPS({
