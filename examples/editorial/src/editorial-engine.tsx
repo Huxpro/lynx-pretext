@@ -1,5 +1,6 @@
 import { root, useState, useCallback, useRef, useMainThreadRef, runOnMainThread, runOnBackground } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 import {
   layoutNextLine,
   layoutWithLines,
@@ -294,6 +295,9 @@ function EditorialEnginePage() {
   const [viewportH, setViewportH] = useState(0)
   const [orbs, setOrbs] = useState<Orb[]>([]) // BTS render copy
 
+  // DevPanel FPS hook - hybrid mode with MTS direct update
+  const { mtsFpsTick, btsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
+
   const initRef = useRef(false)
   const preparedCacheRef = useRef(new Map<string, PreparedTextWithSegments>())
 
@@ -346,6 +350,9 @@ function EditorialEnginePage() {
   function gameTickMT(): void {
     'main thread'
     if (!animatingMT.current) return
+
+    // MTS FPS tick
+    mtsFpsTick()
 
     const now = Date.now()
     const dt = Math.min((now - lastFrameTimeMT.current) / 1000, 0.05)
@@ -474,6 +481,9 @@ function EditorialEnginePage() {
   }
 
   // ── Layout computation ──
+
+  // BTS FPS tick (called on every render)
+  btsFpsTick()
 
   const isNarrow = viewportW < NARROW_BREAKPOINT
   const gutter = isNarrow ? 20 : GUTTER
@@ -697,6 +707,26 @@ function EditorialEnginePage() {
           </view>
         )),
       )}
+
+      {/* DevPanel */}
+      <DevPanel.Root>
+        <DevPanel.Trigger />
+        <DevPanel.Content
+          title="Editorial Engine (Hybrid)"
+          description="MTS animation + touch, BTS text layout. Orbs animate on MTS, text reflows on BTS via runOnBackground sync. 1-2 frame delay."
+        >
+          <DevPanelFPS
+            mtsFpsDisplay={mtsFpsDisplay}
+            btsFpsDisplay={btsFpsDisplay}
+            mtsFpsTextRef={mtsFpsTextRef}
+          />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="Mode" value={isNarrow ? 'Single' : 'Two-col'} />
+            <DevPanel.Stat label="Orbs" value={`${orbs.length}`} />
+            <DevPanel.Stat label="Lines" value={`${allBodyLines.length}`} />
+          </DevPanel.Stats>
+        </DevPanel.Content>
+      </DevPanel.Root>
     </view>
   )
 }

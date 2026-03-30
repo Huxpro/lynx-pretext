@@ -1,5 +1,6 @@
 import { root, runOnMainThread, useCallback, useMainThreadRef } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 import {
   layoutNextLine,
   layoutWithLines,
@@ -252,6 +253,9 @@ function createInitialOrbs(bodyRect: Rect): OrbState[] {
 }
 
 function EditorialMTSPage() {
+  // DevPanel FPS hook - MTS direct update mode
+  const { mtsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
+
   const onLayout = useCallback((e: any) => {
     const width = Math.floor(e.detail.width)
     const height = Math.floor(e.detail.height)
@@ -588,6 +592,9 @@ function EditorialMTSPage() {
 
   function tickMT(timestamp: number): void {
     'main thread'
+    // MTS FPS tick
+    mtsFpsTick()
+
     const last = lastFrameMT.current === 0 ? timestamp : lastFrameMT.current
     const dt = Math.min((timestamp - last) / 1000, 0.05)
     lastFrameMT.current = timestamp
@@ -876,6 +883,25 @@ function EditorialMTSPage() {
         main-thread:bindtouchend={handleTouchEndMT}
         main-thread:bindtouchcancel={handleTouchEndMT}
       />
+
+      {/* DevPanel */}
+      <DevPanel.Root>
+        <DevPanel.Trigger />
+        <DevPanel.Content
+          title="Editorial Engine (Pure MTS)"
+          description="Full text reflow on main thread at 60fps via shared modules. Drag orbs to force text reflow in real time. Zero cross-thread during animation."
+        >
+          <DevPanelFPS
+            mtsFpsDisplay={mtsFpsDisplay}
+            btsFpsDisplay={btsFpsDisplay}
+            mtsFpsTextRef={mtsFpsTextRef}
+          />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="Orbs" value={`${orbsMT.current.length}`} />
+            <DevPanel.Stat label="Lines" value={`${BODY_POOL}`} />
+          </DevPanel.Stats>
+        </DevPanel.Content>
+      </DevPanel.Root>
     </view>
   )
 }
