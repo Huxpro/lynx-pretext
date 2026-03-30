@@ -26,6 +26,8 @@ export {
   PANEL_BG,
   PANEL_RADIUS,
   PANEL_PADDING,
+  PANEL_TOP,
+  SAFE_AREA_TOP,
   TRIGGER_SIZE,
   TRIGGER_RADIUS,
   TRIGGER_BG_OPEN,
@@ -39,6 +41,8 @@ export {
   STEPPER_BG,
   STEPPER_SIZE,
   STEPPER_RADIUS,
+  BUTTON_BG,
+  BUTTON_ACTIVE,
   getFpsColor,
 } from './constants'
 

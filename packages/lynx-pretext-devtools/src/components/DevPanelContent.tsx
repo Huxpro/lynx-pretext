@@ -1,5 +1,5 @@
 import { useDevPanelContext } from '../context'
-import { PANEL_BG, PANEL_RADIUS, PANEL_PADDING, TEXT_PRIMARY, TEXT_SECONDARY } from '../constants'
+import { PANEL_BG, PANEL_RADIUS, PANEL_PADDING, TEXT_PRIMARY, TEXT_SECONDARY, PANEL_TOP } from '../constants'
 import type { DevPanelContentProps } from '../types'
 
 export function DevPanelContent({
@@ -15,24 +15,33 @@ export function DevPanelContent({
     <view
       style={{
         position: 'absolute',
-        top: '56px',
-        left: '12px',
-        right: '12px',
+        top: PANEL_TOP,
+        right: '8px',
+        minWidth: '140px',
         backgroundColor: PANEL_BG,
         borderRadius: PANEL_RADIUS,
         padding: PANEL_PADDING,
       }}
     >
-      <text style={{ fontSize: '18px', fontWeight: 'bold', color: TEXT_PRIMARY }}>
-        {title}
-      </text>
+      {title && (
+        <text style={{
+          fontSize: '10px',
+          color: TEXT_SECONDARY,
+          fontFamily: 'monospace',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          marginBottom: '6px',
+        }}>
+          {title}
+        </text>
+      )}
       {description && (
         <text
           style={{
-            fontSize: '13px',
+            fontSize: '10px',
             color: TEXT_SECONDARY,
-            marginTop: '4px',
-            lineHeight: '18px',
+            marginTop: '2px',
+            lineHeight: '14px',
           }}
         >
           {description}

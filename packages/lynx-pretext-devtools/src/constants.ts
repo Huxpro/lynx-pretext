@@ -3,11 +3,17 @@ export const PANEL_BG = 'rgba(0,0,0,0.88)'
 export const PANEL_RADIUS = '6px'
 export const PANEL_PADDING = '8px'
 
+// Safe area - iOS status bar height
+export const SAFE_AREA_TOP = '48px'
+
 // Trigger button - smaller, more subtle
 export const TRIGGER_SIZE = '24px'
 export const TRIGGER_RADIUS = '4px'
 export const TRIGGER_BG_OPEN = 'rgba(0,0,0,0.85)'
-export const TRIGGER_BG_CLOSED = 'rgba(0,0,0,0.35)'
+export const TRIGGER_BG_CLOSED = 'rgba(0,0,0,0.18)' // More subtle when not active
+
+// Panel content position (below trigger)
+export const PANEL_TOP = '80px' // SAFE_AREA_TOP + TRIGGER_SIZE + 8px gap
 
 // Text colors - muted, devtool-like
 export const TEXT_PRIMARY = 'rgba(255,255,255,0.92)'

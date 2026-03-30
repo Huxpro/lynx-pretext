@@ -6,6 +6,7 @@ import {
   TRIGGER_BG_OPEN,
   TRIGGER_BG_CLOSED,
   TEXT_PRIMARY,
+  SAFE_AREA_TOP,
 } from '../constants'
 
 export function DevPanelTrigger(): React.ReactElement {
@@ -20,7 +21,7 @@ export function DevPanelTrigger(): React.ReactElement {
       bindtap={toggle}
       style={{
         position: 'absolute',
-        top: '67%',
+        top: SAFE_AREA_TOP,
         right: '8px',
         width: TRIGGER_SIZE,
         height: TRIGGER_SIZE,
