@@ -11,6 +11,9 @@ export default defineConfig({
       'dynamic-layout-mts': './src/dynamic-layout-mts.tsx',
     },
   },
+  output: {
+    assetPrefix: '/',
+  },
   plugins: [
     pluginQRCode({
       schema(url) {
