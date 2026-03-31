@@ -95,21 +95,6 @@ for (const project of EXAMPLE_PROJECTS) {
     copyDir(assetsDir, path.join(exampleDest, 'assets'));
   }
 
-  // Copy preview video files from public/previews/{dir}/
-  const previewsDir = path.join(REPO_ROOT, 'website/public/previews', dir);
-  if (fs.existsSync(previewsDir)) {
-    const previewFiles = fs.readdirSync(previewsDir).filter(f =>
-      f.endsWith('.mp4')
-    );
-    for (const previewFile of previewFiles) {
-      fs.copyFileSync(
-        path.join(previewsDir, previewFile),
-        path.join(exampleDest, previewFile)
-      );
-      console.info(`    Copied preview: ${previewFile}`);
-    }
-  }
-
   // Copy lynx.config.ts
   const configPath = path.join(exampleDir, 'lynx.config.ts');
   if (fs.existsSync(configPath)) {

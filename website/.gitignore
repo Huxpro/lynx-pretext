@@ -1,4 +1,3 @@
 node_modules
 dist
-public/examples
-public/previews/*.mp4
+public/examples/*
