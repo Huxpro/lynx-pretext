@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build && cd website && pnpm prepare-examples && pnpm build",
+  "buildCommand": "pnpm build:examples && cd website && pnpm prepare-examples && pnpm build",
   "outputDirectory": "website/dist",
   "cleanUrls": true
 }
