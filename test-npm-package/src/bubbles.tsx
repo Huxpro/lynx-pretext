@@ -1,5 +1,4 @@
 import { root, useState, useCallback, useMemo } from '@lynx-js/react'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 
 import {
   computeBubbleRender,
@@ -29,13 +28,9 @@ const FONT_SIZE = 15
 export function BubblesPage() {
   const [chatWidth, setChatWidth] = useState(360)
 
-  // FPS monitoring
-  const { btsFpsTick, btsFpsDisplay } = useDevPanelFPS()
-
   const onLayout = useCallback((e: any) => {
     setChatWidth(Math.floor(e.detail.width))
-    btsFpsTick()
-  }, [btsFpsTick])
+  }, [])
   const decrease = useCallback(() => setChatWidth(w => Math.max(180, w - 20)), [])
   const increase = useCallback(() => setChatWidth(w => Math.min(1200, w + 20)), [])
 
@@ -56,140 +51,113 @@ export function BubblesPage() {
   }
 
   return (
-    <DevPanel.Root>
-      <view style={{ width: '100%', height: '100%', backgroundColor: '#1c1c1e' }} bindlayoutchange={onLayout}>
-        <scroll-view scroll-orientation="vertical" style={{ width: '100%', height: '100%' }}>
-          <view style={{ padding: '16px', gap: '24px' }}>
-            {/* CSS fit-content chat */}
-            <view>
-              <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff9800' }}>
-                  CSS fit-content
-                </text>
-                <view style={{
-                  paddingLeft: '8px', paddingRight: '8px', paddingTop: '3px', paddingBottom: '3px',
-                  borderRadius: '99px', backgroundColor: 'rgba(255,152,0,0.2)',
-                }}>
-                  <text style={{ fontSize: '11px', color: '#ff9800' }}>
-                    {`${formatPixelCount(cssWastedPixels)} px\u00B2 wasted`}
-                  </text>
-                </view>
-              </view>
+    <view style={{ width: '100%', height: '100%', backgroundColor: '#1c1c1e' }} bindlayoutchange={onLayout}>
+      <scroll-view scroll-orientation="vertical" style={{ width: '100%', height: '100%' }}>
+        <view style={{ padding: '16px', gap: '24px' }}>
+          {/* CSS fit-content chat */}
+          <view>
+            <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff9800' }}>
+                CSS fit-content
+              </text>
               <view style={{
-                width: `${containerWidth}px`,
-                padding: '16px',
-                borderRadius: '14px',
-                backgroundColor: '#1c1c1e',
+                paddingLeft: '8px', paddingRight: '8px', paddingTop: '3px', paddingBottom: '3px',
+                borderRadius: '99px', backgroundColor: 'rgba(255,152,0,0.2)',
               }}>
-                {BUBBLE_TEXTS.map((text, i) => {
-                  const isSent = BUBBLE_DIRECTIONS[i]!
-                  const w = renderState.widths[i]!
-                  return (
-                    <view
-                      key={`css-${i}`}
-                      style={{
-                        alignSelf: isSent ? 'flex-end' : 'flex-start',
-                        maxWidth: `${bubbleMaxWidth}px`,
-                        width: `${w.cssWidth}px`,
-                        paddingTop: `${PADDING_V}px`,
-                        paddingBottom: `${PADDING_V}px`,
-                        paddingLeft: `${PADDING_H}px`,
-                        paddingRight: `${PADDING_H}px`,
-                        borderRadius: '16px',
-                        borderBottomRightRadius: isSent ? '4px' : '16px',
-                        borderBottomLeftRadius: isSent ? '16px' : '4px',
-                        backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
-                        marginBottom: i < BUBBLE_TEXTS.length - 1 ? '8px' : '0',
-                      }}
-                    >
-                      <text style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
-                        {text}
-                      </text>
-                    </view>
-                  )
-                })}
+                <text style={{ fontSize: '11px', color: '#ff9800' }}>
+                  {`${formatPixelCount(cssWastedPixels)} px\u00B2 wasted`}
+                </text>
               </view>
             </view>
-
-            {/* Pretext shrinkwrap chat */}
-            <view>
-              <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#4caf50' }}>
-                  Pretext shrinkwrap
-                </text>
-                <view style={{
-                  paddingLeft: '8px', paddingRight: '8px', paddingTop: '3px', paddingBottom: '3px',
-                  borderRadius: '99px', backgroundColor: 'rgba(76,175,80,0.2)',
-                }}>
-                  <text style={{ fontSize: '11px', color: '#4caf50' }}>
-                    0 px² wasted
-                  </text>
-                </view>
-              </view>
-              <view style={{
-                width: `${containerWidth}px`,
-                padding: '16px',
-                borderRadius: '14px',
-                backgroundColor: '#1c1c1e',
-              }}>
-                {BUBBLE_TEXTS.map((text, i) => {
-                  const isSent = BUBBLE_DIRECTIONS[i]!
-                  const w = renderState.widths[i]!
-                  return (
-                    <view
-                      key={`shrink-${i}`}
-                      style={{
-                        alignSelf: isSent ? 'flex-end' : 'flex-start',
-                        maxWidth: `${bubbleMaxWidth}px`,
-                        width: `${w.tightWidth}px`,
-                        paddingTop: `${PADDING_V}px`,
-                        paddingBottom: `${PADDING_V}px`,
-                        paddingLeft: `${PADDING_H}px`,
-                        paddingRight: `${PADDING_H}px`,
-                        borderRadius: '16px',
-                        borderBottomRightRadius: isSent ? '4px' : '16px',
-                        borderBottomLeftRadius: isSent ? '16px' : '4px',
-                        backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
-                        marginBottom: i < BUBBLE_TEXTS.length - 1 ? '8px' : '0',
-                      }}
-                    >
-                      <text style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
-                        {text}
-                      </text>
-                    </view>
-                  )
-                })}
-              </view>
+            <view style={{
+              width: `${containerWidth}px`,
+              padding: '16px',
+              borderRadius: '14px',
+              backgroundColor: '#1c1c1e',
+            }}>
+              {BUBBLE_TEXTS.map((text, i) => {
+                const isSent = BUBBLE_DIRECTIONS[i]!
+                const w = renderState.widths[i]!
+                return (
+                  <view
+                    key={`css-${i}`}
+                    style={{
+                      alignSelf: isSent ? 'flex-end' : 'flex-start',
+                      maxWidth: `${bubbleMaxWidth}px`,
+                      width: `${w.cssWidth}px`,
+                      paddingTop: `${PADDING_V}px`,
+                      paddingBottom: `${PADDING_V}px`,
+                      paddingLeft: `${PADDING_H}px`,
+                      paddingRight: `${PADDING_H}px`,
+                      borderRadius: '16px',
+                      borderBottomRightRadius: isSent ? '4px' : '16px',
+                      borderBottomLeftRadius: isSent ? '16px' : '4px',
+                      backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
+                      marginBottom: i < BUBBLE_TEXTS.length - 1 ? '8px' : '0',
+                    }}
+                  >
+                    <text style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
+                      {text}
+                    </text>
+                  </view>
+                )
+              })}
             </view>
           </view>
-        </scroll-view>
 
-        {/* DevPanel Trigger */}
-        <DevPanel.Trigger />
-
-        {/* DevPanel Content */}
-        <DevPanel.Content title="Bubbles">
-          {/* FPS Display */}
-          <DevPanelFPS mtsFpsDisplay={0} btsFpsDisplay={btsFpsDisplay} />
-
-          {/* Stats */}
-          <DevPanel.Stats>
-            <DevPanel.Stat label="wasted" value={formatPixelCount(cssWastedPixels)} />
-          </DevPanel.Stats>
-
-          {/* Width Stepper */}
-          <DevPanel.Stepper
-            label="width"
-            value={chatWidth}
-            min={180}
-            max={1200}
-            step={20}
-            unit="px"
-            onChange={setChatWidth}
-          />
-        </DevPanel.Content>
-      </view>
-    </DevPanel.Root>
+          {/* Pretext shrinkwrap chat */}
+          <view>
+            <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#4caf50' }}>
+                Pretext shrinkwrap
+              </text>
+              <view style={{
+                paddingLeft: '8px', paddingRight: '8px', paddingTop: '3px', paddingBottom: '3px',
+                borderRadius: '99px', backgroundColor: 'rgba(76,175,80,0.2)',
+              }}>
+                <text style={{ fontSize: '11px', color: '#4caf50' }}>
+                  0 px² wasted
+                </text>
+              </view>
+            </view>
+            <view style={{
+              width: `${containerWidth}px`,
+              padding: '16px',
+              borderRadius: '14px',
+              backgroundColor: '#1c1c1e',
+            }}>
+              {BUBBLE_TEXTS.map((text, i) => {
+                const isSent = BUBBLE_DIRECTIONS[i]!
+                const w = renderState.widths[i]!
+                return (
+                  <view
+                    key={`shrink-${i}`}
+                    style={{
+                      alignSelf: isSent ? 'flex-end' : 'flex-start',
+                      maxWidth: `${bubbleMaxWidth}px`,
+                      width: `${w.tightWidth}px`,
+                      paddingTop: `${PADDING_V}px`,
+                      paddingBottom: `${PADDING_V}px`,
+                      paddingLeft: `${PADDING_H}px`,
+                      paddingRight: `${PADDING_H}px`,
+                      borderRadius: '16px',
+                      borderBottomRightRadius: isSent ? '4px' : '16px',
+                      borderBottomLeftRadius: isSent ? '16px' : '4px',
+                      backgroundColor: isSent ? '#0b84fe' : '#2c2c2e',
+                      marginBottom: i < BUBBLE_TEXTS.length - 1 ? '8px' : '0',
+                    }}
+                  >
+                    <text style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: '#fff' }}>
+                      {text}
+                    </text>
+                  </view>
+                )
+              })}
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
   )
 }
 

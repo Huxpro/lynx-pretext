@@ -10,10 +10,6 @@ npm install lynx-pretext
 pnpm add lynx-pretext
 ```
 
-## Overview
-
-This is a pure JavaScript text measurement and layout library running on the Lynx main thread. It provides the core functionality of the browser-based Pretext, adapted for the Lynx platform.
-
 ## Core Differences
 
 ### 1. Measurement Backend (Key Difference)
