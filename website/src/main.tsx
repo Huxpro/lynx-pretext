@@ -1,29 +1,88 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import '@douyinfe/semi-ui/dist/css/semi.min.css';
 import { GoConfigProvider, Go } from '@lynx-js/go-web';
 import type { GoConfig } from '@lynx-js/go-web';
 import './styles.css';
 
-// Injected at build time by rsbuild.config.ts
-const entryNames: string[] = import.meta.env.ENTRY_NAMES;
-
 const goConfig: GoConfig = {
   exampleBasePath: '/examples',
   defaultTab: 'preview' as const,
 };
 
-function App() {
-  const hashName = location.hash.slice(1);
-  const [active, setActive] = useState(
-    entryNames.includes(hashName) ? hashName : entryNames[0] || '',
+interface CardConfig {
+  title: string;
+  description: string;
+  example: string;
+  entry: string;
+  img?: string;
+}
+
+const cards: CardConfig[] = [
+  {
+    title: 'Editorial',
+    description: 'Editorial layout engine',
+    example: 'editorial',
+    entry: 'main',
+    img: '/examples/editorial/preview.mp4',
+  },
+  {
+    title: 'ASCII Torus',
+    description: '3D wireframe torus rendered in ASCII art',
+    example: 'ascii-arts',
+    entry: 'torus',
+    img: '/examples/ascii-arts/preview-torus.mp4',
+  },
+  {
+    title: 'ASCII Particles',
+    description: 'Particle system rendered in ASCII art',
+    example: 'ascii-arts',
+    entry: 'particles',
+    img: '/examples/ascii-arts/preview-particles.mp4',
+  },
+  {
+    title: 'Dance',
+    description: 'Text wrap around an animating character',
+    example: 'dance',
+    entry: 'main',
+    img: '/examples/dance/preview.mp4',
+  },
+  {
+    title: 'Dynamic Layout',
+    description: 'Dynamic text layout with animations',
+    example: 'dynamic-layout',
+    entry: 'main',
+    img: '/examples/dynamic-layout/preview.mp4',
+  },
+  {
+    title: 'Bubbles',
+    description: 'iMessage bubble',
+    example: 'bubble',
+    entry: 'main',
+    img: '/examples/bubble/preview.mp4',
+  },
+];
+
+function ExampleCard({ card }: { card: CardConfig }) {
+  return (
+    <div className="example-card">
+      <div className="example-header">
+        <h3 className="example-title">{card.title}</h3>
+        <p className="example-description">{card.description}</p>
+      </div>
+      <div className="example-preview">
+        <Go
+          example={card.example}
+          defaultEntryName={card.entry}
+          img={card.img}
+          mode="preview"
+        />
+      </div>
+    </div>
   );
+}
 
-  function switchTo(name: string) {
-    setActive(name);
-    history.replaceState(null, '', `#${name}`);
-  }
-
+function App() {
   return (
     <GoConfigProvider config={goConfig}>
       <div className="page">
@@ -43,25 +102,10 @@ function App() {
           to see them live.
         </p>
 
-        <div className="tab-bar">
-          {entryNames.map((name) => (
-            <button
-              key={name}
-              className={`tab ${name === active ? 'active' : ''}`}
-              onClick={() => switchTo(name)}
-            >
-              {name}
-            </button>
+        <div className="examples-grid">
+          {cards.map((card) => (
+            <ExampleCard key={`${card.example}-${card.entry}`} card={card} />
           ))}
-        </div>
-
-        <div className="embed-section">
-          <Go
-            key={active}
-            example="lynx-pretext"
-            defaultEntryName={active}
-            mode="preview"
-          />
         </div>
       </div>
     </GoConfigProvider>

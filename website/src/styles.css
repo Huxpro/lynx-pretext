@@ -1,7 +1,7 @@
 /* ── Page layout ─────────────────────────────────────── */
 
 .page {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 32px 16px 64px;
 }
@@ -38,47 +38,78 @@ h1 {
   border-radius: 4px;
 }
 
-/* ── Tab bar ─────────────────────────────────────────── */
+/* ── Examples Grid ────────────────────────────────────── */
 
-.tab-bar {
-  margin-top: 28px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  border-bottom: 1px solid #d8cec3;
+.examples-grid {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
 }
 
-.tab {
-  appearance: none;
-  border: none;
-  background: none;
-  font: 500 13px/1.2 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  padding: 8px 14px;
-  color: #6d645d;
-  cursor: pointer;
-  border-radius: 8px 8px 0 0;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+.example-card {
+  background: #faf8f6;
+  border-radius: 17px;
+  overflow: hidden;
+  border: 1px solid #e8e2db;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
-.tab:hover {
+.example-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: #d8cec3;
+}
+
+.example-header {
+  padding: 16px 16px 12px;
+}
+
+.example-title {
+  margin: 0 0 4px;
+  font: 600 16px/1.3 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #201b18;
-  background: rgba(149, 95, 59, 0.06);
 }
 
-.tab.active {
-  color: #955f3b;
-  border-bottom-color: #955f3b;
-  background: rgba(149, 95, 59, 0.08);
+.example-description {
+  margin: 0;
+  font: 400 13px/1.4 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #6d645d;
 }
 
-/* ── Embed section ───────────────────────────────────── */
+/* ── Example Preview (Mobile Size) ───────────────────── */
 
-.embed-section {
-  margin-top: 16px;
+.example-preview {
+  background: #faf8f6;
+  overflow: hidden;
+}
+
+.example-preview iframe,
+.example-preview > div {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .examples-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
   .page { padding-top: 22px; }
-  .tab { font-size: 12px; padding: 6px 10px; }
+  
+  .examples-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .example-title {
+    font-size: 15px;
+  }
+  
+  .example-description {
+    font-size: 12px;
+  }
 }
