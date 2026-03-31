@@ -17,12 +17,12 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
-      '@lynx-pretext/devtools':
-        specifier: workspace:*
-        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
+      lynx-pretext-devtools:
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.6
@@ -51,12 +51,12 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
-      '@lynx-pretext/devtools':
-        specifier: workspace:*
-        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
+      lynx-pretext-devtools:
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.6
@@ -85,12 +85,12 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
-      '@lynx-pretext/devtools':
-        specifier: workspace:*
-        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
+      lynx-pretext-devtools:
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.6
@@ -119,12 +119,12 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
-      '@lynx-pretext/devtools':
-        specifier: workspace:*
-        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
+      lynx-pretext-devtools:
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.6
@@ -153,12 +153,12 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
-      '@lynx-pretext/devtools':
-        specifier: workspace:*
-        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
+      lynx-pretext-devtools:
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.6
@@ -187,12 +187,12 @@ importers:
       '@lynx-js/react':
         specifier: 0.116.4
         version: 0.116.4(@lynx-js/types@3.7.0)(@types/react@18.3.28)
-      '@lynx-pretext/devtools':
-        specifier: workspace:*
-        version: link:../../packages/lynx-pretext-devtools
       lynx-pretext:
         specifier: workspace:*
         version: link:../../packages/lynx-pretext
+      lynx-pretext-devtools:
+        specifier: workspace:*
+        version: link:../../packages/lynx-pretext-devtools
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.6

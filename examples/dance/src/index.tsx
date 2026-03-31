@@ -1,6 +1,6 @@
 import { root, useState, useEffect, useMemo, useCallback } from '@lynx-js/react'
 import { prepareWithSegments, layoutNextLine } from 'lynx-pretext'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 import {
   chikaFrames,
   chikaMeta,

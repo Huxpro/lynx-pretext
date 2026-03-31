@@ -2,7 +2,7 @@
 // No MTS - all logic runs on Background Thread
 
 import { root, useState, useEffect, useRef, useCallback } from '@lynx-js/react'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 
 // --- Constants ---
 const FONT_SIZE = 10

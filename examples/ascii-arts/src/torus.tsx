@@ -10,7 +10,7 @@
 import { root, useState, useCallback, useMainThreadRef, useEffect, runOnMainThread, runOnBackground } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
 import { prepareWithSegments } from 'lynx-pretext' with { runtime: 'shared' }
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 
 // --- Constants ---
 const FONT_SIZE = 10

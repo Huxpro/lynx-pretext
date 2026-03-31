@@ -6,7 +6,7 @@
 
 import { root, useState, useCallback, useRef, useEffect, useMainThreadRef, runOnMainThread, runOnBackground } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 import { BODY_COPY } from './dynamic-layout-text'
 import {
   openaiLayout as openaiLayoutHull,

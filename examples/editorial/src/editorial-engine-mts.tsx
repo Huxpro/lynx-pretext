@@ -1,6 +1,6 @@
 import { root, runOnMainThread, runOnBackground, useCallback, useMainThreadRef, useState } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 import {
   layoutNextLine,
   layoutWithLines,

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@lynx-js/react": "0.116.4",
-    "@lynx-pretext/devtools": "workspace:*",
+    "lynx-pretext-devtools": "workspace:*",
     "lynx-pretext": "workspace:*"
   },
   "devDependencies": {

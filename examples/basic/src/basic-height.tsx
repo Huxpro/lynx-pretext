@@ -1,7 +1,7 @@
 import { root, useState, useMemo } from '@lynx-js/react'
 
 import { prepare, layout } from 'lynx-pretext'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 
 const SAMPLE_TEXT =
   'The quick brown fox jumps over the lazy dog. ' +

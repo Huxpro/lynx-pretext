@@ -1,5 +1,5 @@
 import { root, useState, useCallback, useMemo } from '@lynx-js/react'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
 
 import {
   computeBubbleRender,

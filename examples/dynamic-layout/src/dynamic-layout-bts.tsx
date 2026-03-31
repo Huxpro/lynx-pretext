@@ -11,8 +11,8 @@ import {
   type LayoutCursor,
   type PreparedTextWithSegments,
 } from 'lynx-pretext'
-import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
-import type { UseDevPanelFPSReturn } from '@lynx-pretext/devtools'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
+import type { UseDevPanelFPSReturn } from 'lynx-pretext-devtools'
 import { BODY_COPY } from './dynamic-layout-text'
 import {
   openaiLayout as openaiLayoutHull,
