@@ -12,6 +12,13 @@ export default defineConfig({
     },
   },
 
+  server: {
+    publicDir: {
+      name: 'public',
+      copyOnBuild: true,
+    },
+  },
+
   resolve: {
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),

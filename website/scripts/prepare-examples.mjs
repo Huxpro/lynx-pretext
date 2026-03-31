@@ -94,7 +94,18 @@ for (const project of EXAMPLE_PROJECTS) {
   if (fs.existsSync(assetsDir)) {
     copyDir(assetsDir, path.join(exampleDest, 'assets'));
   }
-  
+
+  // Copy preview video files
+  const previewFiles = fs.readdirSync(exampleDir).filter(f =>
+    f.startsWith('preview') && f.endsWith('.mp4')
+  );
+  for (const previewFile of previewFiles) {
+    fs.copyFileSync(
+      path.join(exampleDir, previewFile),
+      path.join(exampleDest, previewFile)
+    );
+  }
+
   // Copy lynx.config.ts
   const configPath = path.join(exampleDir, 'lynx.config.ts');
   if (fs.existsSync(configPath)) {
