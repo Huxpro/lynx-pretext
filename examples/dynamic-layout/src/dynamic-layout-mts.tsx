@@ -29,9 +29,9 @@ import {
 import type { Interval, Point, Rect } from './wrap-geometry'
 
 // --- Constants ---
-const BODY_FONT = '20px'
-const BODY_FONT_SIZE = 20
-const BODY_LINE_HEIGHT = 32
+const BODY_FONT = '16px'
+const BODY_FONT_SIZE = 16
+const BODY_LINE_HEIGHT = 26
 const CREDIT_TEXT = 'Leopold Aschenbrenner'
 const CREDIT_FONT = '12px'
 const CREDIT_LINE_HEIGHT = 16
@@ -216,13 +216,13 @@ export function DynamicLayoutMTSPage() {
       const headlineWidth = pWidth - gutter * 2
       const headlineFontSize = Math.min(32, fitHeadlineFontSizeMTS(headlineWidth, pWidth))
       const headlineLineHeight = Math.round(headlineFontSize * 0.92)
-      const openaiSize = Math.round(Math.min(138, pWidth * 0.34))
-      const claudeSize = Math.round(Math.min(184, pWidth * 0.46, pHeight * 0.22))
+      const openaiSize = Math.round(Math.min(160, pWidth * 0.38))
+      const claudeSize = Math.round(Math.min(210, pWidth * 0.50, pHeight * 0.25))
       return { isNarrow, gutter, pageWidth: pWidth, pageHeight: pHeight, centerGap: 0, columnWidth,
         headlineRegion: { x: gutter, y: 28, width: headlineWidth, height: Math.max(320, pHeight - 28 - gutter) },
         headlineFont: `${headlineFontSize}px`, headlineLineHeight, headlineFontSize,
         creditGap: Math.round(Math.max(12, lineHeight * 0.5)), copyGap: Math.round(Math.max(18, lineHeight * 0.7)),
-        openaiRect: { x: gutter - Math.round(openaiSize * 0.22), y: pHeight - gutter - openaiSize + Math.round(openaiSize * 0.08), width: openaiSize, height: openaiSize },
+        openaiRect: { x: gutter + 8, y: pHeight - gutter - openaiSize + Math.round(openaiSize * 0.08), width: openaiSize, height: openaiSize },
         claudeRect: { x: pWidth - gutter - Math.round(claudeSize * 0.88), y: 4, width: claudeSize, height: claudeSize } }
     }
     const gutter = Math.round(Math.max(52, pWidth * 0.048))
@@ -233,13 +233,13 @@ export function DynamicLayoutMTSPage() {
     const headlineFontSize = fitHeadlineFontSizeMTS(headlineWidth, pWidth)
     const headlineLineHeight = Math.round(headlineFontSize * 0.92)
     const openaiShrinkT = Math.max(0, Math.min(1, (960 - pWidth) / 260))
-    const openaiSize = Math.round(Math.min(400 - openaiShrinkT * 56, pHeight * 0.43))
-    const claudeSize = Math.round(Math.max(552, Math.min(1000, pWidth * 0.71, pHeight * 0.9)))
+    const openaiSize = Math.round(Math.min(495 - openaiShrinkT * 62, pHeight * 0.46))
+    const claudeSize = Math.round(Math.max(600, Math.min(1100, pWidth * 0.75, pHeight * 0.95)))
     return { isNarrow, gutter, pageWidth: pWidth, pageHeight: pHeight, centerGap, columnWidth,
       headlineRegion: { x: gutter, y: headlineTop, width: headlineWidth, height: pHeight - headlineTop - gutter },
       headlineFont: `${headlineFontSize}px`, headlineLineHeight, headlineFontSize,
       creditGap: Math.round(Math.max(14, BODY_LINE_HEIGHT * 0.6)), copyGap: Math.round(Math.max(20, BODY_LINE_HEIGHT * 0.9)),
-      openaiRect: { x: gutter - Math.round(openaiSize * 0.3), y: pHeight - gutter - openaiSize + Math.round(openaiSize * 0.2), width: openaiSize, height: openaiSize },
+      openaiRect: { x: gutter + 4, y: pHeight - gutter - openaiSize + Math.round(openaiSize * 0.1), width: openaiSize, height: openaiSize },
       claudeRect: { x: pWidth - Math.round(claudeSize * 0.69), y: -Math.round(claudeSize * 0.22), width: claudeSize, height: claudeSize } }
   }
 
@@ -417,10 +417,7 @@ export function DynamicLayoutMTSPage() {
       {/* DevPanel */}
       <DevPanel.Root>
         <DevPanel.Trigger />
-        <DevPanel.Content
-          title="Dynamic Layout (Pure MTS)"
-          description="Full text reflow on main thread at 60fps via shared modules. Zero cross-thread during animation."
-        >
+        <DevPanel.Content title="MTS Only">
           <DevPanelFPS mtsFpsDisplay={mtsFpsDisplay} btsFpsDisplay={btsFpsDisplay} mtsFpsTextRef={mtsFpsTextRef} />
           <DevPanel.Stats>
             <DevPanel.Stat label="Mode" value={pageWidth < 760 ? 'Single' : 'Two-col'} />

@@ -8,8 +8,8 @@ export function DevPanelActions({
       style={{
         display: 'flex',
         flexDirection: 'row',
-        marginTop: '12px',
-        gap: '8px',
+        marginTop: '6px',
+        gap: '6px',
       }}
     >
       {children}

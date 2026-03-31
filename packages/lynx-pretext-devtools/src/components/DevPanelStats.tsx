@@ -8,8 +8,8 @@ export function DevPanelStats({
       style={{
         display: 'flex',
         flexDirection: 'row',
-        gap: '16px',
-        marginTop: '12px',
+        gap: '10px',
+        marginTop: '6px',
       }}
     >
       {children}

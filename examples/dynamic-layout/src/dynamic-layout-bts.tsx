@@ -32,9 +32,9 @@ import {
 
 // --- Constants ---
 
-const BODY_FONT = '20px'
-const BODY_FONT_SIZE = 20
-const BODY_LINE_HEIGHT = 32
+const BODY_FONT = '16px'
+const BODY_FONT_SIZE = 16
+const BODY_LINE_HEIGHT = 26
 const CREDIT_TEXT = 'Leopold Aschenbrenner'
 const CREDIT_FONT = '12px'
 const CREDIT_LINE_HEIGHT = 16
@@ -189,14 +189,14 @@ function buildLayout(pageWidth: number, pageHeight: number, lineHeight: number, 
     const headlineWidth = pageWidth - gutter * 2
     const headlineFontSize = Math.min(32, fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared))
     const headlineLineHeight = Math.round(headlineFontSize * 0.92)
-    const claudeSize = Math.round(Math.min(184, pageWidth * 0.46, pageHeight * 0.22))
-    const openaiSize = Math.round(Math.min(138, pageWidth * 0.34))
+    const claudeSize = Math.round(Math.min(210, pageWidth * 0.50, pageHeight * 0.25))
+    const openaiSize = Math.round(Math.min(160, pageWidth * 0.38))
     return {
       isNarrow, gutter, pageWidth, pageHeight, centerGap: 0, columnWidth,
       headlineRegion: { x: gutter, y: 28, width: headlineWidth, height: Math.max(320, pageHeight - 28 - gutter) },
       headlineFont: `${headlineFontSize}px`, headlineLineHeight, headlineFontSize,
       creditGap: Math.round(Math.max(12, lineHeight * 0.5)), copyGap: Math.round(Math.max(18, lineHeight * 0.7)),
-      openaiRect: { x: gutter - Math.round(openaiSize * 0.22), y: pageHeight - gutter - openaiSize + Math.round(openaiSize * 0.08), width: openaiSize, height: openaiSize },
+      openaiRect: { x: gutter + 8, y: pageHeight - gutter - openaiSize + Math.round(openaiSize * 0.08), width: openaiSize, height: openaiSize },
       claudeRect: { x: pageWidth - gutter - Math.round(claudeSize * 0.88), y: 4, width: claudeSize, height: claudeSize },
     }
   }
@@ -208,14 +208,14 @@ function buildLayout(pageWidth: number, pageHeight: number, lineHeight: number, 
   const headlineFontSize = fitHeadlineFontSize(headlineWidth, pageWidth, getPrepared)
   const headlineLineHeight = Math.round(headlineFontSize * 0.92)
   const openaiShrinkT = Math.max(0, Math.min(1, (960 - pageWidth) / 260))
-  const openaiSize = Math.round(Math.min(400 - openaiShrinkT * 56, pageHeight * 0.43))
-  const claudeSize = Math.round(Math.max(552, Math.min(1000, pageWidth * 0.71, pageHeight * 0.9)))
+  const openaiSize = Math.round(Math.min(495 - openaiShrinkT * 62, pageHeight * 0.46))
+  const claudeSize = Math.round(Math.max(600, Math.min(1100, pageWidth * 0.75, pageHeight * 0.95)))
   return {
     isNarrow, gutter, pageWidth, pageHeight, centerGap, columnWidth,
     headlineRegion: { x: gutter, y: headlineTop, width: headlineWidth, height: pageHeight - headlineTop - gutter },
     headlineFont: `${headlineFontSize}px`, headlineLineHeight, headlineFontSize,
     creditGap: Math.round(Math.max(14, lineHeight * 0.6)), copyGap: Math.round(Math.max(20, lineHeight * 0.9)),
-    openaiRect: { x: gutter - Math.round(openaiSize * 0.3), y: pageHeight - gutter - openaiSize + Math.round(openaiSize * 0.2), width: openaiSize, height: openaiSize },
+    openaiRect: { x: gutter + 4, y: pageHeight - gutter - openaiSize + Math.round(openaiSize * 0.1), width: openaiSize, height: openaiSize },
     claudeRect: { x: pageWidth - Math.round(claudeSize * 0.69), y: -Math.round(claudeSize * 0.22), width: claudeSize, height: claudeSize },
   }
 }
@@ -412,10 +412,7 @@ export function DynamicLayoutBTSPage() {
       {/* DevPanel */}
       <DevPanel.Root>
         <DevPanel.Trigger />
-        <DevPanel.Content
-          title="Dynamic Layout (BTS)"
-          description="Pure React animation — no Main Thread Script. Every frame: rAF → setState → React render → reconcile → commit."
-        >
+        <DevPanel.Content title="BTS Only">
           <DevPanelFPS mtsFpsDisplay={mtsFpsDisplay} btsFpsDisplay={btsFpsDisplay} />
           <DevPanel.Stats>
             <DevPanel.Stat label="Mode" value={pageLayout.isNarrow ? 'Single' : 'Two-col'} />

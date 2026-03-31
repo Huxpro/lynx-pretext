@@ -19,6 +19,7 @@
 | 文档 | 描述 |
 |------|------|
 | [ascii-art-rendering.md](docs/learning/ascii-art-rendering.md) | MTS ASCII Art 渲染技术：字符宽度测量、自适应布局、60fps 动画 |
+| [lynx-flexbox-centering-pitfall.md](docs/learning/lynx-flexbox-centering-pitfall.md) | Flexbox 居中陷阱：`flex: 1` vs `height: '100%'` |
 
 ### 事件处理
 
@@ -58,6 +59,7 @@ function myMTSFunction(): void {
 1. **TDZ 问题**: `'main thread'` 函数内访问闭包变量可能触发 "lexical variable is not initialized"
 2. **空 view 高度**: Lynx 中空 `<view style={{ flex: 1 }} />` 高度为 0
 3. **Touch identifier**: MTS 中 `touch.identifier` 可能不稳定，建议用 index 匹配
+4. **Flexbox 居中**: `flex: 1` 不能正确撑开高度，需用 `height: '100%'` 配合 `justifyContent: 'center'`
 
 ---
 

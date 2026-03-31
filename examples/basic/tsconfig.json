@@ -6,7 +6,8 @@
     "jsxImportSource": "@lynx-js/react",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "noEmit": true
+    "noEmit": true,
+    "lib": ["ES2020", "ES2022.Intl"]
   },
   "include": ["./**/*.ts", "./**/*.tsx"]
 }

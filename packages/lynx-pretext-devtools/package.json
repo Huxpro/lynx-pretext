@@ -10,6 +10,9 @@
     "directory": "packages/lynx-pretext-devtools"
   },
   "type": "module",
+  "scripts": {
+    "typecheck": "tsc --build"
+  },
   "exports": {
     ".": "./src/index.ts"
   },

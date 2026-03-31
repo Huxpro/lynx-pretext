@@ -1,6 +1,7 @@
-import { root, useState, useCallback, useMemo } from '@lynx-js/react'
+import { root, useState, useMemo } from '@lynx-js/react'
 
 import { prepareWithSegments, layoutNextLine, type LayoutCursor, type LayoutLine } from 'lynx-pretext'
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 
 const SAMPLE_TEXT =
   'The quick brown fox jumps over the lazy dog. ' +
@@ -52,16 +53,11 @@ function layoutVariableFlow(
 
 export function VariableFlowPage() {
   const [maxWidth, setMaxWidth] = useState(360)
-  const [showControls, setShowControls] = useState(false)
 
-  const onLayout = useCallback((e: any) => {
-    setMaxWidth(Math.floor(e.detail.width))
-  }, [])
-  const toggleControls = useCallback(() => setShowControls(v => !v), [])
-  const decrease = useCallback(() => setMaxWidth(w => Math.max(200, w - 20)), [])
-  const increase = useCallback(() => setMaxWidth(w => Math.min(1200, w + 20)), [])
+  // FPS monitoring - BTS only
+  const { btsFpsTick, btsFpsDisplay } = useDevPanelFPS()
 
-  const contentWidth = Math.max(200, maxWidth - 32)
+  const contentWidth = Math.max(160, maxWidth - 32)
   const prepared = useMemo(() => prepareWithSegments(SAMPLE_TEXT, FONT), [])
   const flowLines = layoutVariableFlow(prepared, contentWidth, LINE_HEIGHT)
   const totalHeight = flowLines.length > 0
@@ -69,167 +65,117 @@ export function VariableFlowPage() {
     : 0
   const narrowLineCount = flowLines.filter(l => l.availableWidth < contentWidth).length
 
-  return (
-    <view style={{ flex: 1, backgroundColor: '#fff' }} bindlayoutchange={onLayout}>
-      {/* Demo content — flow layout with obstacle */}
-      <view style={{ flex: 1, padding: '16px' }}>
-        <view style={{
-          width: `${contentWidth}px`,
-          height: `${Math.max(totalHeight, OBSTACLE_H + OBSTACLE_GAP)}px`,
-          borderWidth: '1px',
-          borderColor: '#5c6bc0',
-          borderRadius: '4px',
-          backgroundColor: '#fafafa',
-          overflow: 'hidden',
-        }}>
-          {/* Obstacle */}
-          <view style={{
-            position: 'absolute',
-            top: '0px',
-            right: '0px',
-            width: `${OBSTACLE_W}px`,
-            height: `${OBSTACLE_H}px`,
-            backgroundColor: '#c5cae9',
-            borderBottomLeftRadius: '8px',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#3949ab' }}>
-              Image
-            </text>
-            <text style={{ fontSize: '11px', color: '#5c6bc0' }}>
-              {`${OBSTACLE_W}\u00D7${OBSTACLE_H}`}
-            </text>
-          </view>
+  // BTS FPS tick
+  btsFpsTick()
 
-          {/* Flow lines */}
-          {flowLines.map((line, i) => (
-            <view
-              key={`flow-${i}`}
-              style={{
-                position: 'absolute',
-                top: `${line.y}px`,
-                left: '0px',
-                height: `${LINE_HEIGHT}px`,
-              }}
-            >
-              <text style={{ fontSize: `${FONT_SIZE}px`, color: '#333' }}>
-                {line.text}
+  return (
+    <DevPanel.Root>
+      <view style={{ flex: 1, backgroundColor: '#fff' }}>
+        {/* Demo content — flow layout with obstacle */}
+        <view style={{ flex: 1, padding: '16px' }}>
+          <view style={{
+            width: `${contentWidth}px`,
+            height: `${Math.max(totalHeight, OBSTACLE_H + OBSTACLE_GAP)}px`,
+            borderWidth: '1px',
+            borderColor: '#5c6bc0',
+            borderRadius: '4px',
+            backgroundColor: '#fafafa',
+            overflow: 'hidden',
+          }}>
+            {/* Obstacle */}
+            <view style={{
+              position: 'absolute',
+              top: '0px',
+              right: '0px',
+              width: `${OBSTACLE_W}px`,
+              height: `${OBSTACLE_H}px`,
+              backgroundColor: '#c5cae9',
+              borderBottomLeftRadius: '8px',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <text style={{ fontSize: '14px', fontWeight: 'bold', color: '#3949ab' }}>
+                Image
+              </text>
+              <text style={{ fontSize: '11px', color: '#5c6bc0' }}>
+                {`${OBSTACLE_W}\u00D7${OBSTACLE_H}`}
               </text>
             </view>
-          ))}
-        </view>
 
-        {/* Summary */}
-        <view style={{
-          marginTop: '12px',
-          padding: '10px',
-          borderRadius: '8px',
-          backgroundColor: '#e8eaf6',
-          display: 'flex', flexDirection: 'row',
-          gap: '24px',
-        }}>
-          <view>
-            <text style={{ fontSize: '12px', color: '#283593' }}>Total</text>
-            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#1a237e' }}>
-              {`${flowLines.length}`}
-            </text>
+            {/* Flow lines */}
+            {flowLines.map((line, i) => (
+              <view
+                key={`flow-${i}`}
+                style={{
+                  position: 'absolute',
+                  top: `${line.y}px`,
+                  left: '0px',
+                  height: `${LINE_HEIGHT}px`,
+                }}
+              >
+                <text style={{ fontSize: `${FONT_SIZE}px`, color: '#333' }}>
+                  {line.text}
+                </text>
+              </view>
+            ))}
           </view>
-          <view>
-            <text style={{ fontSize: '12px', color: '#283593' }}>Narrow</text>
-            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#e65100' }}>
-              {`${narrowLineCount}`}
-            </text>
-          </view>
-          <view>
-            <text style={{ fontSize: '12px', color: '#283593' }}>Full</text>
-            <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#2e7d32' }}>
-              {`${flowLines.length - narrowLineCount}`}
-            </text>
-          </view>
-        </view>
-      </view>
 
-      {/* Toggle button */}
-      <view
-        bindtap={toggleControls}
-        style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          width: '36px',
-          height: '36px',
-          borderRadius: '18px',
-          backgroundColor: showControls ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.35)',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <text style={{
-          fontSize: '20px',
-          color: showControls ? '#333' : '#fff',
-          fontWeight: 'bold',
-        }}>
-          {showControls ? '\u00D7' : '\u2261'}
-        </text>
-      </view>
-
-      {/* Controls overlay */}
-      {showControls && (
-        <view style={{
-          position: 'absolute',
-          top: '56px',
-          left: '12px',
-          right: '12px',
-          backgroundColor: 'rgba(0,0,0,0.88)',
-          borderRadius: '12px',
-          padding: '16px',
-        }}>
-          <text style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
-            Variable-Width Flow
-          </text>
-          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
-            layoutNextLine with different maxWidth per line
-          </text>
-
-          {/* Width stepper */}
-          <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '12px', gap: '10px' }}>
-            <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>W:</text>
-            <view
-              bindtap={decrease}
-              style={{
-                width: '32px', height: '32px', borderRadius: '16px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>{'\u2212'}</text>
+          {/* Summary */}
+          <view style={{
+            marginTop: '12px',
+            padding: '10px',
+            borderRadius: '8px',
+            backgroundColor: '#e8eaf6',
+            display: 'flex', flexDirection: 'row',
+            gap: '24px',
+          }}>
+            <view>
+              <text style={{ fontSize: '12px', color: '#283593' }}>Total</text>
+              <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#1a237e' }}>
+                {`${flowLines.length}`}
+              </text>
             </view>
-            <text style={{ fontSize: '14px', color: '#fff', minWidth: '70px', textAlign: 'center' }}>
-              {`${maxWidth}px`}
-            </text>
-            <view
-              bindtap={increase}
-              style={{
-                width: '32px', height: '32px', borderRadius: '16px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <text style={{ fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>+</text>
+            <view>
+              <text style={{ fontSize: '12px', color: '#283593' }}>Narrow</text>
+              <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#e65100' }}>
+                {`${narrowLineCount}`}
+              </text>
+            </view>
+            <view>
+              <text style={{ fontSize: '12px', color: '#283593' }}>Full</text>
+              <text style={{ fontSize: '20px', fontWeight: 'bold', color: '#2e7d32' }}>
+                {`${flowLines.length - narrowLineCount}`}
+              </text>
             </view>
           </view>
-
-          <text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '12px', lineHeight: '18px' }}>
-            {'Each line\'s end cursor becomes the next line\'s start. ' +
-             'Lines overlapping the obstacle get narrower width (' +
-             (contentWidth - OBSTACLE_W - OBSTACLE_GAP) + 'px), ' +
-             'lines below get full width (' + contentWidth + 'px). ' +
-             'This is impossible with native <text> layout.'}
-          </text>
         </view>
-      )}
-    </view>
+
+        {/* DevPanel Trigger */}
+        <DevPanel.Trigger />
+
+        {/* DevPanel Content */}
+        <DevPanel.Content title="Flow">
+          <DevPanelFPS mtsFpsDisplay={0} btsFpsDisplay={btsFpsDisplay} />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="total" value={`${flowLines.length}`} />
+            <DevPanel.Stat label="narrow" value={`${narrowLineCount}`} />
+          </DevPanel.Stats>
+          <DevPanel.Stats>
+            <DevPanel.Stat label="full" value={`${flowLines.length - narrowLineCount}`} />
+            <DevPanel.Stat label="height" value={`${totalHeight}px`} />
+          </DevPanel.Stats>
+          <DevPanel.Stepper
+            label="width"
+            value={maxWidth}
+            min={160}
+            max={1200}
+            step={20}
+            unit="px"
+            onChange={setMaxWidth}
+          />
+        </DevPanel.Content>
+      </view>
+    </DevPanel.Root>
   )
 }
 

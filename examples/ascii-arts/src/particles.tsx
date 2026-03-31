@@ -1,11 +1,12 @@
-// Variable Typographic ASCII Art - Proportional version for Lynx
+// Variable Typographic ASCII Art - Mono version for Lynx
 // Ported from pretext/pages/demos/variable-typographic-ascii.ts
 //
 // Simplified version with fixed dimensions for debugging TDZ issue
 
-import { root, useMainThreadRef, useEffect, runOnMainThread, runOnBackground } from '@lynx-js/react'
+import { root, useMainThreadRef, useEffect, runOnMainThread } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
 import { prepareWithSegments } from 'lynx-pretext' with { runtime: 'shared' }
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 
 // --- Constants ---
 const FONT_SIZE = 10
@@ -31,32 +32,21 @@ const FIELD_ROWS = ROWS * FIELD_OVERSAMPLE
 const FIELD_SCALE_X = FIELD_COLS / CANVAS_W
 const FIELD_SCALE_Y = FIELD_ROWS / CANVAS_H
 
-// Proportional font family
-const PROP_FAMILY = 'Georgia, Palatino, "Times New Roman", serif'
-// Original proportional color: rgba(196,163,90,x) where x is alpha based on brightness
-const PROP_COLOR_BASE = { r: 196, g: 163, b: 90 }
+// Mono character ramp
+const MONO_RAMP = ' .`-_:,;^=+/|)\\!?0oOQ#%@'
+// Original mono color: rgba(130,155,210,0.7)
+const MONO_COLOR = 'rgba(130,155,210,0.7)'
 
-// Character set for proportional version
-const CHARSET = ' .,:;!+-=*#@%&abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-const WEIGHTS = [300, 500, 800] as const
-const STYLES = ['normal', 'italic'] as const
-type FontStyleVariant = typeof STYLES[number]
-
-type PaletteEntry = { char: string; weight: number; style: FontStyleVariant; brightness: number }
 type Particle = { x: number; y: number; vx: number; vy: number }
 type FieldStamp = { radiusX: number; radiusY: number; sizeX: number; sizeY: number; values: Float32Array }
 
-export function FieldPropPage() {
+export function FieldMonoPage() {
   // Row text refs
   const rowRefs: any[] = []
   for (let i = 0; i < ROWS; i++) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     rowRefs.push(useMainThreadRef<MainThread.Element>(null))
   }
-  const statsRef = useMainThreadRef<MainThread.Element>(null)
-  const fpsFrameCountMT = useMainThreadRef(0)
-  const fpsLastTimeMT = useMainThreadRef(0)
-  const paletteMT = useMainThreadRef<PaletteEntry[]>([])
   const brightnessLookupMT = useMainThreadRef<string[]>([])
   const particlesMT = useMainThreadRef<Particle[]>([])
   const brightnessFieldMT = useMainThreadRef<Float32Array>(new Float32Array(0))
@@ -64,63 +54,16 @@ export function FieldPropPage() {
   const largeAttractorFieldStampMT = useMainThreadRef<FieldStamp | null>(null)
   const smallAttractorFieldStampMT = useMainThreadRef<FieldStamp | null>(null)
 
-  function estimateBrightness(ch: string): number {
-    'main thread'
-    if (ch === ' ') return 0
-    if ('.,:;\'`"-~_'.includes(ch)) return 0.1 + Math.random() * 0.05
-    if ('+-=*/|\\<>^'.includes(ch)) return 0.15 + Math.random() * 0.1
-    if (ch >= '0' && ch <= '9') return 0.3 + (parseInt(ch) / 9) * 0.3
-    if (ch >= 'a' && ch <= 'z') {
-      const dm: Record<string, number> = { i: 0.1, l: 0.12, j: 0.15, t: 0.18, f: 0.2, r: 0.22, s: 0.25, v: 0.28, x: 0.3, y: 0.3, c: 0.32, a: 0.35, e: 0.35, o: 0.38, u: 0.35, n: 0.4, h: 0.42, m: 0.45, w: 0.48, b: 0.45, d: 0.45, p: 0.45, q: 0.45, g: 0.5, k: 0.4, z: 0.35 }
-      return dm[ch] || 0.35
-    }
-    if (ch >= 'A' && ch <= 'Z') {
-      const dm: Record<string, number> = { I: 0.15, L: 0.2, T: 0.25, F: 0.28, E: 0.35, Y: 0.3, V: 0.32, X: 0.35, K: 0.35, A: 0.4, H: 0.42, N: 0.42, M: 0.5, W: 0.55, B: 0.48, D: 0.48, O: 0.5, P: 0.45, Q: 0.52, R: 0.48, S: 0.45, G: 0.5, U: 0.45, C: 0.42, J: 0.35, Z: 0.4 }
-      return dm[ch] || 0.45
-    }
-    if ('#%@&'.includes(ch)) return 0.7 + Math.random() * 0.1
-    if ('*=$'.includes(ch)) return 0.5 + Math.random() * 0.1
-    return 0.3
-  }
+  // FPS monitoring - MTS direct update mode
+  const { mtsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
 
-  function initPalette(): void {
-    'main thread'
-    const palette: PaletteEntry[] = []
-    for (const style of STYLES) {
-      for (const weight of WEIGHTS) {
-        const font = `${style === 'italic' ? 'italic ' : ''}${weight} ${FONT_SIZE}px ${PROP_FAMILY}`
-        for (const ch of CHARSET) {
-          if (ch === ' ') continue
-          const p = prepareWithSegments(ch, font)
-          const width = (p as any).widths && (p as any).widths.length > 0 ? (p as any).widths[0] : 0
-          if (width <= 0) continue
-          const brightness = estimateBrightness(ch) * (weight / 300) * (style === 'italic' ? 0.95 : 1)
-          palette.push({ char: ch, weight, style, brightness })
-        }
-      }
-    }
-    const maxB = Math.max(...palette.map(e => e.brightness))
-    if (maxB > 0) for (let i = 0; i < palette.length; i++) palette[i]!.brightness /= maxB
-    palette.sort((a, b) => a.brightness - b.brightness)
-    paletteMT.current = palette
-    buildBrightnessLookup(palette)
-  }
-
-  function buildBrightnessLookup(palette: PaletteEntry[]): void {
+  function buildBrightnessLookup(): void {
     'main thread'
     const lookup: string[] = []
     for (let b = 0; b < 256; b++) {
       const brightness = b / 255
-      if (brightness < 0.03) {
-        lookup.push(' ')
-      } else {
-        let best = palette[0]!, bestScore = Infinity
-        for (const entry of palette) {
-          const err = Math.abs(entry.brightness - brightness)
-          if (err < bestScore) { bestScore = err; best = entry }
-        }
-        lookup.push(best.char)
-      }
+      const char = MONO_RAMP[Math.min(MONO_RAMP.length - 1, (brightness * MONO_RAMP.length) | 0)]!
+      lookup.push(brightness < 0.03 ? ' ' : char)
     }
     brightnessLookupMT.current = lookup
   }
@@ -243,55 +186,64 @@ export function FieldPropPage() {
       const el = rowRefs[row]!.current
       if (el) {
         el.setAttribute('text', rowText)
-        // Original prop uses alpha based on brightness: a1=0.1 to a10=1.0
-        // alphaIndex = Math.max(1, Math.min(10, Math.round(brightness * 10)))
-        const alphaIndex = Math.max(1, Math.min(10, Math.round((rowBrightnessByte / 255) * 10)))
-        const alpha = alphaIndex / 10
-        el.setStyleProperty('color', `rgba(${PROP_COLOR_BASE.r},${PROP_COLOR_BASE.g},${PROP_COLOR_BASE.b},${alpha.toFixed(1)})`)
+        // Original mono uses fixed color: rgba(130,155,210,0.7)
+        el.setStyleProperty('color', MONO_COLOR)
       }
     }
   }
 
   function tick(ts: number): void {
     'main thread'
-    fpsFrameCountMT.current++
-    const now = Date.now()
-    if (fpsLastTimeMT.current === 0) fpsLastTimeMT.current = now
-    const elapsed = now - fpsLastTimeMT.current
-    if (elapsed >= 500) {
-      const fps = Math.round((fpsFrameCountMT.current / elapsed) * 1000)
-      fpsFrameCountMT.current = 0; fpsLastTimeMT.current = now
-      if (statsRef.current) statsRef.current.setAttribute('text', `${COLS}×${ROWS} | ${PARTICLE_N} particles | ${fps} fps`)
-      runOnBackground(() => {})()
-    }
+    mtsFpsTick() // Track MTS FPS
     renderFrame(ts)
     requestAnimationFrame(tick)
   }
 
   function initMTS(): void {
     'main thread'
-    initPalette()
+    buildBrightnessLookup()
     initSimulation()
     requestAnimationFrame(tick)
   }
 
   useEffect(() => { void runOnMainThread(initMTS)() }, [])
 
+  // Calculate actual canvas dimensions for centering
+  const canvasWidth = COLS * FONT_SIZE * 0.6 // monospace char width ≈ 0.6 * fontSize
+  const canvasHeight = ROWS * LINE_HEIGHT
+
   return (
-    <view style={{ flex: 1, backgroundColor: '#0a0a12' }}>
-      <view style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 100 }}>
-        <text main-thread:ref={statsRef} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontFamily: 'Menlo, Courier, monospace' }}> </text>
-      </view>
-      <view style={{ width: '100%', height: '100%', overflow: 'hidden', paddingTop: '30px' }}>
-        {Array.from({ length: ROWS }, (_, i) => (
-          <view key={`r-${i}`} style={{ height: `${LINE_HEIGHT}px` }}>
-            <text main-thread:ref={rowRefs[i]} style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: 'rgba(196,163,90,0.7)', fontFamily: PROP_FAMILY, letterSpacing: '0px' }}> </text>
+    <DevPanel.Root defaultOpen={true}>
+      <view style={{ width: '100%', height: '100%', backgroundColor: '#0a0a12' }}>
+        {/* Centered art container */}
+        <view style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <view style={{ width: `${canvasWidth}px`, height: `${canvasHeight}px`, overflow: 'hidden' }}>
+            {Array.from({ length: ROWS }, (_, i) => (
+              <view key={`r-${i}`} style={{ height: `${LINE_HEIGHT}px` }}>
+                <text main-thread:ref={rowRefs[i]} style={{ fontSize: `${FONT_SIZE}px`, lineHeight: `${LINE_HEIGHT}px`, color: MONO_COLOR, fontFamily: 'Courier New, Courier, monospace', letterSpacing: '0px' }}> </text>
+              </view>
+            ))}
           </view>
-        ))}
+        </view>
+
+        {/* DevPanel Trigger */}
+        <DevPanel.Trigger />
+
+        {/* DevPanel Content */}
+        <DevPanel.Content title="Particles">
+          {/* FPS Display */}
+          <DevPanelFPS mtsFpsDisplay={mtsFpsDisplay} btsFpsDisplay={btsFpsDisplay} mtsFpsTextRef={mtsFpsTextRef} />
+
+          {/* Stats */}
+          <DevPanel.Stats>
+            <DevPanel.Stat label="grid" value={`${COLS}×${ROWS}`} />
+            <DevPanel.Stat label="particles" value={`${PARTICLE_N}`} />
+          </DevPanel.Stats>
+        </DevPanel.Content>
       </view>
-    </view>
+    </DevPanel.Root>
   )
 }
 
-root.render(<FieldPropPage />)
+root.render(<FieldMonoPage />)
 if (import.meta.webpackHot) import.meta.webpackHot.accept()

@@ -6,8 +6,8 @@ import { pluginTypeCheck } from '@rsbuild/plugin-type-check'
 export default defineConfig({
   source: {
     entry: {
-      main: './src/editorial-mts.tsx',
-      'editorial-engine': './src/editorial-engine.tsx',
+      main: './src/main.tsx',
+      'mts-only': './src/editorial-engine-mts.tsx',
     },
   },
   plugins: [

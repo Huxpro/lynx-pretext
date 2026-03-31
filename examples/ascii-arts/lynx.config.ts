@@ -6,9 +6,9 @@ import { pluginTypeCheck } from '@rsbuild/plugin-type-check'
 export default defineConfig({
   source: {
     entry: {
-      main: './src/wireframe-torus.tsx',
-      'field-mono': './src/field-mono.tsx',
-      'field-prop': './src/field-prop.tsx',
+      torus: './src/torus.tsx',
+      particles: './src/particles.tsx',
+      'particles-bts': './src/particles-bts.tsx',
     },
   },
   plugins: [

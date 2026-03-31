@@ -252,7 +252,7 @@ function createInitialOrbs(bodyRect: Rect): OrbState[] {
   ]
 }
 
-function EditorialMTSPage() {
+function EditorialEngineMTSPage() {
   // DevPanel FPS hook - MTS direct update mode
   const { mtsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
 
@@ -892,10 +892,7 @@ function EditorialMTSPage() {
       {/* DevPanel */}
       <DevPanel.Root>
         <DevPanel.Trigger />
-        <DevPanel.Content
-          title="Editorial Engine (Pure MTS)"
-          description="Full text reflow on main thread at 60fps via shared modules. Drag orbs to force text reflow in real time. Zero cross-thread during animation."
-        >
+        <DevPanel.Content title="MTS Only">
           <DevPanelFPS
             mtsFpsDisplay={mtsFpsDisplay}
             btsFpsDisplay={btsFpsDisplay}
@@ -911,7 +908,7 @@ function EditorialMTSPage() {
   )
 }
 
-root.render(<EditorialMTSPage />)
+root.render(<EditorialEngineMTSPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()

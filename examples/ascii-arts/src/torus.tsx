@@ -10,6 +10,7 @@
 import { root, useState, useCallback, useMainThreadRef, useEffect, runOnMainThread, runOnBackground } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
 import { prepareWithSegments } from 'lynx-pretext' with { runtime: 'shared' }
+import { DevPanel, useDevPanelFPS, DevPanelFPS } from '@lynx-pretext/devtools'
 
 // --- Constants ---
 const FONT_SIZE = 10
@@ -47,7 +48,10 @@ for (let i = 0; i < U_STEPS; i++) {
 export function WireframeTorusPage() {
   const [pageWidth, setPageWidth] = useState(390)
   const [pageHeight, setPageHeight] = useState(700)
-  const [fpsDisplay, setFpsDisplay] = useState(0)
+  const [gridDisplay, setGridDisplay] = useState('0×0')
+
+  // DevPanel FPS hook - MTS direct update mode
+  const { mtsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
 
   const onLayout = useCallback((e: any) => {
     setPageWidth(Math.floor(e.detail.width))
@@ -60,14 +64,10 @@ export function WireframeTorusPage() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     rowRefs.push(useMainThreadRef<MainThread.Element>(null))
   }
-  const statsRef = useMainThreadRef<MainThread.Element>(null)
 
   // MTS state
   const pageWidthMT = useMainThreadRef(390)
   const pageHeightMT = useMainThreadRef(700)
-  const animatingMT = useMainThreadRef(false)
-  const fpsFrameCountMT = useMainThreadRef(0)
-  const fpsLastTimeMT = useMainThreadRef(0)
   const charWidthsMT = useMainThreadRef<any>(null) // lazily initialized array of widths
   const colsMT = useMainThreadRef(0)
   const rowsMT = useMainThreadRef(0)
@@ -106,6 +106,8 @@ export function WireframeTorusPage() {
     // avg width + 10% margin — occasional minor overflow is acceptable
     colsMT.current = Math.min(MAX_COLS, Math.floor(pageWidthMT.current / (avgCharWidthMT.current * 1.1)))
     rowsMT.current = Math.min(MAX_ROWS, Math.floor(pageHeightMT.current / LINE_HEIGHT))
+    // Sync to BTS for display
+    runOnBackground(setGridDisplay)(`${colsMT.current}×${rowsMT.current}`)
   }
 
   function renderFrame(now: number): void {
@@ -223,25 +225,14 @@ export function WireframeTorusPage() {
         const rr = Math.round(20 + glow * 60)
         const gg = Math.round(60 + glow * 195)
         const bb = Math.round(80 + glow * 140)
-        el.setStyleProperty('color', `rgb(${rr},${gg},${bb})`)
+        el.setStyleProperty('color', `rgba(${rr},${gg},${bb},1)`)
       }
     }
   }
 
   function tick(ts: number): void {
     'main thread'
-    // FPS
-    fpsFrameCountMT.current++
-    const now = Date.now()
-    if (fpsLastTimeMT.current === 0) fpsLastTimeMT.current = now
-    const fpsElapsed = now - fpsLastTimeMT.current
-    if (fpsElapsed >= 500) {
-      const fps = Math.round((fpsFrameCountMT.current / fpsElapsed) * 1000)
-      fpsFrameCountMT.current = 0; fpsLastTimeMT.current = now
-      if (statsRef.current) statsRef.current.setAttribute('text', `${colsMT.current}\u00D7${rowsMT.current} | ${U_STEPS}\u00D7${V_STEPS} torus | ${fps} fps`)
-      runOnBackground(setFpsDisplay)(fps)
-    }
-
+    mtsFpsTick()
     renderFrame(ts)
     requestAnimationFrame(tick)
   }
@@ -264,26 +255,41 @@ export function WireframeTorusPage() {
   useEffect(() => { void runOnMainThread(syncDims)(pageWidth, pageHeight) }, [pageWidth, pageHeight])
 
   return (
-    <view style={{ flex: 1, backgroundColor: '#000000' }} bindlayoutchange={onLayout}>
-      {/* Row pool — overflow hidden so extra rows beyond screen don't add height */}
-      <view style={{ width: '100%', height: `${pageHeight}px`, overflow: 'hidden' }}>
-        {Array.from({ length: MAX_ROWS }, (_, i) => (
-          <view key={`r-${i}`} style={{ height: `${LINE_HEIGHT}px` }}>
-            <text
-              main-thread:ref={rowRefs[i]}
-              style={{
-                fontSize: `${FONT_SIZE}px`,
-                lineHeight: `${LINE_HEIGHT}px`,
-                color: '#3c9c78',
-                fontFamily: 'Menlo, Courier, monospace',
-                letterSpacing: '0px',
-              }}
-            > </text>
+    <DevPanel.Root defaultOpen={true}>
+      <view style={{ width: '100%', height: '100%', backgroundColor: '#000000' }} bindlayoutchange={onLayout}>
+        {/* Row pool — overflow hidden so extra rows beyond screen don't add height */}
+        <view style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <view style={{ width: '100%', height: `${pageHeight}px`, overflow: 'hidden' }}>
+            {Array.from({ length: MAX_ROWS }, (_, i) => (
+              <view key={`r-${i}`} style={{ height: `${LINE_HEIGHT}px` }}>
+                <text
+                  main-thread:ref={rowRefs[i]}
+                  style={{
+                    fontSize: `${FONT_SIZE}px`,
+                    lineHeight: `${LINE_HEIGHT}px`,
+                    color: 'rgba(60,195,140,1)',
+                    fontFamily: 'Menlo, Courier, monospace',
+                    letterSpacing: '0px',
+                  }}
+                > </text>
+              </view>
+            ))}
           </view>
-        ))}
-      </view>
+        </view>
 
-    </view>
+        {/* DevPanel Trigger */}
+        <DevPanel.Trigger />
+
+        {/* DevPanel Content */}
+        <DevPanel.Content title="Torus">
+          <DevPanelFPS mtsFpsDisplay={mtsFpsDisplay} btsFpsDisplay={btsFpsDisplay} mtsFpsTextRef={mtsFpsTextRef} />
+          <DevPanel.Stats>
+            <DevPanel.Stat label="grid" value={gridDisplay} />
+            <DevPanel.Stat label="mesh" value={`${U_STEPS}×${V_STEPS}`} />
+          </DevPanel.Stats>
+        </DevPanel.Content>
+      </view>
+    </DevPanel.Root>
   )
 }
 

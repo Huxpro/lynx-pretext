@@ -334,7 +334,7 @@ export function DancePage() {
         <DevPanel.Trigger />
 
         {/* DevPanel Content */}
-        <DevPanel.Content title="Dance Controls">
+        <DevPanel.Content title="Dance">
           {/* FPS Display */}
           <DevPanelFPS mtsFpsDisplay={0} btsFpsDisplay={btsFpsDisplay} />
 

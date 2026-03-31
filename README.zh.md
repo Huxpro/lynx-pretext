@@ -127,18 +127,35 @@ const { lines } = layoutWithLines(prepared, maxWidthPx, lineHeight)
 
 ```
 lynx-pretext/
-├── src/
-│   ├── analysis.ts          # 文本分析/分段（复用 pretext）
-│   ├── line-break.ts        # 断行算法（复用 pretext）
-│   ├── layout.ts            # 布局 API（复用 pretext）
-│   ├── measurement.ts       # 测量层（Lynx 适配）
-│   ├── intl-shim.ts         # PrimJS Intl polyfill（新增）
-│   ├── segmenter-polyfill.ts # Intl.Segmenter 替代（新增）
-│   └── ...
-├── pages/
-│   └── demos/               # 示例页面（移植中）
-└── docs/
-    └── learning/            # 学习笔记和迁移指南
+├── src/                        # 核心库
+│   ├── analysis.ts             # 文本分析/分段（~95% 复用）
+│   ├── line-break.ts           # 断行算法（~98% 复用）
+│   ├── layout.ts               # 布局 API（~85% 复用）
+│   ├── measurement.ts          # 测量层（Lynx 适配）
+│   ├── intl-shim.ts            # PrimJS Intl polyfill
+│   └── segmenter-polyfill.ts   # Intl.Segmenter 替代
+│
+├── packages/                   # Monorepo 包
+│   └── devtools/               # @lynx-pretext/devtools（DevPanel 组件）
+│
+├── examples/                   # 示例项目
+│   ├── basic/                  # 基础 API 用法演示
+│   ├── ascii-arts/             # ASCII 艺术渲染（甜甜圈、粒子）
+│   ├── bubble/                 # 气泡文本布局
+│   ├── dance/                  # 舞蹈精灵动画与文本排除
+│   ├── dynamic-layout/         # 动态布局（三种架构：BTS/MTS/混合）
+│   └── editorial/              # 杂志排版布局（可拖拽光球）
+│
+├── docs/                       # 文档
+│   ├── blog.md                 # 项目概述与探索之旅
+│   └── learning/               # 学习笔记和迁移指南
+│       ├── mts-bts-architecture-patterns.md
+│       ├── ascii-art-rendering.md
+│       ├── bts-mts-compatible-components.md
+│       └── ...
+│
+├── website/                    # 项目网站
+└── scripts/                    # 构建和工具脚本
 ```
 
 ## 相关项目

@@ -127,18 +127,35 @@ const { lines } = layoutWithLines(prepared, maxWidthPx, lineHeight)
 
 ```
 lynx-pretext/
-├── src/
-│   ├── analysis.ts          # Text analysis/segmentation (reused from pretext)
-│   ├── line-break.ts        # Line breaking algorithm (reused from pretext)
-│   ├── layout.ts            # Layout API (reused from pretext)
-│   ├── measurement.ts       # Measurement layer (Lynx adaptation)
-│   ├── intl-shim.ts         # PrimJS Intl polyfill (new)
-│   ├── segmenter-polyfill.ts # Intl.Segmenter alternative (new)
-│   └── ...
-├── pages/
-│   └── demos/               # Demo pages (porting in progress)
-└── docs/
-    └── learning/            # Learning notes and migration guides
+├── src/                        # Core library
+│   ├── analysis.ts             # Text analysis/segmentation (~95% reused)
+│   ├── line-break.ts           # Line breaking algorithm (~98% reused)
+│   ├── layout.ts               # Layout API (~85% reused)
+│   ├── measurement.ts          # Measurement layer (Lynx adaptation)
+│   ├── intl-shim.ts            # PrimJS Intl polyfill
+│   └── segmenter-polyfill.ts   # Intl.Segmenter alternative
+│
+├── packages/                   # Monorepo packages
+│   └── devtools/               # @lynx-pretext/devtools (DevPanel component)
+│
+├── examples/                   # Example projects
+│   ├── basic/                  # Basic API usage demos
+│   ├── ascii-arts/             # ASCII art rendering (torus, particles)
+│   ├── bubble/                 # Bubble text layout
+│   ├── dance/                  # Dance sprite animation with text exclusion
+│   ├── dynamic-layout/         # Dynamic layout with 3 architectures (BTS/MTS/Hybrid)
+│   └── editorial/              # Editorial layout with draggable orbs
+│
+├── docs/                       # Documentation
+│   ├── blog.md                 # Project overview and journey
+│   └── learning/               # Learning notes and migration guides
+│       ├── mts-bts-architecture-patterns.md
+│       ├── ascii-art-rendering.md
+│       ├── bts-mts-compatible-components.md
+│       └── ...
+│
+├── website/                    # Project website
+└── scripts/                    # Build and utility scripts
 ```
 
 ## Related Projects

@@ -289,11 +289,12 @@ const ORB_DEFS = [
 
 // ── Component ──────────────────────────────────────────────
 
-function EditorialEnginePage() {
+function EditorialPage() {
 
   const [viewportW, setViewportW] = useState(0)
   const [viewportH, setViewportH] = useState(0)
   const [orbs, setOrbs] = useState<Orb[]>([]) // BTS render copy
+  const [columnMode, setColumnMode] = useState<'auto' | 'single' | 'double'>('double')
 
   // DevPanel FPS hook - hybrid mode with MTS direct update
   const { mtsFpsTick, btsFpsTick, mtsFpsDisplay, btsFpsDisplay, mtsFpsTextRef } = useDevPanelFPS(true)
@@ -485,7 +486,9 @@ function EditorialEnginePage() {
   // BTS FPS tick (called on every render)
   btsFpsTick()
 
-  const isNarrow = viewportW < NARROW_BREAKPOINT
+  // Column mode: auto (based on width), or manual override
+  const isNarrowAuto = viewportW < NARROW_BREAKPOINT
+  const isNarrow = columnMode === 'auto' ? isNarrowAuto : columnMode === 'single'
   const gutter = isNarrow ? 20 : GUTTER
   const colGap = isNarrow ? 16 : COL_GAP
   const bottomGap = isNarrow ? 12 : BOTTOM_GAP
@@ -496,11 +499,11 @@ function EditorialEnginePage() {
     vPad: isNarrow ? 2 : 3,
   }))
 
-  // Headline
-  const headlineWidth = viewportW - gutter * 2
-  const maxHeadlineHeight = Math.floor(viewportH * (isNarrow ? 0.18 : 0.22))
+  // Headline - use same size for all column modes
+  const headlineWidth = viewportW - GUTTER * 2
+  const maxHeadlineHeight = Math.floor(viewportH * 0.22)
   const { fontSize: headlineSize, lines: headlineLines } = fitHeadline(
-    headlineWidth, maxHeadlineHeight, isNarrow ? 36 : 60, getPrepared,
+    headlineWidth, maxHeadlineHeight, 60, getPrepared,
   )
   const headlineLineHeight = Math.round(headlineSize * 0.93)
   const headlineHeight = headlineLines.length * headlineLineHeight
@@ -629,8 +632,8 @@ function EditorialEnginePage() {
       {headlineLines.map((line, i) => (
         <view key={`hl-${i}`} style={{
           position: 'absolute',
-          left: `${gutter + line.x}px`,
-          top: `${gutter + line.y}px`,
+          left: `${GUTTER + line.x}px`,
+          top: `${GUTTER + line.y}px`,
           height: `${headlineLineHeight}px`,
         }}>
           <text style={{
@@ -711,27 +714,42 @@ function EditorialEnginePage() {
       {/* DevPanel */}
       <DevPanel.Root>
         <DevPanel.Trigger />
-        <DevPanel.Content
-          title="Editorial Engine (Hybrid)"
-          description="MTS animation + touch, BTS text layout. Orbs animate on MTS, text reflows on BTS via runOnBackground sync. 1-2 frame delay."
-        >
+        <DevPanel.Content title="Hybrid">
           <DevPanelFPS
             mtsFpsDisplay={mtsFpsDisplay}
             btsFpsDisplay={btsFpsDisplay}
             mtsFpsTextRef={mtsFpsTextRef}
           />
           <DevPanel.Stats>
-            <DevPanel.Stat label="Mode" value={isNarrow ? 'Single' : 'Two-col'} />
             <DevPanel.Stat label="Orbs" value={`${orbs.length}`} />
             <DevPanel.Stat label="Lines" value={`${allBodyLines.length}`} />
           </DevPanel.Stats>
+
+          {/* Column Mode Buttons */}
+          <DevPanel.Actions>
+            <DevPanel.Button
+              label="Auto"
+              active={columnMode === 'auto'}
+              onPress={() => setColumnMode('auto')}
+            />
+            <DevPanel.Button
+              label="1-Col"
+              active={columnMode === 'single'}
+              onPress={() => setColumnMode('single')}
+            />
+            <DevPanel.Button
+              label="2-Col"
+              active={columnMode === 'double'}
+              onPress={() => setColumnMode('double')}
+            />
+          </DevPanel.Actions>
         </DevPanel.Content>
       </DevPanel.Root>
     </view>
   )
 }
 
-root.render(<EditorialEnginePage />)
+root.render(<EditorialPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()

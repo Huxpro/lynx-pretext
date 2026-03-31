@@ -29,9 +29,9 @@ import {
 
 // --- Constants ---
 
-const BODY_FONT = '20px "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif'
-const BODY_FONT_SIZE = 20
-const BODY_LINE_HEIGHT = 32
+const BODY_FONT = '16px "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif'
+const BODY_FONT_SIZE = 16
+const BODY_LINE_HEIGHT = 26
 const CREDIT_TEXT = 'Leopold Aschenbrenner'
 const CREDIT_FONT = '12px "Helvetica Neue", Helvetica, Arial, sans-serif'
 const CREDIT_LINE_HEIGHT = 16
@@ -256,8 +256,8 @@ function buildLayout(
     const headlineFont = `700 ${headlineFontSize}px ${HEADLINE_FONT_FAMILY}`
     const creditGap = Math.round(Math.max(12, lineHeight * 0.5))
     const copyGap = Math.round(Math.max(18, lineHeight * 0.7))
-    const claudeSize = Math.round(Math.min(184, pageWidth * 0.46, pageHeight * 0.22))
-    const openaiSize = Math.round(Math.min(138, pageWidth * 0.34))
+    const claudeSize = Math.round(Math.min(210, pageWidth * 0.50, pageHeight * 0.25))
+    const openaiSize = Math.round(Math.min(160, pageWidth * 0.38))
     const headlineRegion: Rect = {
       x: gutter,
       y: headlineTop,
@@ -265,7 +265,7 @@ function buildLayout(
       height: Math.max(320, pageHeight - headlineTop - gutter),
     }
     const openaiRect: Rect = {
-      x: gutter - Math.round(openaiSize * 0.22),
+      x: gutter + 8,
       y: pageHeight - gutter - openaiSize + Math.round(openaiSize * 0.08),
       width: openaiSize,
       height: openaiSize,
@@ -295,9 +295,9 @@ function buildLayout(
   const creditGap = Math.round(Math.max(14, lineHeight * 0.6))
   const copyGap = Math.round(Math.max(20, lineHeight * 0.9))
   const openaiShrinkT = Math.max(0, Math.min(1, (960 - pageWidth) / 260))
-  const OPENAI_SIZE = 400 - openaiShrinkT * 56
-  const openaiSize = Math.round(Math.min(OPENAI_SIZE, pageHeight * 0.43))
-  const claudeSize = Math.round(Math.max(552, Math.min(1000, pageWidth * 0.71, pageHeight * 0.9)))
+  const OPENAI_SIZE = 545 - openaiShrinkT * 68
+  const openaiSize = Math.round(Math.min(OPENAI_SIZE, pageHeight * 0.46))
+  const claudeSize = Math.round(Math.max(600, Math.min(1100, pageWidth * 0.75, pageHeight * 0.95)))
   const headlineRegion: Rect = {
     x: gutter,
     y: headlineTop,
@@ -305,8 +305,8 @@ function buildLayout(
     height: pageHeight - headlineTop - gutter,
   }
   const openaiRect: Rect = {
-    x: gutter - Math.round(openaiSize * 0.3),
-    y: pageHeight - gutter - openaiSize + Math.round(openaiSize * 0.2),
+    x: gutter - 24,
+    y: pageHeight - gutter - openaiSize - Math.round(openaiSize * 0.05),
     width: openaiSize,
     height: openaiSize,
   }
@@ -719,10 +719,7 @@ export function DynamicLayoutPage() {
       {/* DevPanel */}
       <DevPanel.Root>
         <DevPanel.Trigger />
-        <DevPanel.Content
-          title="Dynamic Editorial Layout"
-          description="Two-column text flows around rotatable logo obstacles. Tap logos to rotate. Width >760px shows two-column spread."
-        >
+        <DevPanel.Content title="Dynamic Layout">
           <DevPanelFPS
             mtsFpsDisplay={mtsFpsDisplay}
             btsFpsDisplay={btsFpsDisplay}

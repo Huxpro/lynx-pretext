@@ -1,5 +1,5 @@
 import { useCallback } from '@lynx-js/react'
-import { TEXT_PRIMARY, STEPPER_BG, STEPPER_RADIUS } from '../constants'
+import { TEXT_PRIMARY, BUTTON_BG, BUTTON_ACTIVE, STEPPER_RADIUS } from '../constants'
 import type { DevPanelButtonProps } from '../types'
 
 export function DevPanelButton({
@@ -19,14 +19,14 @@ export function DevPanelButton({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '28px',
-        paddingLeft: '12px',
-        paddingRight: '12px',
+        height: '22px',
+        paddingLeft: '8px',
+        paddingRight: '8px',
         borderRadius: STEPPER_RADIUS,
-        backgroundColor: active ? 'rgba(255,255,255,0.4)' : STEPPER_BG,
+        backgroundColor: active ? BUTTON_ACTIVE : BUTTON_BG,
       }}
     >
-      <text style={{ fontSize: '13px', color: TEXT_PRIMARY, fontWeight: 'bold' }}>
+      <text style={{ fontSize: '10px', color: TEXT_PRIMARY, fontFamily: 'monospace' }}>
         {label}
       </text>
     </view>

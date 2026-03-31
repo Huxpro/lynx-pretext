@@ -1,6 +1,6 @@
 import type { MainThreadRef } from '@lynx-js/react'
 import type { MainThread } from '@lynx-js/types'
-import { getFpsColor, TEXT_TERTIARY } from '../constants'
+import { getFpsColor, TEXT_TERTIARY, TEXT_SECONDARY } from '../constants'
 
 export interface DevPanelFPSProps {
   mtsFpsDisplay: number
@@ -18,18 +18,19 @@ export function DevPanelFPS({
       style={{
         display: 'flex',
         flexDirection: 'row',
-        marginTop: '12px',
-        gap: '16px',
+        marginTop: '6px',
+        gap: '12px',
+        alignItems: 'center',
       }}
     >
       {/* MTS FPS */}
-      <view>
-        <text style={{ fontSize: '11px', color: TEXT_TERTIARY }}>MTS</text>
+      <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '3px' }}>
+        <text style={{ fontSize: '9px', color: TEXT_TERTIARY, fontFamily: 'monospace' }}>M</text>
         <text
           main-thread:ref={mtsFpsTextRef}
           style={{
-            fontSize: '14px',
-            fontWeight: 'bold',
+            fontSize: '11px',
+            fontFamily: 'monospace',
             color: getFpsColor(mtsFpsDisplay),
           }}
         >
@@ -38,12 +39,12 @@ export function DevPanelFPS({
       </view>
 
       {/* BTS FPS */}
-      <view>
-        <text style={{ fontSize: '11px', color: TEXT_TERTIARY }}>BTS</text>
+      <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '3px' }}>
+        <text style={{ fontSize: '9px', color: TEXT_TERTIARY, fontFamily: 'monospace' }}>B</text>
         <text
           style={{
-            fontSize: '14px',
-            fontWeight: 'bold',
+            fontSize: '11px',
+            fontFamily: 'monospace',
             color: getFpsColor(btsFpsDisplay),
           }}
         >

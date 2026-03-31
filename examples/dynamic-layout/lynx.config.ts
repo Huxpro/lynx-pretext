@@ -7,8 +7,8 @@ export default defineConfig({
   source: {
     entry: {
       main: './src/dynamic-layout.tsx',
-      'dynamic-layout-bts': './src/dynamic-layout-bts.tsx',
-      'dynamic-layout-mts': './src/dynamic-layout-mts.tsx',
+      'bts-only': './src/dynamic-layout-bts.tsx',
+      'mts-only': './src/dynamic-layout-mts.tsx',
     },
   },
   output: {
