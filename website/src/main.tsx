@@ -27,6 +27,13 @@ const cards: CardConfig[] = [
     img: '/previews/editorial.mp4',
   },
   {
+    title: 'Dance',
+    description: 'Text wrap around an animating character',
+    example: 'dance',
+    entry: 'main',
+    img: '/previews/dance.mp4',
+  },
+  {
     title: 'ASCII Torus',
     description: '3D wireframe torus rendered in ASCII art',
     example: 'ascii-arts',
@@ -34,18 +41,11 @@ const cards: CardConfig[] = [
     img: '/previews/torus.mp4',
   },
   {
-    title: 'ASCII Particles',
-    description: 'Particle system rendered in ASCII art',
-    example: 'ascii-arts',
-    entry: 'particles',
-    img: '/previews/particles.mp4',
-  },
-  {
-    title: 'Dance',
-    description: 'Text wrap around an animating character',
-    example: 'dance',
+    title: 'Bubbles',
+    description: 'iMessage bubble',
+    example: 'bubble',
     entry: 'main',
-    img: '/previews/dance.mp4',
+    img: '/previews/bubble.mp4',
   },
   {
     title: 'Dynamic Layout',
@@ -55,11 +55,11 @@ const cards: CardConfig[] = [
     img: '/previews/dynamic-layout.mp4',
   },
   {
-    title: 'Bubbles',
-    description: 'iMessage bubble',
-    example: 'bubble',
-    entry: 'main',
-    img: '/previews/bubble.mp4',
+    title: 'ASCII Particles',
+    description: 'Particle system rendered in ASCII art',
+    example: 'ascii-arts',
+    entry: 'particles',
+    img: '/previews/particles.mp4',
   },
 ];
 
@@ -89,7 +89,7 @@ function App() {
         <header className="page-header">
           <div>
             <p className="eyebrow">Lynx Pretext</p>
-            <h1>Demos</h1>
+            <h1>Lynx Pretext</h1>
           </div>
           <a
             className="github-link"
@@ -104,17 +104,8 @@ function App() {
           </a>
         </header>
         <p className="intro">
-          Lynx ports of the{' '}
-          <a
-            href="https://chenglou.me/pretext/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Pretext
-          </a>{' '}
-          layout demos. These run natively on Lynx via{' '}
-          <code>getTextInfo()</code> — scan the QR code on a Lynx-enabled device
-          to see them live.
+          Lynx ports of the Pretext. Scan the QR code on a Lynx-enabled app to
+          see them live.
         </p>
 
         <div className="examples-grid">
