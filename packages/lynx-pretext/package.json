@@ -30,5 +30,8 @@
   ],
   "dependencies": {
     "@formatjs/intl-segmenter": "^12.2.1"
+  },
+  "devDependencies": {
+    "@lynx-js/types": "3.7.0"
   }
 }

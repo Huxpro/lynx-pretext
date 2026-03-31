@@ -218,6 +218,10 @@ importers:
       '@formatjs/intl-segmenter':
         specifier: ^12.2.1
         version: 12.2.1
+    devDependencies:
+      '@lynx-js/types':
+        specifier: 3.7.0
+        version: 3.7.0
 
   packages/lynx-pretext-devtools:
     devDependencies:

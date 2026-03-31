@@ -2,9 +2,8 @@
   "name": "lynx-pretext-monorepo",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter lynx-pretext run build",
-    "build:examples": "pnpm --filter './examples/*' --parallel run build",
     "typecheck": "pnpm -r run typecheck",
+    "build:examples": "pnpm --filter './examples/*' --parallel run build",
     "dev:basic": "pnpm --filter @lynx-pretext-example/basic run dev",
     "dev:bubble": "pnpm --filter @lynx-pretext-example/bubble run dev",
     "dev:dynamic-layout": "pnpm --filter @lynx-pretext-example/dynamic-layout run dev",

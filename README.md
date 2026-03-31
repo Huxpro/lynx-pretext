@@ -1,6 +1,6 @@
 # lynx-pretext
 
-A port of [chenglou/pretext](https://github.com/chenglou/pretext) text layout engine to the Lynx platform.
+A port of [chenglou/pretext](https://github.com/chenglou/pretext) text layout engine to the [Lynx](https://lynxjs.org/) platform.
 
 ## Installation
 
