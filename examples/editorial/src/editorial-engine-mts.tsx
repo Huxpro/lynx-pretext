@@ -684,7 +684,7 @@ function EditorialEngineMTSPage() {
     ensureAnimationMT()
   }
 
-  function getTouchPoint(event: MainThread.TouchEvent): { identifier: number; clientX: number; clientY: number } | null {
+  function getTouchPoint(event: MainThread.TouchEvent): { identifier: number; pageX: number; pageY: number } | null {
     'main thread'
     if (event.touches.length > 0) return event.touches[0]!
     if (event.changedTouches.length > 0) return event.changedTouches[0]!
@@ -696,10 +696,10 @@ function EditorialEngineMTSPage() {
     const touch = getTouchPoint(event)
     if (touch === null) return
 
-    const hitIndex = hitTestOrbIndex(touch.clientX, touch.clientY)
+    const hitIndex = hitTestOrbIndex(touch.pageX, touch.pageY)
     if (hitIndex === -1) {
       logTouchMT(
-        `start miss touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) body=(${Math.round(bodyRectMT.current.x)},${Math.round(bodyRectMT.current.y)},${Math.round(bodyRectMT.current.width)},${Math.round(bodyRectMT.current.height)}) orbs=${summarizeOrbsMT()}`,
+        `start miss touch=${touch.identifier}@(${Math.round(touch.pageX)},${Math.round(touch.pageY)}) body=(${Math.round(bodyRectMT.current.x)},${Math.round(bodyRectMT.current.y)},${Math.round(bodyRectMT.current.width)},${Math.round(bodyRectMT.current.height)}) orbs=${summarizeOrbsMT()}`,
       )
       return
     }
@@ -707,14 +707,14 @@ function EditorialEngineMTSPage() {
     const orb = orbsMT.current[hitIndex]!
     touchIdMT.current = touch.identifier
     dragOrbIndexMT.current = hitIndex
-    dragStartXMT.current = touch.clientX
-    dragStartYMT.current = touch.clientY
+    dragStartXMT.current = touch.pageX
+    dragStartYMT.current = touch.pageY
     dragStartOrbXMT.current = orb.x
     dragStartOrbYMT.current = orb.y
     dragMoveCountMT.current = 0
     orb.paused = true // 暂停物理模拟，确保拖拽过程中不受干扰
     logTouchMT(
-      `start hit orb=${hitIndex} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) r=${orb.r} paused=${orb.paused ? '1' : '0'}`,
+      `start hit orb=${hitIndex} touch=${touch.identifier}@(${Math.round(touch.pageX)},${Math.round(touch.pageY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) r=${orb.r} paused=${orb.paused ? '1' : '0'}`,
     )
   }
 
@@ -732,13 +732,13 @@ function EditorialEngineMTSPage() {
 
     const orb = orbsMT.current[dragIndex]
     if (!orb) return
-    orb.x = dragStartOrbXMT.current + (touch.clientX - dragStartXMT.current)
-    orb.y = dragStartOrbYMT.current + (touch.clientY - dragStartYMT.current)
+    orb.x = dragStartOrbXMT.current + (touch.pageX - dragStartXMT.current)
+    orb.y = dragStartOrbYMT.current + (touch.pageY - dragStartYMT.current)
     clampOrbToBody(orb, bodyRectMT.current)
     dragMoveCountMT.current += 1
     if (dragMoveCountMT.current === 1 || dragMoveCountMT.current % 4 === 0) {
       logTouchMT(
-        `move orb=${dragIndex} step=${dragMoveCountMT.current} touch@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)})`,
+        `move orb=${dragIndex} step=${dragMoveCountMT.current} touch@(${Math.round(touch.pageX)},${Math.round(touch.pageY)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)})`,
       )
     }
     // 实时更新 orb 元素位置，确保拖拽过程可见
@@ -768,7 +768,7 @@ function EditorialEngineMTSPage() {
     const dragIndex = dragOrbIndexMT.current
     if (dragIndex === -1) return
 
-    let touch = null as null | { identifier: number; clientX: number; clientY: number }
+    let touch = null as null | { identifier: number; pageX: number; pageY: number }
     for (let index = 0; index < event.changedTouches.length; index++) {
       const candidate = event.changedTouches[index]!
       if (candidate.identifier === touchIdMT.current) {
@@ -787,8 +787,8 @@ function EditorialEngineMTSPage() {
       return
     }
 
-    const dx = touch.clientX - dragStartXMT.current
-    const dy = touch.clientY - dragStartYMT.current
+    const dx = touch.pageX - dragStartXMT.current
+    const dy = touch.pageY - dragStartYMT.current
     orb.x = dragStartOrbXMT.current + dx
     orb.y = dragStartOrbYMT.current + dy
     clampOrbToBody(orb, bodyRectMT.current)
@@ -800,7 +800,7 @@ function EditorialEngineMTSPage() {
     }
 
     logTouchMT(
-      `end orb=${dragIndex} touch=${touch.identifier}@(${Math.round(touch.clientX)},${Math.round(touch.clientY)}) delta=(${Math.round(dx)},${Math.round(dy)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) mode=${dx * dx + dy * dy <= DRAG_TAP_THRESHOLD * DRAG_TAP_THRESHOLD ? 'tap' : 'drag'} paused=${orb.paused ? '1' : '0'}`,
+      `end orb=${dragIndex} touch=${touch.identifier}@(${Math.round(touch.pageX)},${Math.round(touch.pageY)}) delta=(${Math.round(dx)},${Math.round(dy)}) orb=(${Math.round(orb.x)},${Math.round(orb.y)}) mode=${dx * dx + dy * dy <= DRAG_TAP_THRESHOLD * DRAG_TAP_THRESHOLD ? 'tap' : 'drag'} paused=${orb.paused ? '1' : '0'}`,
     )
 
     dragOrbIndexMT.current = -1

@@ -19,6 +19,13 @@ export default defineConfig({
     },
   },
 
+  output: {
+    assetPrefix: '/',
+    copy: [
+      { from: 'public' }
+    ],
+  },
+
   resolve: {
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),

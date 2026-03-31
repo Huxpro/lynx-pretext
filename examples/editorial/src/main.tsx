@@ -420,7 +420,7 @@ function EditorialPage() {
     if (touch === null) return
 
     const orbs = orbsMT.current
-    console.log('[MTS] touchstart at', touch.clientX.toFixed(0), touch.clientY.toFixed(0))
+    console.log('[MTS] touchstart at', touch.pageX.toFixed(0), touch.pageY.toFixed(0))
     for (let i = 0; i < orbs.length; i++) {
       const orb = orbs[i]!
       console.log(`  orb ${i}: pos=(${orb.x.toFixed(0)}, ${orb.y.toFixed(0)}) r=${orb.r}`)
@@ -428,14 +428,14 @@ function EditorialPage() {
 
     for (let i = orbs.length - 1; i >= 0; i--) {
       const orb = orbs[i]!
-      const dx = touch.clientX - orb.x
-      const dy = touch.clientY - orb.y
+      const dx = touch.pageX - orb.x
+      const dy = touch.pageY - orb.y
       const grabR = orb.r + 20
       if (dx * dx + dy * dy <= grabR * grabR) {
         console.log('[MTS] DRAG START on orb', i)
         dragOrbIndexMT.current = i
-        dragStartXMT.current = touch.clientX
-        dragStartYMT.current = touch.clientY
+        dragStartXMT.current = touch.pageX
+        dragStartYMT.current = touch.pageY
         dragStartOrbXMT.current = orb.x
         dragStartOrbYMT.current = orb.y
         return
@@ -459,8 +459,8 @@ function EditorialPage() {
 
     const orb = orbsMT.current[dragIndex]
     if (!orb) return
-    orb.x = dragStartOrbXMT.current + (touch.clientX - dragStartXMT.current)
-    orb.y = dragStartOrbYMT.current + (touch.clientY - dragStartYMT.current)
+    orb.x = dragStartOrbXMT.current + (touch.pageX - dragStartXMT.current)
+    orb.y = dragStartOrbYMT.current + (touch.pageY - dragStartYMT.current)
     console.log('[MTS] DRAG MOVE orb', dragIndex, '->', orb.x, orb.y)
   }
 
