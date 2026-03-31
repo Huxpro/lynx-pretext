@@ -26,6 +26,7 @@
 | 文档 | 描述 |
 |------|------|
 | [mts-touch-event-pitfalls.md](docs/learning/mts-touch-event-pitfalls.md) | MainThread 触摸事件陷阱，特别是 `MainThread.Touch.identifier` 相关问题 |
+| [touch-event-coordinates.md](docs/learning/touch-event-coordinates.md) | 触摸事件坐标系统：`clientX/Y` vs `pageX/Y` 的选择指南 |
 
 ### 移植指南
 
@@ -60,6 +61,7 @@ function myMTSFunction(): void {
 2. **空 view 高度**: Lynx 中空 `<view style={{ flex: 1 }} />` 高度为 0
 3. **Touch identifier**: MTS 中 `touch.identifier` 可能不稳定，建议用 index 匹配
 4. **Flexbox 居中**: `flex: 1` 不能正确撑开高度，需用 `height: '100%'` 配合 `justifyContent: 'center'`
+5. **触摸坐标**: Lynx 中做命中测试、绝对定位或跨全屏/非全屏兼容时优先用 `pageX/pageY`；若只做相对位移且手势期间不会滚动，`clientX/clientY` 也可
 
 ---
 

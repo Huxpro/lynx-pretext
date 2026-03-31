@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#faf8f6"/>
+      <stop offset="100%" style="stop-color:#f5f0eb"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+
+  <!-- Decorative text elements - floating letters -->
+  <text x="80" y="120" font-family="Georgia, serif" font-size="180" font-weight="700" fill="rgba(149,95,59,0.06)">Aa</text>
+  <text x="950" y="520" font-family="Georgia, serif" font-size="220" font-weight="700" fill="rgba(149,95,59,0.05)">Ly</text>
+  <text x="1050" y="180" font-family="'SF Mono', monospace" font-size="48" fill="rgba(109,100,93,0.08)">pretext</text>
+
+  <!-- Decorative lines -->
+  <line x1="80" y1="280" x2="280" y2="280" stroke="#955f3b" stroke-width="2" opacity="0.3"/>
+  <line x1="920" y1="350" x2="1120" y2="350" stroke="#955f3b" stroke-width="2" opacity="0.2"/>
+
+  <!-- Main content area -->
+  <g transform="translate(80, 240)">
+    <!-- Eyebrow -->
+    <text font-family="'SF Mono', 'Consolas', monospace" font-size="14" letter-spacing="0.15em" fill="#955f3b" text-transform="uppercase">
+      LYNX PRETEXT
+    </text>
+
+    <!-- Main title -->
+    <text y="70" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700" fill="#201b18">
+      Lynx Pretext
+    </text>
+
+    <!-- Subtitle -->
+    <text y="130" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="400" fill="#6d645d">
+      Dynamic Text Layout Demos
+    </text>
+
+    <!-- Description -->
+    <text y="180" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" fill="#8a827a" max-width="600">
+      <tspan x="0" dy="0">Native text layout with </tspan>
+      <tspan font-family="'SF Mono', monospace" font-size="16" fill="#955f3b">getTextInfo()</tspan>
+      <tspan> on Lynx</tspan>
+    </text>
+  </g>
+
+  <!-- Right side decorative text block -->
+  <g transform="translate(750, 200)" opacity="0.15">
+    <text font-family="Georgia, serif" font-size="16" fill="#201b18">
+      <tspan x="0" dy="0">The quick brown fox</tspan>
+      <tspan x="20" dy="24">jumps over the lazy</tspan>
+      <tspan x="40" dy="24">dog. Typography is</tspan>
+      <tspan x="60" dy="24">the art of arranging</tspan>
+      <tspan x="80" dy="24">type to make written</tspan>
+      <tspan x="100" dy="24">language readable</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom decorative elements -->
+  <rect x="80" y="550" width="60" height="4" fill="#955f3b" rx="2"/>
+  <rect x="150" y="550" width="30" height="4" fill="#955f3b" opacity="0.4" rx="2"/>
+
+  <!-- GitHub hint -->
+  <g transform="translate(1080, 560)">
+    <text font-family="'Helvetica Neue', sans-serif" font-size="12" fill="#8a827a">github.com/Huxpro/lynx-pretext</text>
+  </g>
+</svg>
