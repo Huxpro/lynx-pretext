@@ -10,6 +10,16 @@ npm install lynx-pretext
 pnpm add lynx-pretext
 ```
 
+## Demos
+
+See live examples at [lynx-pretext.vercel.app](https://lynx-pretext.vercel.app/)
+
+Includes:
+- **ASCII Art**: Wireframe torus, particles (pure MTS animation)
+- **Dynamic Layout**: Logo rotation + text reflow (3 architectures: BTS/MTS/Hybrid)
+- **Editorial**: Magazine layout with draggable orbs and text exclusion
+- **Basic**: API usage examples and accuracy validation
+
 ## What Works the Same
 
 ### API Compatibility

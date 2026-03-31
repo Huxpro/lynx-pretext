@@ -10,6 +10,16 @@ npm install lynx-pretext
 pnpm add lynx-pretext
 ```
 
+## 示例
+
+在线演示：[lynx-pretext.vercel.app](https://lynx-pretext.vercel.app/)
+
+包含：
+- **ASCII 艺术**：甜甜圈、粒子（纯 MTS 动画）
+- **动态布局**：Logo 旋转 + 文本绕排（三种架构：BTS/MTS/混合）
+- **Editorial**：杂志排版布局，可拖拽光球与文本排除
+- **基础示例**：API 用法和精度验证
+
 ## 保持一致的部分
 
 ### API 兼容性
