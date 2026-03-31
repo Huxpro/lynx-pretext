@@ -2,6 +2,14 @@
 
 A port of [chenglou/pretext](https://github.com/chenglou/pretext) text layout engine to the Lynx platform.
 
+## Installation
+
+```bash
+npm install lynx-pretext
+# or
+pnpm add lynx-pretext
+```
+
 ## Overview
 
 This is a pure JavaScript text measurement and layout library running on the Lynx main thread. It provides the core functionality of the browser-based Pretext, adapted for the Lynx platform.

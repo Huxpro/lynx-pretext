@@ -2,6 +2,14 @@
 
 将 [chenglou/pretext](https://github.com/chenglou/pretext) 文本布局引擎移植到 Lynx 平台的项目。
 
+## 安装
+
+```bash
+npm install lynx-pretext
+# 或
+pnpm add lynx-pretext
+```
+
 ## 项目概述
 
 这是一个纯 JavaScript 文本测量与布局库，运行在 Lynx 主线程上。它提供了浏览器端 Pretext 的核心功能，但针对 Lynx 平台进行了适配。
