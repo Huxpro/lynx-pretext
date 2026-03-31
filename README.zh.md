@@ -162,11 +162,6 @@ lynx-pretext/
 └── scripts/                    # 构建和工具脚本
 ```
 
-## 相关项目
-
-- [chenglou/pretext](https://github.com/chenglou/pretext) - 原始浏览器端文本布局引擎
-- [Lynx](https://lynxjs.org/) - 跨端框架
-
 ## License
 
 与原始 Pretext 项目保持一致

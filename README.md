@@ -162,11 +162,6 @@ lynx-pretext/
 └── scripts/                    # Build and utility scripts
 ```
 
-## Related Projects
-
-- [chenglou/pretext](https://github.com/chenglou/pretext) - Original browser-based text layout engine
-- [Lynx](https://lynxjs.org/) - Cross-platform framework
-
 ## License
 
 Same as the original Pretext project
