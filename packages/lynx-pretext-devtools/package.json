@@ -1,12 +1,25 @@
 {
   "name": "@lynx-pretext/devtools",
   "version": "0.0.1",
+  "description": "Developer tools and debugging components for lynx-pretext",
   "license": "MIT",
+  "author": "Huxpro",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Huxpro/lynx-pretext.git",
+    "directory": "packages/lynx-pretext-devtools"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "files": ["src"],
+  "keywords": [
+    "lynx",
+    "devtools",
+    "debug",
+    "performance"
+  ],
   "peerDependencies": {
     "@lynx-js/react": ">=0.116.0",
     "@lynx-js/types": ">=3.7.0"

@@ -8,6 +8,12 @@
     "dev:bubble": "pnpm --filter @lynx-pretext-example/bubble run dev",
     "dev:dynamic-layout": "pnpm --filter @lynx-pretext-example/dynamic-layout run dev",
     "dev:editorial": "pnpm --filter @lynx-pretext-example/editorial run dev",
-    "dev:ascii-arts": "pnpm --filter @lynx-pretext-example/ascii-arts run dev"
+    "dev:ascii-arts": "pnpm --filter @lynx-pretext-example/ascii-arts run dev",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0"
   }
 }

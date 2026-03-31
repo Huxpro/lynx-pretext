@@ -1,12 +1,30 @@
 {
   "name": "lynx-pretext",
   "version": "0.0.1",
+  "description": "Pure JavaScript text measurement and layout library for Lynx, using main-thread lynx.getTextInfo() as the measurement primitive",
   "license": "MIT",
+  "author": "Huxpro",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Huxpro/lynx-pretext.git",
+    "directory": "packages/lynx-pretext"
+  },
   "type": "module",
   "exports": {
-    ".": "./src/layout.ts"
+    ".": "./src/layout.ts",
+    "./analysis": "./src/analysis.ts",
+    "./layout": "./src/layout.ts",
+    "./line-break": "./src/line-break.ts",
+    "./measurement": "./src/measurement.ts"
   },
   "files": ["src"],
+  "keywords": [
+    "lynx",
+    "text",
+    "layout",
+    "measurement",
+    "typography"
+  ],
   "dependencies": {
     "@formatjs/intl-segmenter": "^12.2.1"
   }
