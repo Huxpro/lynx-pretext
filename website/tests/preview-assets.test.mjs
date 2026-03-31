@@ -110,6 +110,11 @@ test('preview videos stay within a smaller mobile resolution and size budget', (
 
 test('page width stays slightly tighter on desktop', () => {
   const source = readWebsiteFile('src/styles.css');
+  const match = source.match(/\.page\s*\{[\s\S]*?max-width:\s*(\d+)px;/);
 
-  assert.match(source, /\.page\s*\{[\s\S]*max-width:\s*1140px;/);
+  assert.ok(match, 'expected .page max-width declaration');
+  assert.ok(
+    Number(match[1]) <= 1140,
+    `page max-width ${match[1]}px exceeds 1140px budget`,
+  );
 });

@@ -7,8 +7,8 @@ import type { Point, Rect } from "./wrap-geometry"
 
 /** Sprite metadata */
 export const makimaMeta = {
-  "frameWidth": 480,
-  "frameHeight": 853,
+  "frameWidth": 432,
+  "frameHeight": 768,
   "cols": 10,
   "rows": 20,
   "totalFrames": 192,
@@ -24,8 +24,8 @@ export function getMakimaFramePos(frameIndex: number): { x: number; y: number } 
   const col = frameIndex % 10
   const row = Math.floor(frameIndex / 10)
   return {
-    x: col * 480,
-    y: row * 853,
+    x: col * 432,
+    y: row * 768,
   }
 }
 
