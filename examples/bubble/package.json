@@ -7,8 +7,9 @@
     "dev": "rspeedy dev"
   },
   "dependencies": {
-    "lynx-pretext": "workspace:*",
-    "@lynx-js/react": "0.116.4"
+    "@lynx-js/react": "0.116.4",
+    "@lynx-pretext/devtools": "workspace:*",
+    "lynx-pretext": "workspace:*"
   },
   "devDependencies": {
     "@lynx-js/rspeedy": "0.13.4",
