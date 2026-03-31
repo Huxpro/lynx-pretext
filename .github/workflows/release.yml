@@ -30,8 +30,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Type Check
+        run: pnpm typecheck
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets

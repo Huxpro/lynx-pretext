@@ -10,44 +10,26 @@ npm install lynx-pretext
 pnpm add lynx-pretext
 ```
 
-## Core Differences
+## What Works the Same
 
-### 1. Measurement Backend (Key Difference)
+### API Compatibility
 
-| Feature | Original Pretext (Browser) | Lynx Pretext |
-|---------|---------------------------|--------------|
-| **Measurement API** | Canvas `measureText()` | `lynx.getTextInfo()` |
-| **Runtime Environment** | Browser main thread/Worker | Lynx main thread |
-| **Font Configuration** | `ctx.font = font` | Via `fontSize`/`fontFamily` parameters |
-| **Emoji Correction** | Auto-detect and correct Canvas/DOM differences | Not supported (MVP version) |
+Main APIs remain consistent between the original Pretext and Lynx Pretext:
 
-### 2. Code File Comparison
+```typescript
+// Preparation phase (same in both projects)
+const prepared = prepare(text, font, options)
+const preparedWithSegments = prepareWithSegments(text, font, options)
 
-| File | Original Pretext | Lynx Pretext | Reuse Rate |
-|------|-----------------|--------------|------------|
-| `analysis.ts` | 1,008 lines | ~1,016 lines | ~95% |
-| `line-break.ts` | ~1,056 lines | ~1,056 lines | ~98% |
-| `layout.ts` | 718 lines | 621 lines | ~85% |
-| `measurement.ts` | 232 lines | 149 lines | ~60% (main adaptation point) |
+// Layout phase (same in both projects)
+const result = layout(prepared, maxWidth, lineHeight)
+const { lines } = layoutWithLines(preparedWithSegments, maxWidth, lineHeight)
 
-### 3. Platform Adaptation Layer
+// Line-by-line layout (same in both projects)
+const line = layoutNextLine(preparedWithSegments, cursor, maxWidth)
+```
 
-Lynx Pretext adds the following adaptation files:
-
-- **`intl-shim.ts`** (6 lines): Provides `Intl` global object polyfill for PrimJS
-- **`segmenter-polyfill.ts`** (102 lines): Lightweight `Intl.Segmenter` alternative (PrimJS's `@formatjs/intl-segmenter` crashes)
-- **`rspeedy-env.d.ts`** (12 lines): Lynx/Rspeedy environment TypeScript declarations
-
-### 4. Feature Differences
-
-| Feature | Original Pretext | Lynx Pretext |
-|---------|-----------------|--------------|
-| **Bidirectional Text (Bidi)** | Full support | Returns `null` in MVP (stub) |
-| **Emoji Width Correction** | Supported (Canvas vs DOM differences) | Not supported (returns 0) |
-| **Browser Engine Config** | Safari/Chromium differentiated handling | Fixed default values |
-| **System Font Detection** | Supports `system-ui`, etc. | Depends on Lynx underlying implementation |
-
-### 5. Architecture Consistency
+### Architecture Consistency
 
 Both projects share the same two-phase architecture:
 
@@ -68,35 +50,36 @@ Core type definitions remain consistent:
 - `PreparedText` / `PreparedTextWithSegments`
 - `LayoutCursor` / `LayoutLine` / `LayoutResult`
 
-### 6. API Compatibility
+### Code Reuse
 
-Main APIs remain consistent:
-
-```typescript
-// Preparation phase (same in both projects)
-const prepared = prepare(text, font, options)
-const preparedWithSegments = prepareWithSegments(text, font, options)
-
-// Layout phase (same in both projects)
-const result = layout(prepared, maxWidth, lineHeight)
-const { lines } = layoutWithLines(preparedWithSegments, maxWidth, lineHeight)
-
-// Line-by-line layout (same in both projects)
-const line = layoutNextLine(preparedWithSegments, cursor, maxWidth)
-```
-
-## Code Reuse Summary
-
-- **Analysis Layer (`analysis.ts`)**: ~95% reuse, mainly import path adjustments
-- **Line Breaking Layer (`line-break.ts`)**: ~98% reuse, almost direct port
-- **Layout Layer (`layout.ts`)**: ~85% reuse, removed browser-specific features
-- **Measurement Layer (`measurement.ts`)**: ~60% reuse, main adaptation point (Canvas → Lynx API)
+| File | Original Pretext | Lynx Pretext | Reuse Rate |
+|------|-----------------|--------------|------------|
+| `analysis.ts` | 1,008 lines | ~1,016 lines | ~95% |
+| `line-break.ts` | ~1,056 lines | ~1,056 lines | ~98% |
+| `layout.ts` | 718 lines | 621 lines | ~85% |
+| `measurement.ts` | 232 lines | 149 lines | ~60% (main adaptation point) |
 
 **Overall Reuse Rate**: Approximately 85-90% of core logic is directly reused, with differences concentrated in the platform adaptation layer.
 
-## Technical Details
+- **Analysis Layer**: ~95% reuse, mainly import path adjustments
+- **Line Breaking Layer**: ~98% reuse, almost direct port
+- **Layout Layer**: ~85% reuse, removed browser-specific features
+- **Measurement Layer**: ~60% reuse, main adaptation point (Canvas → Lynx API)
 
-### Original Pretext Measurement
+---
+
+## Differences
+
+### 1. Measurement Backend (Key Difference)
+
+| Feature | Original Pretext (Browser) | Lynx Pretext |
+|---------|---------------------------|--------------|
+| **Measurement API** | Canvas `measureText()` | `lynx.getTextInfo()` |
+| **Runtime Environment** | Browser main thread/Worker | Lynx main thread |
+| **Font Configuration** | `ctx.font = font` | Via `fontSize`/`fontFamily` parameters |
+| **Emoji Correction** | Auto-detect and correct Canvas/DOM differences | Not supported (MVP version) |
+
+**Original Pretext Measurement:**
 ```typescript
 // Browser version uses Canvas
 const ctx = getMeasureContext() // OffscreenCanvas or DOM Canvas
@@ -104,7 +87,7 @@ ctx.font = font
 const width = ctx.measureText(segment).width
 ```
 
-### Lynx Pretext Measurement
+**Lynx Pretext Measurement:**
 ```typescript
 // Lynx version uses main thread API
 const info = { fontSize: currentFontSizeStr }
@@ -113,7 +96,24 @@ const result = lynx.getTextInfo(segment, info)
 const width = result.width
 ```
 
-### Verification Strategy
+### 2. Platform Adaptation Layer
+
+Lynx Pretext adds the following adaptation files:
+
+- **`intl-shim.ts`** (6 lines): Provides `Intl` global object polyfill for PrimJS
+- **`segmenter-polyfill.ts`** (102 lines): Lightweight `Intl.Segmenter` alternative (PrimJS's `@formatjs/intl-segmenter` crashes)
+- **`rspeedy-env.d.ts`** (12 lines): Lynx/Rspeedy environment TypeScript declarations
+
+### 3. Feature Differences
+
+| Feature | Original Pretext | Lynx Pretext |
+|---------|-----------------|--------------|
+| **Bidirectional Text (Bidi)** | Full support | Returns `null` in MVP (stub) |
+| **Emoji Width Correction** | Supported (Canvas vs DOM differences) | Not supported (returns 0) |
+| **Browser Engine Config** | Safari/Chromium differentiated handling | Fixed default values |
+| **System Font Detection** | Supports `system-ui`, etc. | Depends on Lynx underlying implementation |
+
+### 4. Verification Strategy
 
 Using Lynx native `getTextInfo` with `maxWidth` mode as the verification oracle:
 

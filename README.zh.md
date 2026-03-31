@@ -10,44 +10,26 @@ npm install lynx-pretext
 pnpm add lynx-pretext
 ```
 
-## 核心差异对比
+## 保持一致的部分
 
-### 1. 测量后端（关键差异）
+### API 兼容性
 
-| 特性 | 原始 Pretext (Browser) | Lynx Pretext |
-|------|------------------------|--------------|
-| **测量 API** | Canvas `measureText()` | `lynx.getTextInfo()` |
-| **运行环境** | 浏览器主线程/Worker | Lynx 主线程 |
-| **字体设置** | `ctx.font = font` | 通过 `fontSize`/`fontFamily` 参数 |
-| **Emoji 校正** | 自动检测并校正 Canvas/DOM 差异 | 暂不支持（MVP 版本） |
+原始 Pretext 和 Lynx Pretext 的主要 API 保持一致：
 
-### 2. 代码文件对比
+```typescript
+// 准备阶段（两个项目相同）
+const prepared = prepare(text, font, options)
+const preparedWithSegments = prepareWithSegments(text, font, options)
 
-| 文件 | 原始 Pretext | Lynx Pretext | 复用率 |
-|------|-------------|--------------|--------|
-| `analysis.ts` | 1,008 行 | ~1,016 行 | ~95% |
-| `line-break.ts` | ~1,056 行 | ~1,056 行 | ~98% |
-| `layout.ts` | 718 行 | 621 行 | ~85% |
-| `measurement.ts` | 232 行 | 149 行 | ~60%（主要适配点） |
+// 布局阶段（两个项目相同）
+const result = layout(prepared, maxWidth, lineHeight)
+const { lines } = layoutWithLines(preparedWithSegments, maxWidth, lineHeight)
 
-### 3. 平台适配层
+// 逐行布局（两个项目相同）
+const line = layoutNextLine(preparedWithSegments, cursor, maxWidth)
+```
 
-Lynx Pretext 新增了以下适配文件：
-
-- **`intl-shim.ts`** (6 行): 为 PrimJS 提供 `Intl` 全局对象 polyfill
-- **`segmenter-polyfill.ts`** (102 行): 轻量级 `Intl.Segmenter` 替代实现（PrimJS 的 `@formatjs/intl-segmenter` 会崩溃）
-- **`rspeedy-env.d.ts`** (12 行): Lynx/Rspeedy 环境 TypeScript 声明
-
-### 4. 功能差异
-
-| 功能 | 原始 Pretext | Lynx Pretext |
-|------|-------------|--------------|
-| **双向文本 (Bidi)** | 完整支持 | MVP 版本返回 `null`（stub） |
-| **Emoji 宽度校正** | 支持（Canvas vs DOM 差异） | 暂不支持（返回 0） |
-| **浏览器引擎配置** | Safari/Chromium 差异化处理 | 固定默认值 |
-| **系统字体检测** | 支持 `system-ui` 等 | 依赖 Lynx 底层实现 |
-
-### 5. 架构一致性
+### 架构一致性
 
 两个项目共享相同的两阶段架构：
 
@@ -68,35 +50,36 @@ Lynx Pretext 新增了以下适配文件：
 - `PreparedText` / `PreparedTextWithSegments`
 - `LayoutCursor` / `LayoutLine` / `LayoutResult`
 
-### 6. API 兼容性
+### 代码复用
 
-主要 API 保持一致：
-
-```typescript
-// 准备阶段（两个项目相同）
-const prepared = prepare(text, font, options)
-const preparedWithSegments = prepareWithSegments(text, font, options)
-
-// 布局阶段（两个项目相同）
-const result = layout(prepared, maxWidth, lineHeight)
-const { lines } = layoutWithLines(preparedWithSegments, maxWidth, lineHeight)
-
-// 逐行布局（两个项目相同）
-const line = layoutNextLine(preparedWithSegments, cursor, maxWidth)
-```
-
-## 核心代码复用率总结
-
-- **分析层 (`analysis.ts`)**: ~95% 复用，主要是导入路径调整
-- **断行层 (`line-break.ts`)**: ~98% 复用，几乎直接移植
-- **布局层 (`layout.ts`)**: ~85% 复用，移除浏览器特定功能
-- **测量层 (`measurement.ts`)**: ~60% 复用，主要适配点（Canvas → Lynx API）
+| 文件 | 原始 Pretext | Lynx Pretext | 复用率 |
+|------|-------------|--------------|--------|
+| `analysis.ts` | 1,008 行 | ~1,016 行 | ~95% |
+| `line-break.ts` | ~1,056 行 | ~1,056 行 | ~98% |
+| `layout.ts` | 718 行 | 621 行 | ~85% |
+| `measurement.ts` | 232 行 | 149 行 | ~60%（主要适配点） |
 
 **整体复用率**: 约 85-90% 的核心逻辑直接复用，主要差异集中在平台适配层。
 
-## 技术细节
+- **分析层**: ~95% 复用，主要是导入路径调整
+- **断行层**: ~98% 复用，几乎直接移植
+- **布局层**: ~85% 复用，移除浏览器特定功能
+- **测量层**: ~60% 复用，主要适配点（Canvas → Lynx API）
 
-### 原始 Pretext 测量方式
+---
+
+## 差异部分
+
+### 1. 测量后端（关键差异）
+
+| 特性 | 原始 Pretext (Browser) | Lynx Pretext |
+|------|------------------------|--------------|
+| **测量 API** | Canvas `measureText()` | `lynx.getTextInfo()` |
+| **运行环境** | 浏览器主线程/Worker | Lynx 主线程 |
+| **字体设置** | `ctx.font = font` | 通过 `fontSize`/`fontFamily` 参数 |
+| **Emoji 校正** | 自动检测并校正 Canvas/DOM 差异 | 暂不支持（MVP 版本） |
+
+**原始 Pretext 测量方式：**
 ```typescript
 // 浏览器版本使用 Canvas
 const ctx = getMeasureContext() // OffscreenCanvas 或 DOM Canvas
@@ -104,7 +87,7 @@ ctx.font = font
 const width = ctx.measureText(segment).width
 ```
 
-### Lynx Pretext 测量方式
+**Lynx Pretext 测量方式：**
 ```typescript
 // Lynx 版本使用主线程 API
 const info = { fontSize: currentFontSizeStr }
@@ -113,7 +96,24 @@ const result = lynx.getTextInfo(segment, info)
 const width = result.width
 ```
 
-### 验证策略
+### 2. 平台适配层
+
+Lynx Pretext 新增了以下适配文件：
+
+- **`intl-shim.ts`** (6 行): 为 PrimJS 提供 `Intl` 全局对象 polyfill
+- **`segmenter-polyfill.ts`** (102 行): 轻量级 `Intl.Segmenter` 替代实现（PrimJS 的 `@formatjs/intl-segmenter` 会崩溃）
+- **`rspeedy-env.d.ts`** (12 行): Lynx/Rspeedy 环境 TypeScript 声明
+
+### 3. 功能差异
+
+| 功能 | 原始 Pretext | Lynx Pretext |
+|------|-------------|--------------|
+| **双向文本 (Bidi)** | 完整支持 | MVP 版本返回 `null`（stub） |
+| **Emoji 宽度校正** | 支持（Canvas vs DOM 差异） | 暂不支持（返回 0） |
+| **浏览器引擎配置** | Safari/Chromium 差异化处理 | 固定默认值 |
+| **系统字体检测** | 支持 `system-ui` 等 | 依赖 Lynx 底层实现 |
+
+### 4. 验证策略
 
 使用 Lynx 原生 `getTextInfo` 的 `maxWidth` 模式作为验证基准：
 
