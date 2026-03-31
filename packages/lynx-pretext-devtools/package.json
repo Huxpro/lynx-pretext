@@ -1,6 +1,7 @@
 {
   "name": "lynx-pretext-devtools",
   "version": "0.0.1",
+  "private": true,
   "description": "Developer tools and debugging components for lynx-pretext",
   "license": "MIT",
   "author": "Huxpro",
