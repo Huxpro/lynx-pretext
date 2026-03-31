@@ -6,6 +6,22 @@
   padding: 32px 16px 64px;
 }
 
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.github-link {
+  color: #6d645d;
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.github-link:hover {
+  color: #955f3b;
+}
+
 .eyebrow {
   margin: 0 0 8px;
   font: 12px/1.2 'SF Mono', ui-monospace, monospace;

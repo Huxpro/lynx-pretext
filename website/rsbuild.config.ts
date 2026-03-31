@@ -22,7 +22,7 @@ export default defineConfig({
   output: {
     assetPrefix: '/',
     copy: [
-      { from: 'public' }
+      { from: 'public', to: '.' }
     ],
   },
 
