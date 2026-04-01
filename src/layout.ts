@@ -51,13 +51,7 @@ function getSharedGraphemeSegmenter(): Intl.Segmenter {
   return sharedGraphemeSegmenter
 }
 
-// Bidi stub for MVP — returns null (no bidi metadata).
-function computeSegmentLevels(
-  _normalized: string,
-  _segStarts: number[],
-): Int8Array | null {
-  return null
-}
+import { computeSegmentLevels } from './bidi'
 
 // --- Public types ---
 
