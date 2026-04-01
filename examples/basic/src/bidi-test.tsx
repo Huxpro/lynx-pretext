@@ -1,4 +1,4 @@
-import { useState, useMemo } from '@lynx-js/react'
+import { root, useState, useMemo } from '@lynx-js/react'
 
 import { prepareWithSegments, layoutWithLines } from 'lynx-pretext'
 import { DevPanel, useDevPanelFPS, DevPanelFPS } from 'lynx-pretext-devtools'
@@ -20,7 +20,7 @@ const FONT_SIZE = 16
 const LINE_HEIGHT = 24
 const FONT = `${FONT_SIZE}px`
 
-export function BidiTestPage() {
+function BidiTestPage() {
   const [maxWidth, setMaxWidth] = useState(360)
 
   const { btsFpsTick, btsFpsDisplay } = useDevPanelFPS()
@@ -121,4 +121,10 @@ export function BidiTestPage() {
       </view>
     </DevPanel.Root>
   )
+}
+
+root.render(<BidiTestPage />)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
 }

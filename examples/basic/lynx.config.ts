@@ -13,6 +13,7 @@ export default defineConfig({
       'variable-flow': './src/variable-flow.tsx',
       accuracy: './src/accuracy.tsx',
       'hello-world': './src/hello-world.tsx',
+      'bidi-test': './src/bidi-test.tsx',
     },
   },
   plugins: [
