@@ -1,7 +1,7 @@
 import { root } from '@lynx-js/react'
-import { VariableFlowPage } from './variable-flow'
+import { BidiTestPage } from './bidi-test'
 
-root.render(<VariableFlowPage />)
+root.render(<BidiTestPage />)
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()
