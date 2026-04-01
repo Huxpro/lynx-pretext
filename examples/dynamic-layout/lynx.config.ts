@@ -8,6 +8,10 @@ import { pluginTypeCheck } from '@rsbuild/plugin-type-check'
 const exampleName = path.basename(path.dirname(fileURLToPath(import.meta.url)))
 
 export default defineConfig({
+  environments: {
+    lynx: {},
+    web: {},
+  },
   output: {
     assetPrefix: `https://lynx-pretext.vercel.app/examples/${exampleName}/dist/`,
   },
