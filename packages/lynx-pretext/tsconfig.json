@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "composite": true,
+    "lib": ["ES2021", "DOM", "ESNext.Intl"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,

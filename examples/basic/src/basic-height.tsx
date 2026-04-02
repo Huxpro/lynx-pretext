@@ -11,6 +11,10 @@ const SAMPLE_TEXT =
 const FONT_SIZE = 16
 const LINE_HEIGHT = 24
 const FONT = `${FONT_SIZE}px`
+const nativeGetTextInfo =
+  typeof lynx !== 'undefined' && typeof lynx.getTextInfo === 'function'
+    ? lynx.getTextInfo.bind(lynx)
+    : null
 
 export function BasicHeightPage() {
   const [maxWidth, setMaxWidth] = useState(360)
@@ -23,16 +27,22 @@ export function BasicHeightPage() {
   const prepared = prepare(SAMPLE_TEXT, FONT)
   const result = layout(prepared, contentWidth, LINE_HEIGHT)
 
-  const native = lynx.getTextInfo(SAMPLE_TEXT, {
+  const native = nativeGetTextInfo?.(SAMPLE_TEXT, {
     fontSize: `${FONT_SIZE}px`,
     maxWidth: `${contentWidth}px`,
-  })
-  // Debug: log native result
-  console.log('[basic-height] native.getTextInfo:', JSON.stringify(native), 'contentWidth:', contentWidth)
-  const nativeContent = native.content ?? [SAMPLE_TEXT]
-  const nativeLineCount = nativeContent.length
-  const nativeHeight = nativeLineCount * LINE_HEIGHT
-  const match = result.lineCount === nativeLineCount
+  }) ?? null
+  if (native !== null) {
+    console.log('[basic-height] native.getTextInfo:', JSON.stringify(native), 'contentWidth:', contentWidth)
+  }
+  const nativeContent = native?.content ?? null
+  const nativeLineCount = nativeContent?.length ?? null
+  const nativeHeight = nativeLineCount === null ? null : nativeLineCount * LINE_HEIGHT
+  const match = nativeLineCount === null ? null : result.lineCount === nativeLineCount
+  const comparisonText = match === null
+    ? 'lynx.getTextInfo is unavailable on Web, so this page only shows the pretext result.'
+    : match
+    ? `Both agree: ${result.lineCount} lines, ${result.height}px height`
+    : `Height diff: ${Math.abs(result.height - nativeHeight!)}px | Lines: pretext=${result.lineCount} native=${nativeLineCount!}`
 
   // BTS FPS tick on every render
   btsFpsTick()
@@ -71,10 +81,10 @@ export function BasicHeightPage() {
             <view style={{ width: `${halfWidth}px`, padding: '12px', borderRadius: '8px', backgroundColor: '#f3e5f5' }}>
               <text style={{ fontSize: '13px', fontWeight: 'bold', color: '#7b1fa2' }}>Native</text>
               <text style={{ fontSize: '28px', fontWeight: 'bold', color: '#4a148c', marginTop: '4px' }}>
-                {`${nativeHeight}px`}
+                {nativeHeight === null ? 'N/A' : `${nativeHeight}px`}
               </text>
               <text style={{ fontSize: '12px', color: '#7b1fa2', marginTop: '2px' }}>
-                {`${nativeLineCount} lines`}
+                {nativeLineCount === null ? 'Unavailable on Web' : `${nativeLineCount} lines`}
               </text>
             </view>
           </view>
@@ -89,14 +99,12 @@ export function BasicHeightPage() {
             <text style={{
               fontSize: '16px',
               fontWeight: 'bold',
-              color: match ? '#2e7d32' : '#e65100',
+              color: match === null ? '#1565c0' : match ? '#2e7d32' : '#e65100',
             }}>
-              {match ? 'MATCH' : 'MISMATCH'}
+              {match === null ? 'WEB FALLBACK' : match ? 'MATCH' : 'MISMATCH'}
             </text>
             <text style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>
-              {match
-                ? `Both agree: ${result.lineCount} lines, ${result.height}px height`
-                : `Height diff: ${Math.abs(result.height - nativeHeight)}px | Lines: pretext=${result.lineCount} native=${nativeLineCount}`}
+              {comparisonText}
             </text>
           </view>
         </view>
@@ -110,7 +118,7 @@ export function BasicHeightPage() {
           <DevPanelFPS mtsFpsDisplay={0} btsFpsDisplay={btsFpsDisplay} />
           <DevPanel.Stats>
             <DevPanel.Stat label="width" value={`${maxWidth}px`} />
-            <DevPanel.Stat label="match" value={match ? 'yes' : 'no'} />
+            <DevPanel.Stat label="match" value={match === null ? 'n/a' : match ? 'yes' : 'no'} />
           </DevPanel.Stats>
           <DevPanel.Stepper
             label="width"

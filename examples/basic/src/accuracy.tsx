@@ -7,6 +7,11 @@ import {
 } from 'lynx-pretext'
 import { TEXTS, WIDTHS, FONT_SIZE, LINE_HEIGHT } from '../src/test-data'
 
+const nativeGetTextInfo =
+  typeof lynx !== 'undefined' && typeof lynx.getTextInfo === 'function'
+    ? lynx.getTextInfo.bind(lynx)
+    : null
+
 type TestResult = {
   label: string
   width: number
@@ -31,6 +36,19 @@ type Summary = {
 }
 
 function runAccuracyCheck(): Summary {
+  if (nativeGetTextInfo === null) {
+    return {
+      total: 0,
+      passed: 0,
+      failed: 0,
+      passRate: '0.0',
+      englishTotal: 0,
+      englishPassed: 0,
+      englishPassRate: '0.0',
+      results: [],
+    }
+  }
+
   const results: TestResult[] = []
   let total = 0
   let passed = 0
@@ -49,7 +67,7 @@ function runAccuracyCheck(): Summary {
 
     for (const width of WIDTHS) {
       // Native oracle: getTextInfo with maxWidth
-      const native = lynx.getTextInfo(text, {
+      const native = nativeGetTextInfo(text, {
         fontSize: fontSizeStr,
         maxWidth: `${width}px`,
       })
@@ -127,6 +145,19 @@ export function AccuracyPage() {
     return (
       <view style={{ padding: '20px' }}>
         <text style={{ fontSize: '18px', color: '#666' }}>Running accuracy check...</text>
+      </view>
+    )
+  }
+
+  if (nativeGetTextInfo === null) {
+    return (
+      <view style={{ padding: '20px' }}>
+        <text style={{ fontSize: '22px', fontWeight: 'bold', color: '#222' }}>
+          Accuracy Validation
+        </text>
+        <text style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+          lynx.getTextInfo is unavailable on Web, so the native-oracle comparison page is disabled there.
+        </text>
       </view>
     )
   }

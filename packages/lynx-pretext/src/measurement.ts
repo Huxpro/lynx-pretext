@@ -1,4 +1,5 @@
 import { isCJK } from './analysis'
+import type { MeasurementHost } from './pretext/host.js'
 
 export type SegmentMetrics = {
   width: number
@@ -13,6 +14,12 @@ export type EngineProfile = {
   carryCJKAfterClosingQuote: boolean
   preferPrefixWidthsForBreakableRuns: boolean
   preferEarlySoftHyphenBreak: boolean
+}
+
+export type FontMeasurementState = {
+  cache: Map<string, SegmentMetrics>
+  fontSize: number
+  emojiCorrection: number
 }
 
 // Module-level font context (replaces Canvas ctx.font)
@@ -127,11 +134,7 @@ export function getSegmentGraphemePrefixWidths(
   return metrics.graphemePrefixWidths
 }
 
-export function getFontMeasurementState(font: string, needsEmojiCorrection: boolean): {
-  cache: Map<string, SegmentMetrics>
-  fontSize: number
-  emojiCorrection: number
-} {
+export function getFontMeasurementState(font: string, needsEmojiCorrection: boolean): FontMeasurementState {
   const fontSize = parseFontSize(font)
   const fontFamily = parseFontFamily(font)
   // Set module-level font context for getSegmentMetrics
@@ -147,3 +150,16 @@ export function clearMeasurementCaches(): void {
   segmentMetricCaches.clear()
   sharedGraphemeSegmenter = null
 }
+
+export const lynxMeasurementHost: MeasurementHost = {
+  clearMeasurementCaches,
+  getSegmentMetrics,
+  getEngineProfile,
+  getCorrectedSegmentWidth,
+  getSegmentGraphemeWidths,
+  getSegmentGraphemePrefixWidths,
+  getFontMeasurementState,
+  textMayContainEmoji,
+}
+
+export type { MeasurementHost }
