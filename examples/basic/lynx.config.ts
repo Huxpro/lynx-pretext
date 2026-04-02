@@ -14,6 +14,7 @@ export default defineConfig({
       accuracy: './src/accuracy.tsx',
       'hello-world': './src/hello-world.tsx',
       'bidi-test': './src/bidi-test.tsx',
+      'rich-note': './src/rich-note.tsx',
     },
   },
   plugins: [
