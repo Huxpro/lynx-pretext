@@ -174,7 +174,7 @@ lynx-pretext/
 
 ## Known Issues
 
-- **Rich-note demo: inline layout overflow at certain widths.** The `layoutInlineItems` function (ported from the upstream `rich-note` demo) can produce lines that slightly exceed `maxWidth` when chips and code spans interact with near-zero remaining space. The root cause is that `layoutNextLine` uses `Math.max(1, remainingWidth)` which can inflate a near-zero budget, causing the first grapheme to overflow. Tracked upstream: [chenglou/pretext#88](https://github.com/chenglou/pretext/issues/88)
+- **Rich-note demo: inline layout overflow at certain widths.** The `layoutInlineItems` function (ported from the upstream `rich-note` demo) can produce lines that slightly exceed `maxWidth` when chips and code spans interact with near-zero remaining space. The root cause is that `layoutNextLine` uses `Math.max(1, remainingWidth)` which can inflate a near-zero budget, causing the first grapheme to overflow. Tracked upstream: [huxpro/lynx-pretext#3](https://github.com/Huxpro/lynx-pretext/issues/3)
 
 ## License
 
